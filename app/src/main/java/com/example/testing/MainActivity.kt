@@ -13,7 +13,7 @@ class MainActivity : AppCompatActivity() {
         checkAccessibilityPermission()
     }
     /**Check for permissions **/
-    fun checkAccessibilityPermission(): Boolean {
+    private fun checkAccessibilityPermission(): Boolean {
         var accessEnabled = 0
         try {
             accessEnabled =
