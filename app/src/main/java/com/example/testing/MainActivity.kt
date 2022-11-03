@@ -10,7 +10,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        checkAccessibilityPermission()
+        checkAccessibilityPermission() //this could be moved so if permission changes, it gets asked again
     }
     /**Check for permissions **/
     private fun checkAccessibilityPermission(): Boolean {

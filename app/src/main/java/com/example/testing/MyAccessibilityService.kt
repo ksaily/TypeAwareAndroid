@@ -33,13 +33,6 @@ class MyAccessibilityService : AccessibilityService() {
         TODO("Get info on keyboard click, whether it is a new character or not, return boolean")
     }
 
-    fun setPermission(context: Context, key: String, value: Any) {
-        TODO("Set permission for keyboard as true")
-    }
-
-    fun checkPermission() {
-        TODO("Check if permission is ok")
-    }
 
 }
 
