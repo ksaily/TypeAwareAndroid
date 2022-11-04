@@ -10,12 +10,4 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(entities = [Clicks::class], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun clicksDao(): ClicksDao
-
-    companion object {
-
-        private fun buildDatabase(context: Context): AppDatabase {
-            return Room.databaseBuilder(context, AppDatabase::class.java, "Clicks"
-                ).build()
-        }
-    }
 }

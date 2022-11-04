@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 
 @Dao
 interface ClicksDao {
@@ -14,9 +15,11 @@ interface ClicksDao {
     fun loadAllByIds(deviceIds: IntArray): List<Clicks>
 
     @Insert
-    fun insertAll(vararg clicks: Clicks)
+    fun insert(vararg clicks: Clicks)
 
     @Delete
-    fun delete(clicks: Clicks)
+    fun delete(vararg clicks: Clicks)
 
+    @Update
+    fun update(vararg clicks: Clicks)
 }
