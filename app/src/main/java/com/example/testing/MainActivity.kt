@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
 
@@ -29,6 +30,9 @@ class MainActivity : AppCompatActivity() {
         }
         return if (accessEnabled == 0) {
             /** if not construct intent to request permission  */
+            Toast.makeText(applicationContext, "Accessibility permission allows us to track your keyboard usage" +
+                    "and is required for the app to function properly. Please allow it in Settings to continue using the app.",
+                    Toast.LENGTH_LONG).show()
             val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             /** request permission via start activity for result  */

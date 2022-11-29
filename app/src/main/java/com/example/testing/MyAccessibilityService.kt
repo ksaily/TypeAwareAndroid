@@ -1,22 +1,25 @@
 package com.example.testing
 
 import android.accessibilityservice.AccessibilityService
-import android.content.Context
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.example.testing.utils.*
 import com.example.testing.utils.KeyboardHelper.Companion.addToString
 import com.example.testing.utils.KeyboardHelper.Companion.beforeString
 import com.example.testing.utils.KeyboardHelper.Companion.countErrorRate
 import com.example.testing.utils.KeyboardHelper.Companion.countTimeSlot
 import com.example.testing.utils.KeyboardHelper.Companion.countWords
-import com.example.testing.utils.KeyboardHelper.Companion.currentPackage
+import com.example.testing.utils.KeyboardHelper.Companion.currentTimeSlot
+import com.example.testing.utils.KeyboardHelper.Companion.dataList
 import com.example.testing.utils.KeyboardHelper.Companion.deletedChars
-import com.example.testing.utils.KeyboardHelper.Companion.errorRate
 import com.example.testing.utils.KeyboardHelper.Companion.newPackage
+import com.example.testing.utils.KeyboardHelper.Companion.previousTimeSlot
 import com.example.testing.utils.KeyboardHelper.Companion.sameSession
+import com.example.testing.utils.KeyboardHelper.Companion.thisPackage
 import com.example.testing.utils.KeyboardHelper.Companion.timeElapsed
-import com.example.testing.utils.KeyboardHelper.Companion.timeSlots
 import com.example.testing.utils.KeyboardHelper.Companion.timeStampBeginning
 import com.example.testing.utils.KeyboardHelper.Companion.typingTimes
 import com.google.firebase.database.ktx.database
@@ -25,63 +28,74 @@ import java.lang.System.nanoTime
 import java.util.*
 
 class MyAccessibilityService : AccessibilityService() {
-    var startTime: Long = nanoTime()
-    var endTime: Long = 0
+    private var startTime: Long = 0
+    private var endTime: Long = 0
 
     override fun onInterrupt() {
         TODO("Not yet implemented")
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        //var dbHelper = DataBaseHelperImpl(DatabaseBuilder.getInstance(applicationContext))
         if (event == null) return
         if (event.eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
             if (startTime == 0L) {
                 //First character in a session, don't add to typing times
-                currentPackage = event.packageName.toString()
-                KeyboardHelper.timeStampBeginning = System.currentTimeMillis()
+                thisPackage = event.packageName.toString()
+                timeStampBeginning = System.currentTimeMillis()
+                Log.d("KeyboardEvents", "This is the first char of this session")
             } else {
                 endTime = nanoTime()
                 // Time elapsed in seconds:
-                KeyboardHelper.timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
-                KeyboardHelper.typingTimes.add(KeyboardHelper.timeElapsed)
+                timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
+                typingTimes.add(timeElapsed)
             }
             startTime = nanoTime()
+
             checkSession(event)
         }
     }
 
-    private fun saveToFirebase(path: String, timeslot: Int, events: KeyboardEvents) {
-        val database = Firebase.database("https://health-app-9c151-default-rtdb.europe-west1.firebasedatabase.app")
-        val myRef = database.getReference("KeyboardEvents")
-        myRef.child("events").child(timeslot.toString()).child(path).setValue(events)
-        Log.d("KeyboardEvents", "Info saved to firebase")
-    }
-
+    /** Check if session remains the same.
+     * If yes, add written character to string and typing time to an arraylist. **/
     private fun checkSession(event: AccessibilityEvent) {
-        if (!sameSession(event.packageName.toString(), KeyboardHelper.timeElapsed)) {
-            onSessionChange()
-        } else {
-            addToString(event.text.toString().removeSurrounding("[", "]"),
+        addToString(event.text.toString().removeSurrounding("[", "]"),
             event.beforeText.toString())
+        if (!sameSession(event.packageName.toString(), timeElapsed)) {
+            newPackage = event.packageName.toString()
+            startTime = nanoTime()
+            onSessionChange()
         }
     }
 
+    /** Session has changed, save the current info as KeyboardEvents data class
+     * and if the timeslot has changed, also set up a worker that saves info to Firebase.
+     * After that, reset values. **/
     private fun onSessionChange() {
-        var id= UUID.randomUUID().toString()
-        val keyboardEvent = KeyboardEvents(id, countWords(), typingTimes, deletedChars,
-        countErrorRate(), timeStampBeginning, System.currentTimeMillis(), currentPackage,
-        beforeString, countTimeSlot(), Calendar.getInstance().get(Calendar.DATE))
-        saveToFirebase(id, timeSlots, keyboardEvent)
+        currentTimeSlot = countTimeSlot()
+        val keyboardEvent = KeyboardEvents(UUID.randomUUID().toString(), countWords(), typingTimes, deletedChars,
+            countErrorRate(), timeStampBeginning, System.currentTimeMillis(), thisPackage,
+            beforeString, currentTimeSlot, Calendar.getInstance().get(Calendar.DATE)
+        )
+        if (currentTimeSlot != previousTimeSlot) {
+            val setUpWork = OneTimeWorkRequestBuilder<KeyboardWorker>()
+                .setInputData(workDataOf(
+                    "TIMESLOT" to previousTimeSlot
+                ))
+                .build()
+            WorkManager.getInstance(applicationContext).enqueue(setUpWork)
+        }
+        //Add the current event to a list of KeyboardEvents
+        dataList.add(keyboardEvent)
+        Log.d("KeyboardEvents", "$dataList")
         resetValues()
     }
 
     private fun resetValues() {
-        startTime; timeElapsed; deletedChars = 0
+        timeElapsed; deletedChars = 0
+        previousTimeSlot = currentTimeSlot
         typingTimes = arrayListOf()
-        currentPackage = newPackage
-        var startNewString = beforeString.substring(beforeString.length - 1)
-        beforeString = startNewString
+        thisPackage = newPackage
+        beforeString = beforeString.substring(beforeString.length - 1)
     }
 
 }

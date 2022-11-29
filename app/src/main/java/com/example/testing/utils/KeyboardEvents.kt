@@ -1,17 +1,22 @@
 package com.example.testing.utils
 
+import android.provider.ContactsContract.Data
+import java.util.*
+import kotlin.collections.ArrayList
+
 data class KeyboardEvents(
-    val id: String = "",
-    val wordCount: Int = 0,
+    val id: String?,
+    val wordCount: Int,
     val typingSpeed: ArrayList<Double>,
-    val errorAmount: Int = 0,
-    val errorRate: Double = 0.0,
-    val timeStampBeginning: Long = 0,
-    val timeStampEnd: Long = 0,
-    val sessionPackage: String = "",
-    val beforeText: CharSequence = "",
-    val dailyTimeWindow: Int = 0,
-    val day: Int = 0
+    val errorAmount: Int,
+    val errorRate: Double,
+    val timeStampBeginning: Long,
+    val timeStampEnd: Long,
+    val sessionPackage: String,
+    val beforeText: CharSequence,
+    val dailyTimeWindow: Int,
+    val day: Int
 )
+
 
 
