@@ -2,6 +2,7 @@ package com.example.testing.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.testing.MainActivity
@@ -28,10 +29,13 @@ class SignInActivity : AppCompatActivity() {
         binding.signInBtn.setOnClickListener {
             val email = binding.email.text.toString()
             val pass = binding.passwrd.text.toString()
+            Log.d("SignIn", "Sign in Button clicked")
 
             if (email.isNotEmpty() && pass.isNotEmpty()) {
+                Log.d("SignIn", "Email and password are not empty")
                 firebaseAuth.signInWithEmailAndPassword(email, pass).addOnCompleteListener {
                     if (it.isSuccessful) {
+                        Log.d("SignIn", "Sign in successful")
                         val intent = Intent(this, MainActivity::class.java)
                         startActivity(intent)
                     } else {

@@ -27,13 +27,13 @@ class SignUpActivity : AppCompatActivity() {
         }
         binding.signUpBtn.setOnClickListener{
             val email = binding.createEmail.text.toString()
-            val passwrd = binding.createPassword.text.toString()
+            val newPassword = binding.createPassword.text.toString()
             val confirmPass = binding.confirmPassword.text.toString()
 
             //Check that none of the fields are empty
-            if (email.isNotEmpty() && passwrd.isNotEmpty() && confirmPass.isNotEmpty()) {
-                if (passwrd == confirmPass) { //Password and confirm password need to match
-                    firebaseAuth.createUserWithEmailAndPassword(email, passwrd)
+            if (email.isNotEmpty() && newPassword.isNotEmpty() && confirmPass.isNotEmpty()) {
+                if (newPassword == confirmPass) { //Password and confirm password need to match
+                    firebaseAuth.createUserWithEmailAndPassword(email, newPassword)
                         .addOnCompleteListener {
                             if (it.isSuccessful) {
                                 val intent = Intent(this, SignInActivity::class.java)
