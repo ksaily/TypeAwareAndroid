@@ -2,6 +2,7 @@ package com.example.testing
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -12,7 +13,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
 import com.example.testing.databinding.ActivityMainBinding
 import com.example.testing.databinding.ActivitySignInBinding
+import com.example.testing.fitbit.FitbitApiService
+import com.github.kittinunf.fuel.httpGet
+import com.github.kittinunf.fuel.httpPost
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.NonCancellable.start
 
 
 class MainActivity : AppCompatActivity() {
@@ -27,6 +32,13 @@ class MainActivity : AppCompatActivity() {
         view = binding.root
         setContentView(view)
         checkAccessibilityPermission()
+        binding.FitbitBtn.setOnClickListener {
+            Log.d("Thread", "Button clicked")
+            Thread(Runnable {
+                FitbitApiService.authorizeRequest()
+            }).start()
+        }
+
     }
 
     /** Check accessibility permissions again if not provided when returning to the app **/
@@ -78,4 +90,25 @@ class MainActivity : AppCompatActivity() {
             snackbar.show()
         }
     }
+/**
+    private var CLIENT_ID: String = "2393N9"
+    private var REDIRECT_URL: Uri = Uri.parse("https://alertness-level-monitor.com")
+    private lateinit var SECURE_KEY: String
+    private val fitbitAuthUrl = "https://www.fitbit.com/oauth2/authorize"
+    private val fitbitTokenUrl = "https://www.fitbit.com/oauth2/token"
+    private val grantType = "client_credentials"
+
+    var token: String? = null
+    var tokenType: String? = null
+
+    fun main() {
+        val (_, _, result) = fitbitAuthUrl
+            .httpPost(listOf("client_id" to CLIENT_ID,
+                "response_type" to "token",
+                "redirect_uri" to REDIRECT_URL,
+                "expires_in" to "86400",
+                "scope" to "sleep"))
+            .responseString()
+        println(result)
+    }**/
 }
