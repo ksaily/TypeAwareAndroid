@@ -1,11 +1,23 @@
 package com.example.testing.fitbit
 import android.net.Uri
-import com.github.kittinunf.fuel.core.extensions.authentication
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
+import com.example.testing.fitbit.CodeChallenge.Companion.CLIENT_ID
+import com.example.testing.fitbit.CodeChallenge.Companion.CODE_VERIFIER
+import com.example.testing.fitbit.CodeChallenge.Companion.REDIRECT_URL
+import com.example.testing.fitbit.CodeChallenge.Companion.getCodeChallenge
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
-import android.util.Base64
-import java.security.SecureRandom
+import com.github.scribejava.core.builder.ServiceBuilder
+import com.github.scribejava.core.model.OAuthConstants.CLIENT_SECRET
+import com.github.scribejava.core.oauth.OAuth20Service
+import org.json.JSONArray
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.*
 
 /**
  * Fitbit's OAuth2 client's implementation
@@ -14,30 +26,47 @@ import java.security.SecureRandom
 
 class FitbitApiService {
     companion object {
-        private var CLIENT_ID: String = "2393N9"
-        private var REDIRECT_URL: Uri = Uri.parse("https://alertness-level-monitor.com")
-        private lateinit var SECURE_KEY: String
-        private val fitbitAuthUrl = "https://www.fitbit.com/oauth2/authorize"
-        private val fitbitTokenUrl = "https://www.fitbit.com/oauth2/token"
-        private val grantType = "client_credentials"
 
-        var token: String? = null
-        var tokenType: String? = null
+        private val fitbitTokenUrl = "https://api.fitbit.com/oauth2/token"
+        private val grantType = "authorization_code"
+        var accessToken: String? = null
+        var refreshToken: String? = null
 
-        fun authorizeRequest() {
-            val (_, _, result) = fitbitAuthUrl
+        /**
+         * Create an authorization request to send to Fitbit
+         */
+        fun authorizeRequestToken(code: String, state: String) {
+            //val basicToken = "Basic " + Base64.getEncoder().encodeToString("$CLIENT_ID:$CLIENT_SECRET".toByteArray())
+            val (request, response, result) = fitbitTokenUrl
                 .httpPost(
                     listOf(
                         "client_id" to CLIENT_ID,
-                        "response_type" to "token",
+                        "code" to code,
+                        "code_verifier" to CODE_VERIFIER,
                         "redirect_uri" to REDIRECT_URL,
-                        "expires_in" to "86400",
-                        "scope" to "sleep"
+                        "state" to state,
+                        "grant_type" to grantType
                     )
-                )
-                .responseString()
+                    //).appendHeader("Authorization", basicToken)
+                ).responseString()
+            println(request)
             println(result)
+            when (result) {
+                is Result.Success -> {
+                    val jsonArray = JSONArray(response)
+                    val jsonObject: JSONObject = jsonArray.getJSONObject(0)
+                    accessToken = jsonObject.get("access_token") as String
+                    refreshToken = jsonObject.get("refresh_token") as String
+                    println(response)
+                    Log.d("Authorization: ", "Access token: $accessToken")
+                    Log.d("Authorization: ", "Refresh token: $refreshToken")
+                    TODO("Check scopes and start requesting for user data")
+                }
+                is Result.Failure -> {
+                    Log.d("HTTP request", response.toString())
+                    TODO("If error is expired token, refresh token")
+                }
+            }
         }
     }
-
 }
