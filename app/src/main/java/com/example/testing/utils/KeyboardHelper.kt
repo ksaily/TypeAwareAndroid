@@ -42,7 +42,7 @@ class KeyboardHelper {
         }
 
         fun countWords(): Int {
-            val trimmedStr = beforeString.trim().replace("[^a-zA-Z]+".toRegex(), " ")
+            val trimmedStr = beforeString.replace("[^a-zA-Z]+".toRegex(), " ").trim()
             return if (trimmedStr.isEmpty()) {
                 0
             } else {

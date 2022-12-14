@@ -1,4 +1,5 @@
 package com.example.testing.fitbit
+
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -74,7 +75,7 @@ class FitbitApiService {
                     Log.d("HTTP request", response.toString())
                     try {
                         if (error == "expired_token") {
-                            val (_,refreshResponse, refreshResult) = buildTokenRequest(
+                            val (_, refreshResponse, refreshResult) = buildTokenRequest(
                                 "refresh_token", code, state)
                             val (refresh, err) = refreshResult
                             when (refreshResult) {
@@ -99,36 +100,35 @@ class FitbitApiService {
         }
 
         fun getSleepData(date: String) {
-                FuelManager.instance.basePath = "https://api.fitbit.com/1.2/user/-"
-                val url = "/sleep/date/$date.json"
+            FuelManager.instance.basePath = "https://api.fitbit.com/1.2/user/-"
+            val url = "/sleep/date/$date.json"
 
-                val (request, response, result) = url.httpGet().header(
-                    "Authorization" to
-                            "Bearer $accessToken"
-                ).responseString()
+            val (request, response, result) = url.httpGet().header(
+                "Authorization" to
+                        "Bearer $accessToken"
+            ).responseString()
             //.responseObject(SleepDataDeserializer())
             Log.d("SleepData", "Request: $request")
-                val (sleepData, error) = result
-                if (error == null) {
-                    //Print the sleep data
-                    val jsonObject = JSONTokener(sleepData).nextValue() as JSONObject
-                    val jsonArray = jsonObject.getJSONArray("sleep")
-                    val duration = jsonArray.getJSONObject(0).getString("duration")
-                    val dateOfSleep = jsonArray.getJSONObject(0).getString("dateOfSleep")
-                    Log.i("Sleep", "Duration: $duration")
-                    Log.i("Sleep", "Date of sleep : $dateOfSleep")
-                    runningThread = false
-                }
-            else {
+            val (sleepData, error) = result
+            if (error == null) {
+                //Print the sleep data
+                val jsonObject = JSONTokener(sleepData).nextValue() as JSONObject
+                val jsonArray = jsonObject.getJSONArray("sleep")
+                val duration = jsonArray.getJSONObject(0).getString("duration")
+                val dateOfSleep = jsonArray.getJSONObject(0).getString("dateOfSleep")
+                Log.i("Sleep", "Duration: $duration")
+                Log.i("Sleep", "Date of sleep : $dateOfSleep")
+                runningThread = false
+            } else {
                 println(error)
-                    runningThread = false
+                runningThread = false
             }
         }
 
         fun buildTokenRequest(
             grant: String,
             code: String,
-            state: String
+            state: String,
         ): Triple<Request, Response, Result<String, Exception>> {
             return if (grant == "authorization_code") {
                 fitbitTokenUrl.httpPost(listOf(

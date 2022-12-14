@@ -1,49 +1,60 @@
 package com.example.testing
 
-import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.View
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabsIntent
-import androidx.room.Room
+import androidx.fragment.app.Fragment
 import com.example.testing.databinding.ActivityMainBinding
-import com.example.testing.databinding.ActivitySignInBinding
 import com.example.testing.fitbit.AuthenticationActivity
-import com.example.testing.fitbit.CodeChallenge
-import com.example.testing.fitbit.CodeChallenge.Companion
-import com.example.testing.fitbit.CodeChallenge.Companion.REDIRECT_URL
-import com.example.testing.fitbit.CodeChallenge.Companion.uniqueState
-import com.example.testing.fitbit.FitbitApiService
-import com.github.kittinunf.fuel.httpGet
-import com.github.kittinunf.fuel.httpPost
+import com.example.testing.ui.menu.ChartFragment
+import com.example.testing.ui.menu.HomeFragment
+import com.example.testing.ui.menu.SettingsFragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.NonCancellable.start
-import java.net.URL
 
-
+/**
+ * First week, show only survey for the user: How do you think you did this week
+ * Second week, survey first and then reveal them the data
+ * Q1: How much time did you spend typing during date x?
+ * Q2: How often did you have to correct your typing? (Scale 1-7)
+ * Q3: At what time of day were you most active with typing? (some kind of selector)
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var view: View
     private lateinit var binding: ActivityMainBinding
-
+    private lateinit var bottomNav: BottomNavigationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         view = binding.root
         setContentView(view)
+        loadFragment(HomeFragment())
+        bottomNav = findViewById(R.id.bottomNav)
+        bottomNav.setOnItemSelectedListener {
+            when (it.itemId) {
+                R.id.home -> {
+                    loadFragment(HomeFragment())
+                    true
+                }
+                R.id.settings -> {
+                    loadFragment(SettingsFragment())
+                    true
+                }
+                R.id.charts -> {
+                    loadFragment(ChartFragment())
+                    true
+                }
+                else -> {
+                    false
+                }
+            }
+        }
         checkAccessibilityPermission()
         binding.FitbitBtn.setOnClickListener {
-            Log.d("Thread", "Button clicked")
             val intent = Intent(this, AuthenticationActivity::class.java)
             startActivity(intent)
         }
@@ -53,9 +64,13 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         checkAccessibilityPermission()
-        Log.d("Authorization", "User has enabled sleep scope")
-        }
+    }
 
+    private fun loadFragment(fragment: Fragment) {
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.container, fragment)
+        transaction.commit()
+    }
 
     /**Check for permissions **/
     private fun checkAccessibilityPermission(): Boolean {
@@ -92,7 +107,7 @@ class MainActivity : AppCompatActivity() {
         msg: String,
         length: Int,
         actionMessage: CharSequence?,
-        action: (View) -> Unit
+        action: (View) -> Unit,
     ) {
         val snackbar = Snackbar.make(view, msg, length)
         if (actionMessage != null) {

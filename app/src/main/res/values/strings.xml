@@ -11,4 +11,10 @@
     <string name="login_failed">"Login failed"</string>
     <string name="permission_required">Accessibility permission is required for the app to function properly.</string>
     <string name="permission_granted">Permission is granted. The app can track your typing speed now.</string>
+    <string name="title_activity_chart">ChartActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_charts">Charts</string>
+    <string name="title_settings">Settings</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

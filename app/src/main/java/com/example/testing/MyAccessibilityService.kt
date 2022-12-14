@@ -103,6 +103,7 @@ class MyAccessibilityService : AccessibilityService() {
         thisPackage = newPackage
        //beforeString = beforeString.substring(beforeString.length - 1)
         beforeString = newString
+        newString = ""
     }
 
 }
