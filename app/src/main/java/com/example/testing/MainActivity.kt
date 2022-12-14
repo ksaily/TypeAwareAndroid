@@ -53,7 +53,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         checkAccessibilityPermission()
-    }
+        Log.d("Authorization", "User has enabled sleep scope")
+        }
 
 
     /**Check for permissions **/

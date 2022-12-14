@@ -37,7 +37,8 @@ class KeyboardWorker(appContext: Context, workerParams: WorkerParameters):
         val database = Firebase.database("https://health-app-9c151-default-rtdb.europe-west1.firebasedatabase.app")
         val myRef = database.getReference("KeyboardEvents")
         // Save data under the current timeslot with an unique id for each
-        val dateString = "Date: " + event.day.toString()
-        myRef.child("events").child(dateString).child(timeslot.toString()).child(event.id.toString()).setValue(event)
+        val dateString = "Date: " + event.date
+        val timeSlotString = "Timeslot: $timeslot"
+        myRef.child("events").child(dateString).child(timeSlotString).child(event.id.toString()).setValue(event)
     }
 }

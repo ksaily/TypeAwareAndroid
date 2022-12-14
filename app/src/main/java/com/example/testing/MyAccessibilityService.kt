@@ -16,6 +16,7 @@ import com.example.testing.utils.KeyboardHelper.Companion.currentTimeSlot
 import com.example.testing.utils.KeyboardHelper.Companion.dataList
 import com.example.testing.utils.KeyboardHelper.Companion.deletedChars
 import com.example.testing.utils.KeyboardHelper.Companion.newPackage
+import com.example.testing.utils.KeyboardHelper.Companion.newString
 import com.example.testing.utils.KeyboardHelper.Companion.previousTimeSlot
 import com.example.testing.utils.KeyboardHelper.Companion.sameSession
 import com.example.testing.utils.KeyboardHelper.Companion.thisPackage
@@ -41,16 +42,15 @@ class MyAccessibilityService : AccessibilityService() {
             if (startTime == 0L) {
                 //First character in a session, don't add to typing times
                 thisPackage = event.packageName.toString()
-                timeStampBeginning = System.currentTimeMillis()
                 Log.d("KeyboardEvents", "This is the first char of this session")
             } else {
                 endTime = nanoTime()
                 // Time elapsed in seconds:
                 timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
-                typingTimes.add(timeElapsed)
+                //typingTimes.add(timeElapsed)
             }
             startTime = nanoTime()
-
+            timeStampBeginning = System.currentTimeMillis()
             checkSession(event)
         }
     }
@@ -58,12 +58,17 @@ class MyAccessibilityService : AccessibilityService() {
     /** Check if session remains the same.
      * If yes, add written character to string and typing time to an arraylist. **/
     private fun checkSession(event: AccessibilityEvent) {
-        addToString(event.text.toString().removeSurrounding("[", "]"),
-            event.beforeText.toString())
+
         if (!sameSession(event.packageName.toString(), timeElapsed)) {
             newPackage = event.packageName.toString()
-            startTime = nanoTime()
+            //startTime = nanoTime()
+            addToString(event.text.toString().removeSurrounding("[", "]"),
+                event.beforeText.toString(),false)
             onSessionChange()
+        } else { // Ignore typing time when session has changed
+            typingTimes.add(timeElapsed)
+            addToString(event.text.toString().removeSurrounding("[", "]"),
+                event.beforeText.toString(), true)
         }
     }
 
@@ -71,10 +76,11 @@ class MyAccessibilityService : AccessibilityService() {
      * and if the timeslot has changed, also set up a worker that saves info to Firebase.
      * After that, reset values. **/
     private fun onSessionChange() {
+        val date = KeyboardHelper.dateFormatter(Date())
         currentTimeSlot = countTimeSlot()
         val keyboardEvent = KeyboardEvents(UUID.randomUUID().toString(), countWords(), typingTimes, deletedChars,
             countErrorRate(), timeStampBeginning, System.currentTimeMillis(), thisPackage,
-            beforeString, currentTimeSlot, Calendar.getInstance().get(Calendar.DATE)
+            beforeString, currentTimeSlot, date
         )
         if (currentTimeSlot != previousTimeSlot) {
             val setUpWork = OneTimeWorkRequestBuilder<KeyboardWorker>()
@@ -91,11 +97,12 @@ class MyAccessibilityService : AccessibilityService() {
     }
 
     private fun resetValues() {
-        timeElapsed; deletedChars = 0
+        timeElapsed = 0.0
         previousTimeSlot = currentTimeSlot
         typingTimes = arrayListOf()
         thisPackage = newPackage
-        beforeString = beforeString.substring(beforeString.length - 1)
+       //beforeString = beforeString.substring(beforeString.length - 1)
+        beforeString = newString
     }
 
 }

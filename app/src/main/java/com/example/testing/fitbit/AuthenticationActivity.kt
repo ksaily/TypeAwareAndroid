@@ -11,12 +11,14 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
+import com.example.testing.MainActivity
 import java.net.URI
 import java.net.URL
 import java.util.UUID
 import com.example.testing.fitbit.CodeChallenge.Companion.CLIENT_ID
 import com.example.testing.fitbit.CodeChallenge.Companion.REDIRECT_URL
 import com.example.testing.fitbit.CodeChallenge.Companion.CODE_VERIFIER
+import com.example.testing.fitbit.FitbitApiService.Companion.runningThread
 import java.util.Base64
 
 /**
@@ -46,7 +48,6 @@ class AuthenticationActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         Log.d("Authorization", "On new intent")
@@ -60,11 +61,20 @@ class AuthenticationActivity : AppCompatActivity() {
             AUTH_CODE = code
             uniqueState = state
             Thread(Runnable {
-                FitbitApiService.authorizeRequestToken(code, state)
+                try {
+                    if (!runningThread) {
+                        return@Runnable
+                    }
+                    FitbitApiService.authorizeRequestToken(code, state)
+                    FitbitApiService.getSleepData("2022-12-10")
+                } catch (e: InterruptedException) {
+                    e.printStackTrace()
+                }
             }).start()
+            val returnIntent = Intent(this, MainActivity::class.java)
+            startActivity(returnIntent)
         } else {
             Log.d("Authorization", "Authorization code not received")
-            TODO("Handle error")
         }
     }
 
