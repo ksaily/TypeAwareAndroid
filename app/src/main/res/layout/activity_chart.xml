@@ -12,9 +12,12 @@
         android:layout_height="60dp"
         android:layout_alignParentBottom="true"
         android:scrollIndicators="left"
+        app:itemTextColor="#CFCFCF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/nav_menu" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

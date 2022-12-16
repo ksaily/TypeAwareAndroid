@@ -1,6 +1,8 @@
 package com.example.testing.ui
 
 import android.os.Bundle
+import android.widget.ProgressBar
+import android.widget.TextView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -18,25 +20,28 @@ class ChartActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityChartBinding
     private lateinit var bottomNav: BottomNavigationView
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityChartBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        progressBar = findViewById(R.id.progress_circular)
         loadFragment(HomeFragment())
         bottomNav = findViewById(R.id.bottomNav)
+        showPercentage(0.2, progressBar)
         bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.home -> {
+                R.id.homeFragment -> {
                     loadFragment(HomeFragment())
                     true
                 }
-                R.id.settings -> {
+                R.id.settingsFragment -> {
                     loadFragment(SettingsFragment())
                     true
                 }
-                R.id.charts -> {
+                R.id.chartFragment -> {
                     loadFragment(ChartFragment())
                     true
                 }
@@ -50,4 +55,14 @@ class ChartActivity : AppCompatActivity() {
         transaction.replace(R.id.container, fragment)
         transaction.commit()
     }
+
+    fun showPercentage(errorRate: Double, progressBar: ProgressBar) {
+        var successRate = (1.0 - errorRate) * 100
+        progressBar.progress = successRate.toInt()
+        findViewById<TextView>(R.id.ProgressTextView).text = successRate.toString()
+    }
+
+
+
+
 }

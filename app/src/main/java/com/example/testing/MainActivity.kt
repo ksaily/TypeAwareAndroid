@@ -2,10 +2,14 @@ package com.example.testing
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.provider.Settings
 import android.view.View
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
+import androidx.navigation.ui.setupWithNavController
 import com.example.testing.databinding.ActivityMainBinding
 import com.example.testing.fitbit.AuthenticationActivity
 import com.example.testing.ui.menu.ChartFragment
@@ -26,25 +30,33 @@ class MainActivity : AppCompatActivity() {
     private lateinit var view: View
     private lateinit var binding: ActivityMainBinding
     private lateinit var bottomNav: BottomNavigationView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var handler: Handler
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         view = binding.root
         setContentView(view)
-        loadFragment(HomeFragment())
+        progressBar = findViewById(R.id.circle_progress_bar)
+        showPercentage(0.23)
+        //loadFragment(HomeFragment())
+        // Initialize the bottom navigation view
         bottomNav = findViewById(R.id.bottomNav)
+        val navController = findNavController(R.id.nav_fragment)
+        bottomNav.setupWithNavController(navController)
+        /**
         bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.home -> {
+                R.id.homeFragment -> {
                     loadFragment(HomeFragment())
                     true
                 }
-                R.id.settings -> {
+                R.id.settingsFragment -> {
                     loadFragment(SettingsFragment())
                     true
                 }
-                R.id.charts -> {
+                R.id.chartFragment -> {
                     loadFragment(ChartFragment())
                     true
                 }
@@ -52,7 +64,7 @@ class MainActivity : AppCompatActivity() {
                     false
                 }
             }
-        }
+        }*/
         checkAccessibilityPermission()
         binding.FitbitBtn.setOnClickListener {
             val intent = Intent(this, AuthenticationActivity::class.java)
@@ -64,6 +76,16 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         checkAccessibilityPermission()
+    }
+
+    /**
+     * Show the opposite of error rate to indicate how accurate
+     * the user has been in typing words
+     */
+    fun showPercentage(errorRate: Double) {
+        var successRate = (1.0 - errorRate) * 100
+        progressBar.progress = successRate.toInt()
+
     }
 
     private fun loadFragment(fragment: Fragment) {
