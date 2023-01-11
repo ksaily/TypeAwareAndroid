@@ -1,5 +1,6 @@
-package com.example.testing.ui
+package com.example.testing
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -28,38 +29,48 @@ class ChartActivity : AppCompatActivity() {
         binding = ActivityChartBinding.inflate(layoutInflater)
         setContentView(binding.root)
         progressBar = findViewById(R.id.progress_circular)
-        loadFragment(HomeFragment())
+        loadFragment(ChartFragment())
+        val pros = showPercentage(0.2, progressBar)
+        findViewById<TextView>(R.id.ProgressTextView).text = pros.toString()
         bottomNav = findViewById(R.id.bottomNav)
-        showPercentage(0.2, progressBar)
+        //This is only for navigating between fragments:
+        //val navController = findNavController(R.id.nav_fragment)
+        //bottomNav.setupWithNavController(navController)
+        bottomNav.selectedItemId = R.id.chartFragment
         bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.homeFragment -> {
-                    loadFragment(HomeFragment())
+                    startActivity(Intent(this, MainActivity::class.java))
+                    overridePendingTransition(0,0)
                     true
                 }
                 R.id.settingsFragment -> {
-                    loadFragment(SettingsFragment())
+                    //loadFragment(SettingsFragment())
                     true
                 }
                 R.id.chartFragment -> {
-                    loadFragment(ChartFragment())
+                    //loadFragment(ChartFragment())
                     true
                 }
-                else -> {false}
+                else -> {
+                    false
+                }
             }
         }
     }
 
     private fun loadFragment(fragment: Fragment) {
         val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.container, fragment)
+        transaction.replace(R.id.container_chart, fragment)
         transaction.commit()
     }
+    companion object {
 
-    fun showPercentage(errorRate: Double, progressBar: ProgressBar) {
-        var successRate = (1.0 - errorRate) * 100
-        progressBar.progress = successRate.toInt()
-        findViewById<TextView>(R.id.ProgressTextView).text = successRate.toString()
+        fun showPercentage(errorRate: Double, progressBar: ProgressBar, ): Double {
+            var successRate = (1.0 - errorRate) * 100
+            progressBar.progress = successRate.toInt()
+            return successRate
+        }
     }
 
 

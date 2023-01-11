@@ -59,16 +59,16 @@ class MyAccessibilityService : AccessibilityService() {
      * If yes, add written character to string and typing time to an arraylist. **/
     private fun checkSession(event: AccessibilityEvent) {
 
-        if (!sameSession(event.packageName.toString(), timeElapsed)) {
+        if (sameSession(event.packageName.toString(), timeElapsed)) {
+            typingTimes.add(timeElapsed)
+            addToString(event.text.toString().removeSurrounding("[", "]"),
+                event.beforeText.toString(), true)
+        } else { // Ignore typing time when session has changed
             newPackage = event.packageName.toString()
             //startTime = nanoTime()
             addToString(event.text.toString().removeSurrounding("[", "]"),
                 event.beforeText.toString(),false)
             onSessionChange()
-        } else { // Ignore typing time when session has changed
-            typingTimes.add(timeElapsed)
-            addToString(event.text.toString().removeSurrounding("[", "]"),
-                event.beforeText.toString(), true)
         }
     }
 

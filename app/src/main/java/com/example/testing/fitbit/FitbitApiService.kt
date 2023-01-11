@@ -47,6 +47,7 @@ class FitbitApiService {
         var userId: String? = null
         var fitbitApiEndpoint = "https://api.fitbit.com"
         var runningThread: Boolean = true
+        var fitbitPermission: Boolean = false
 
         /**
          * Create an authorization request to send to Fitbit
@@ -68,6 +69,7 @@ class FitbitApiService {
                     println(response)
                     Log.d("Authorization: ", "Access token: $accessToken")
                     Log.d("Authorization: ", "Refresh token: $refreshToken")
+                    fitbitPermission = true
                 }
                 is Result.Failure -> {
                     val errObject = JSONTokener(err.toString()).nextValue() as JSONObject
@@ -84,9 +86,11 @@ class FitbitApiService {
                                     refreshToken = jsonObject.getString("refresh_token")
                                     userId = jsonObject.getString("user_id")
                                     Log.d("Authorization", "Access token updated")
+                                    fitbitPermission = true
                                 }
                                 is Result.Failure -> {
                                     Log.d("Authorization", "Error, Access token not updated")
+                                    fitbitPermission = false
                                 }
                             }
                         } else {

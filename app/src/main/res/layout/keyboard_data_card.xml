@@ -6,7 +6,8 @@
     android:layout_height="300dp"
     android:layout_margin="20dp"
     app:cardCornerRadius="17dp"
-    app:cardBackgroundColor="@color/cardview_light_background">
+    app:cardBackgroundColor="@color/cardview_light_background"
+    android:id="@+id/KeyboardDataCard">
 
     <TableLayout
         android:layout_width="match_parent"

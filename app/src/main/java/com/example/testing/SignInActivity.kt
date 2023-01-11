@@ -1,12 +1,10 @@
-package com.example.testing.ui
+package com.example.testing
 
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.testing.MainActivity
-import com.example.testing.R
 import com.example.testing.databinding.ActivitySignInBinding
 import com.google.firebase.auth.FirebaseAuth
 
