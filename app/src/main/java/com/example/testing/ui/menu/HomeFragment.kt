@@ -3,18 +3,30 @@ package com.example.testing.ui.menu
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import com.example.testing.MainActivity
 import com.example.testing.R
 import com.example.testing.databinding.FragmentHomeBinding
 import com.example.testing.fitbit.AuthenticationActivity
+import com.example.testing.ui.menu.ChartFragment.Companion.countAvgErrors
+import com.example.testing.ui.menu.ChartFragment.Companion.countAvgSpeed
+import com.example.testing.ui.menu.ChartFragment.Companion.currentDate
+import com.example.testing.ui.menu.ChartFragment.Companion.keyboardList
+import com.example.testing.ui.menu.ChartFragment.Companion.showPercentage
 import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.data.LineData
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -34,7 +46,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val GROUP_2_LABEL = ""
     private val BAR_SPACE = 0.1f
     private val BAR_WIDTH = 0.8f
-    private var chart: BarChart? = null
+    private var chart: LineChart? = null
     protected var tfRegular: Typeface? = null
     protected var tfLight: Typeface? = null
     private val statValues: ArrayList<Float> = ArrayList()
@@ -43,6 +55,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     )
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+    private var chosenDate: String = ""
+    private val formatter = SimpleDateFormat("yyyy-MM-dd")
+    var currentDate: String = getCurrentDateString()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,11 +70,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        chart = binding.barChart
-        binding.FitbitBtn.setOnClickListener {
+        binding.currentDateTextView.text = "Today"
+        chosenDate = currentDate
+        binding.arrowRight.isVisible = false
+        binding.sleepDataContainer.FitbitBtn.setOnClickListener {
             val intent = Intent(activity, AuthenticationActivity::class.java)
             startActivity(intent)
+
         }
+        ChartFragment.getFromFirebase(chosenDate)
+
 
         var values1: ArrayList<BarEntry> = ArrayList()
         var values2: ArrayList<BarEntry> = ArrayList()
@@ -89,8 +109,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val data: BarData = BarData()
         data.addDataSet(dataSet1)
         data.addDataSet(dataSet2)
-        configureBarChart()
-        prepareChartData(data)
+        //configureBarChart()
+        //prepareChartData(data)
     }
 
     override fun onDestroyView() {
@@ -98,17 +118,61 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         _binding = null
     }
 
-    private fun prepareChartData(data: BarData) {
+    override fun onResume() {
+        super.onResume()
+        binding.currentDateTextView.text = ChartFragment.currentDate
+        binding.arrowLeft.setOnClickListener {
+            chosenDate = ChartFragment.getPreviousDateString(chosenDate)
+            binding.arrowRight.isVisible = true
+            binding.currentDateTextView.text = chosenDate
+            ChartFragment.getFromFirebase(chosenDate)
+            updateKeyboardData()
+            //Set up LiveData listener: Changes in chosenDate -> Update UI
+
+        }
+        if (isLoggedInFitbit) {
+            binding.sleepDataContainer.FitbitBtn.isVisible = false
+            binding.sleepDataContainer.FitbitLoginPrompt.isVisible = false
+            binding.sleepDataContainer.sleepDataChart.isVisible = true
+            //Show Fitbit sleep data in a chart, replace SleepDataContainer with chart fragment
+        }
+    }
+
+    fun getCurrentDateString(): String {
+        var time = Calendar.getInstance().time
+        return formatter.format(time)
+    }
+
+    private fun updateKeyboardData() {
+        if (keyboardList != null) {
+            var totalErr = mutableListOf<Double>()
+            var totalSpeed = mutableListOf<Double>()
+            for (i in keyboardList) {
+                if (i.date == chosenDate) {
+                    totalErr.add(i.errors)
+                    totalSpeed.add(i.speed)
+                }
+            }
+            binding.keyboardChart.speedData.text = countAvgSpeed(totalSpeed).toString()
+            binding.keyboardChart.ProgressTextView.text = showPercentage(countAvgSpeed(totalErr),
+            binding.keyboardChart.progressCircular).toString()
+        }
+        else {
+            Log.d("UpdateUI", "No data on keyboardList")
+        }
+    }
+
+    private fun prepareChartData(data: LineData) {
         chart!!.data = data
-        chart!!.barData.barWidth = BAR_WIDTH
+        //chart!!.barData.barWidth = BAR_WIDTH
         val groupSpace = 1f - (BAR_SPACE + BAR_WIDTH)
-        chart!!.groupBars(0f, groupSpace, BAR_SPACE)
+        //chart!!.groupBars(0f, groupSpace, BAR_SPACE)
         chart!!.invalidate()
     }
 
     private fun configureBarChart() {
         chart!!.setPinchZoom(false)
-        chart!!.setDrawBarShadow(false)
+        //chart!!.setDrawBarShadow(false)
         chart!!.setDrawGridBackground(false)
 
         chart!!.description.isEnabled = false
@@ -134,6 +198,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
          * @param param2 Parameter 2.
          * @return A new instance of fragment HomeFragment.
          */
+        var isLoggedInFitbit = false
         // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =

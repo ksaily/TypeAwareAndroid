@@ -24,7 +24,9 @@ class KeyboardWorker(appContext: Context, workerParams: WorkerParameters):
             Log.d("FirebaseDebug", "New list: $newList")
             for (instance in newList) {
                 saveToFirebase(keyboardTimeslot, instance)
-                dataList.remove(instance)
+                if (dataList.isNotEmpty()) {
+                    dataList.remove(instance)
+                }
             }
             //dataList = newList as MutableList<KeyboardEvents>
             Result.success()
@@ -34,8 +36,7 @@ class KeyboardWorker(appContext: Context, workerParams: WorkerParameters):
     }
 
     private fun saveToFirebase(timeslot: Int, event: KeyboardEvents) {
-        val database = Firebase.database("https://health-app-9c151-default-rtdb.europe-west1.firebasedatabase.app")
-        val myRef = database.getReference("KeyboardEvents")
+        val myRef = Firebase.database.getReference("KeyboardEvents")
         // Save data under the current timeslot with an unique id for each
         val dateString = "Date:" + event.date
         val timeSlotString = "Timeslot:$timeslot"

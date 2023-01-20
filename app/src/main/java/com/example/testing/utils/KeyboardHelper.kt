@@ -84,7 +84,6 @@ class KeyboardHelper {
                         Log.d("KeyboardEvents", "Current string is: $beforeString")
                     } else {
                         newString += newChar
-                        deletedChars = 0
                         Log.d("KeyboardEvents", "New char is: $newChar")
                         Log.d("KeyboardEvents", "Current string is: $newString")
                     }

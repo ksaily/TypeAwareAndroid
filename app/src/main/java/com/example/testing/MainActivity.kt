@@ -23,6 +23,8 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -59,6 +61,7 @@ class MainActivity : AppCompatActivity() {
     private val homeFragment = HomeFragment()
     private val chartFragment = ChartFragment()
     private val settingsFragment = SettingsFragment()
+    val database = Firebase.database("https://health-app-9c151-default-rtdb.europe-west1.firebasedatabase.app")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -165,6 +168,7 @@ class MainActivity : AppCompatActivity() {
         val transaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.container, fragment)
         transaction.commit()
+        transaction.addToBackStack(null)
     }
 
     /**Check for permissions **/
@@ -213,5 +217,7 @@ class MainActivity : AppCompatActivity() {
             snackbar.show()
         }
     }
+
+
 
 }

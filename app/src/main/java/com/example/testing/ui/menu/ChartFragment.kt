@@ -16,6 +16,7 @@ import com.example.testing.databinding.FragmentChartBinding
 import com.example.testing.databinding.FragmentHomeBinding
 import com.example.testing.utils.KeyboardAdapter
 import com.example.testing.utils.KeyboardAdapter.Companion.getFromFirebase
+import com.example.testing.utils.KeyboardEvents
 import com.example.testing.utils.KeyboardStats
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -26,11 +27,12 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.ArrayList
 
+private const val ARG_PARAM1 = "param1"
+private const val ARG_PARAM2 = "param2"
+
 class ChartFragment : Fragment(R.layout.fragment_chart) {
     private var _binding: FragmentChartBinding? = null
     private val binding get() = _binding!!
-    private val calendar: Calendar = Calendar.getInstance()
-    private val year = calendar.get(Calendar.YEAR)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,29 +48,48 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
         //layoutManager = LinearLayoutManager(activity)
         //adapter = KeyboardAdapter()
         //Set date to today
-
-        getFromFirebase("2023-01-05")
-        Log.d("Firebaseinfo", "OnViewCreated")
-        binding.speedData.text = avgSpeed.toString()
-        //Sets the progressbar correctly and returns
-        binding.ProgressTextView.text = showPercentage(avgErrors, binding.progressCircular).toString()
         }
+
+    override fun onResume() {
+        super.onResume()
+        getFromFirebase("2023-01-05")
+        Log.d("Firebaseinfo", "onResume")
+        //binding.keyspeedData.text = avgSpeed.toString()
+        //Sets the progressbar correctly and returns
+        //binding.ProgressTextView.text = showPercentage(avgErrors, binding.progressCircular).toString()
+
+    }
 
 
     companion object {
-        var totalAvgSpeed: ArrayList<Double> = arrayListOf()
-        var totalAvgErrors: ArrayList<Int> = arrayListOf()
-        var avgSpeed: Double = 0.0
-        var avgErrors: Double = 0.0
-        var currentDate: String = ""
+        var keyboardList: ArrayList<KeyboardStats> = arrayListOf()
+        var errorsList: MutableList<Long> = mutableListOf()
+        var totalErrList: MutableList<Long> = mutableListOf()
+        var totalSpeedsList: MutableList<MutableList<Double>> = mutableListOf()
+        var totalAvgErrors: ArrayList<Long> = arrayListOf()
+        var timeWindow: String = ""
+        var totalErr: Double = 0.0
+        var totalSpeed: Double = 0.0
+        var speedsList: MutableList<Double> = mutableListOf()
+        val calendar = Calendar.getInstance()
+        val formatter = SimpleDateFormat("yyyy-MM-dd")
+        var currentDate: String = getCurrentDateString()
         /**
          * Count average for one instance in firebase database,
          * which is a list of typing speeds and
          * return the average speed for that instance
          */
 
+        fun newInstance(param1: String, param2: String) =
+            HomeFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_PARAM1, param1)
+                    putString(ARG_PARAM2, param2)
+                }
+            }
 
-        fun countAvgSpeed(speed: List<Double>): Double {
+
+        fun countAvgSpeed(speed: MutableList<Double>): Double {
             var total = 0.0
             for (i in speed) {
                 total += i
@@ -76,43 +97,78 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
             return total / speed.size
         }
 
-        fun countAvgErrors(errors: ArrayList<Int>): Double {
+        fun countAvgErrors(errors: MutableList<Long>): Double {
             var total = 0.0
             for (i in errors) {
                 total += i
             }
-            return total / totalAvgErrors.size
+            return total / errors.size
         }
 
-        fun getCurrentDate() {
-            val time = Calendar.getInstance().time
-            val formatter = SimpleDateFormat("yyyy-MM-dd")
-            currentDate = formatter.format(time)
+        fun getCurrentDateString(): String {
+            var time = Calendar.getInstance().time
+            return formatter.format(time)
+        }
+
+
+        fun getPreviousDateString(inputDate: String): String {
+            val cal = Calendar.getInstance()
+            var date = formatter.parse(inputDate) as Date
+            cal.time = date
+            cal.add(Calendar.DATE, -1)
+            var previousDate = formatter.format(cal.time)
+            Log.d("Dates", "Selected date: $inputDate")
+            Log.d("Dates", "Previous date: $date")
+            return previousDate
+        }
+
+        fun getNextDateString(inputDate: String): String {
+            val cal = Calendar.getInstance()
+            var date = formatter.parse(inputDate) as Date
+            cal.time = date
+            cal.add(Calendar.DATE, +1)
+            var inputDate = formatter.format(cal.time)
+            Log.d("Dates", "Selected date: $inputDate")
+            Log.d("Dates", "Previous date: $date")
+            return inputDate
+
         }
 
         fun getFromFirebase(date: String) {
-            getCurrentDate()
             val rootRef = FirebaseDatabase.getInstance().reference
             val ref = rootRef.child(date)
             val valueEventListener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val content = snapshot.children
-                    content.forEach { dataSnapshot ->
-                        var list = dataSnapshot.children
-                        list.forEach {
-                            var speeds = it.child("typingSpeed").value
-                            var avgForOne = countAvgSpeed(speeds as List<Double>)
-                            totalAvgErrors.add(it.child("errorAmount").value as Int)
-                            //Add the average for one instance to a new list
-                            totalAvgSpeed.add(avgForOne)
+                    if (snapshot.value != null) {
+                        val children = snapshot.children
+                        children.forEach { dataSnapshot ->
+                            var child = dataSnapshot.children
+                            child.forEach {
+                                var speeds = it.child("typingSpeed").value
+                                var avgForOne = countAvgSpeed(speeds as MutableList<Double>)
+                                errorsList.add(it.child("errorAmount").value as Long)
+                                //Add the average for one instance to a new list
+                                speedsList.add(avgForOne)
+                            }
+                            totalErrList = (totalErrList + errorsList).toMutableList()
+                            Log.d("Firebase", child.toString())
+                            totalSpeedsList.add(speedsList.toMutableList())
+                            timeWindow = dataSnapshot.key.toString()
+                            //avgSpeed = countAvgSpeed(totalAvgSpeed)
+                            //var data = KeyboardStats(date, dataSnapshot.key, avgErrors, avgSpeed)
+                            //println(data)
                         }
-                        Log.d("Firebase", list.toString())
-                        avgErrors = countAvgErrors(totalAvgErrors)
-                        avgSpeed = countAvgSpeed(totalAvgSpeed)
-                        var data = KeyboardStats(date, dataSnapshot.key, avgErrors, avgSpeed)
+                        totalErr = countAvgErrors(totalErrList)
+                        var total: MutableList<Double> = mutableListOf()
+                        for (i in totalSpeedsList) {
+                            total.add(countAvgSpeed(i))
+                        }
+                        totalSpeed = countAvgSpeed(total)
+                        var data = KeyboardStats(currentDate, timeWindow, totalErr, totalSpeed)
+                        Log.d("Firebase", "Data fetched from firebase")
                         println(data)
+                        keyboardList.add(data)
                     }
-                    Log.d("Firebase", "Data fetched from firebase")
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -120,7 +176,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
                 }
             }
             if (date != currentDate) {
-                ref.addListenerForSingleValueEvent(valueEventListener)
+                rootRef.addListenerForSingleValueEvent(valueEventListener)
             } else {
                 ref.addValueEventListener(valueEventListener)
             }

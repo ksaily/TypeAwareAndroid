@@ -11,5 +11,9 @@
     <color name="transparent">#00000000</color>
     <color name="dark_grey">#514E4E</color>
     <color name="light_grey">#CFCFCF</color>
+    <color name="dark_purple">#251A62</color>
+    <color name="light_purple">#5944AB</color>
+    <color name="muted_purple">#76649A</color>
+
 
 </resources>
