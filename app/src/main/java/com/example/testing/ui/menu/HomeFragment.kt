@@ -13,6 +13,7 @@ import com.example.testing.MainActivity
 import com.example.testing.R
 import com.example.testing.databinding.FragmentHomeBinding
 import com.example.testing.fitbit.AuthenticationActivity
+import com.example.testing.fitbit.FitbitApiService
 import com.example.testing.ui.menu.ChartFragment.Companion.countAvgErrors
 import com.example.testing.ui.menu.ChartFragment.Companion.countAvgSpeed
 import com.example.testing.ui.menu.ChartFragment.Companion.currentDate
@@ -58,6 +59,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private var chosenDate: String = ""
     private val formatter = SimpleDateFormat("yyyy-MM-dd")
     var currentDate: String = getCurrentDateString()
+    var dateFragment = DateFragment()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -70,15 +72,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.currentDateTextView.text = "Today"
-        chosenDate = currentDate
-        binding.arrowRight.isVisible = false
         binding.sleepDataContainer.FitbitBtn.setOnClickListener {
             val intent = Intent(activity, AuthenticationActivity::class.java)
             startActivity(intent)
 
         }
-        ChartFragment.getFromFirebase(chosenDate)
+        ChartFragment.getFromFirebase(DateFragment.chosenDate)
 
 
         var values1: ArrayList<BarEntry> = ArrayList()
@@ -120,21 +119,22 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     override fun onResume() {
         super.onResume()
+        /**
         binding.currentDateTextView.text = ChartFragment.currentDate
         binding.arrowLeft.setOnClickListener {
             chosenDate = ChartFragment.getPreviousDateString(chosenDate)
             binding.arrowRight.isVisible = true
-            binding.currentDateTextView.text = chosenDate
-            ChartFragment.getFromFirebase(chosenDate)
+            binding.currentDate.text = chosenDate
+            ChartFragment.getFromFirebase(chosenDate)**/
             updateKeyboardData()
             //Set up LiveData listener: Changes in chosenDate -> Update UI
 
-        }
         if (isLoggedInFitbit) {
             binding.sleepDataContainer.FitbitBtn.isVisible = false
             binding.sleepDataContainer.FitbitLoginPrompt.isVisible = false
             binding.sleepDataContainer.sleepDataChart.isVisible = true
             //Show Fitbit sleep data in a chart, replace SleepDataContainer with chart fragment
+            FitbitApiService.getSleepData(chosenDate)
         }
     }
 

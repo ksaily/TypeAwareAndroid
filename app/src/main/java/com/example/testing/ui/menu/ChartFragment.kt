@@ -141,33 +141,35 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.value != null) {
                         val children = snapshot.children
+                        if (children != null) {
                         children.forEach { dataSnapshot ->
-                            var child = dataSnapshot.children
-                            child.forEach {
-                                var speeds = it.child("typingSpeed").value
-                                var avgForOne = countAvgSpeed(speeds as MutableList<Double>)
-                                errorsList.add(it.child("errorAmount").value as Long)
-                                //Add the average for one instance to a new list
-                                speedsList.add(avgForOne)
+                                var child = dataSnapshot.children
+                                child.forEach {
+                                    var speeds = it.child("typingSpeed").value
+                                    var avgForOne = countAvgSpeed(speeds as MutableList<Double>)
+                                    errorsList.add(it.child("errorAmount").value as Long)
+                                    //Add the average for one instance to a new list
+                                    speedsList.add(avgForOne)
+                                }
+                                totalErrList = (totalErrList + errorsList).toMutableList()
+                                Log.d("Firebase", child.toString())
+                                totalSpeedsList.add(speedsList.toMutableList())
+                                timeWindow = dataSnapshot.key.toString()
+                                //avgSpeed = countAvgSpeed(totalAvgSpeed)
+                                //var data = KeyboardStats(date, dataSnapshot.key, avgErrors, avgSpeed)
+                                //println(data)
                             }
-                            totalErrList = (totalErrList + errorsList).toMutableList()
-                            Log.d("Firebase", child.toString())
-                            totalSpeedsList.add(speedsList.toMutableList())
-                            timeWindow = dataSnapshot.key.toString()
-                            //avgSpeed = countAvgSpeed(totalAvgSpeed)
-                            //var data = KeyboardStats(date, dataSnapshot.key, avgErrors, avgSpeed)
-                            //println(data)
+                            totalErr = countAvgErrors(totalErrList)
+                            var total: MutableList<Double> = mutableListOf()
+                            for (i in totalSpeedsList) {
+                                total.add(countAvgSpeed(i))
+                            }
+                            totalSpeed = countAvgSpeed(total)
+                            var data = KeyboardStats(currentDate, timeWindow, totalErr, totalSpeed)
+                            Log.d("Firebase", "Data fetched from firebase")
+                            println(data)
+                            keyboardList.add(data)
                         }
-                        totalErr = countAvgErrors(totalErrList)
-                        var total: MutableList<Double> = mutableListOf()
-                        for (i in totalSpeedsList) {
-                            total.add(countAvgSpeed(i))
-                        }
-                        totalSpeed = countAvgSpeed(total)
-                        var data = KeyboardStats(currentDate, timeWindow, totalErr, totalSpeed)
-                        Log.d("Firebase", "Data fetched from firebase")
-                        println(data)
-                        keyboardList.add(data)
                     }
                 }
 

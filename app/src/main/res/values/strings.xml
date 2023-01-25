@@ -20,14 +20,23 @@
     <!-- Consent form -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="con_title">Consent to Participate</string>
-    <string name="con_intro">Welcome to Circog! This app is part of a scientific study, which focuses on detecting users\' circadian rhythms, i.e. performance variations throughout the day. From time to time, Circog will prompt you to perform a sequence of concentration tasks. If you do not receive a notification within 24hours after installation, please let us know.</string>
+    <string name="con_intro">Welcome to Alertness Monitor! This app is part of a scientific study, which focuses on tracking users\' keyboard usage during the day. During the first week, the app will send you a notification every day to complete a brief questionnaire about how you have experienced your own keyboard usage. The second week you will also be shown an overview of the data that the app has collected and you will also be asked to answer the same daily questionnaire. If you do not receive a notification within 24hours after installation, please let us know.</string>
     <string name="con_portrait">Portrait of the researchers that organise the study: Tilman Dingler and Tonja Maschulla</string>
-    <string name="con_contact">"This study is conducted by Tilman Dingler and Tonja Maschulla at the University of Stuttgart. In case you have questions, please contact us at userstudies@hcilab.org."</string>
-    <string name="con_data">"By pressing accept, you allow Circog to anonymously collect app usage data. All data will be securely stored on a server in compliance with European data protection laws (BGBl. I S. 2325). No phone content or sensor data will be collected. Logs will only be uploaded when you are connected to WiFi to prevent any upload cost. Your data will only be used in the context of our research and will never be shared with third parties. You can withdraw from the study at any moment by simply uninstalling the app. Thanks! And have fun with the tasks!</string>
+    <string name="con_contact">"This study is conducted by Katri Säily and Aku Visuri at the University of Oulu. In case you have questions, please contact us at ..."</string>
+    <string name="con_data">"By pressing accept, you allow Alertness Monitor to anonymously collect app and keyboard usage data. All data will be securely stored on a server in compliance with European data protection laws (BGBl. I S. 2325). All the keyboard data will be encrypted before sending it to the server so nobody can see exactly what you have written. Logs will only be uploaded when you are connected to WiFi to prevent any upload cost. Your data will only be used in the context of our research and will never be shared with third parties. You can withdraw from the study at any moment by simply uninstalling the app. Thanks! And have fun with the tasks!</string>
     <string name="con_btn_give_consent">Accept</string>
     <string name="con_btn_not_now">Not Now</string>
     <string name="con_could_not_register">No connection to our servers - are you connected to the Internet?</string>
     <string name="title_activity_consent">ConsentActivity</string>
+
+    <!-- User information -->
+    <string name="user_info_title">Welcome to the study!</string>
+    <string name="user_info_intro">We still need to collect some basic information from you</string>
+    <string name="user_full_name">Full name:</string>
+    <string name="user_email">Email</string>
+    <string name="save_user_info_consent">After saving your info you will be redirected to the onboarding pages. If you wish to change your info after pressing save, you will need to reinstall the app.</string>
+    <string name="save_user_info">Save</string>
+
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
@@ -36,4 +45,20 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
 </resources>

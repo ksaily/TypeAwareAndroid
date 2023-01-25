@@ -18,48 +18,8 @@
         android:orientation="vertical">
 
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:paddingTop="20dp"
-            android:paddingBottom="5dp">
-
-            <ImageView
-                android:id="@+id/arrowLeft"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:padding="5dp"
-                android:layout_alignBottom="@id/currentDateTextView"
-                android:layout_toStartOf="@id/currentDateTextView"
-                app:tint="@color/light_grey"
-                app:srcCompat="@drawable/ic_baseline_arrow_back_ios_new_24" />
-
-            <TextView
-                android:id="@+id/currentDateTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="date"
-                android:gravity="center_horizontal"
-                android:textColor="@color/white"
-                android:textSize="22sp"
-                android:padding="10dp"
-                android:layout_centerHorizontal="true"
-                android:fontFamily="@font/roboto_black"/>
-
-            <ImageView
-                android:id="@+id/arrowRight"
-                app:tint="@color/light_grey"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:layout_toEndOf="@id/currentDateTextView"
-                android:padding="5dp"
-                android:layout_alignBottom="@id/currentDateTextView"
-                app:srcCompat="@drawable/ic_baseline_arrow_forward_ios_24" />
-
-        </RelativeLayout>
+        <include layout="@layout/fragment_date"
+            android:id="@+id/homeDatePicker"/>
 
         <include layout="@layout/keyboard_data_card"
             android:id="@+id/keyboardChart"/>

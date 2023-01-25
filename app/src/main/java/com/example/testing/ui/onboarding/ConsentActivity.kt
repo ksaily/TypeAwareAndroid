@@ -20,8 +20,6 @@ class ConsentActivity : AppCompatActivity() {
 
         binding = ActivityConsentBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-
         val navController = findNavController(R.id.nav_host_fragment_content_consent)
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -33,4 +31,6 @@ class ConsentActivity : AppCompatActivity() {
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
     }
+
+
 }
