@@ -27,6 +27,7 @@
     <string name="con_btn_give_consent">Accept</string>
     <string name="con_btn_not_now">Not Now</string>
     <string name="con_could_not_register">No connection to our servers - are you connected to the Internet?</string>
+    <string name="con_not_now_prompt">Without permission to access your data, the app can not track your behaviour and therefore does not fulfill the purpose of this study. If you still wish to participate in the study, please click accept.</string>
     <string name="title_activity_consent">ConsentActivity</string>
 
     <!-- User information -->

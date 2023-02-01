@@ -7,9 +7,9 @@
 
     <fragment
         android:id="@+id/FirstFragment"
-        android:name="com.example.testing.ui.onboarding.FirstFragment"
+        android:name="com.example.testing.ui.onboarding.UserInfoFragment"
         android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
+        tools:layout="@layout/fragment_onboarding">
 
         <action
             android:id="@+id/action_FirstFragment_to_SecondFragment"

@@ -8,17 +8,17 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import androidx.core.view.isVisible
 import com.example.testing.MainActivity
 import com.example.testing.R
 import com.example.testing.databinding.FragmentHomeBinding
 import com.example.testing.fitbit.AuthenticationActivity
 import com.example.testing.fitbit.FitbitApiService
-import com.example.testing.ui.menu.ChartFragment.Companion.countAvgErrors
-import com.example.testing.ui.menu.ChartFragment.Companion.countAvgSpeed
-import com.example.testing.ui.menu.ChartFragment.Companion.currentDate
-import com.example.testing.ui.menu.ChartFragment.Companion.keyboardList
-import com.example.testing.ui.menu.ChartFragment.Companion.showPercentage
+import com.example.testing.utils.Utils.Companion.countAvgSpeed
+import com.example.testing.utils.Utils.Companion.getCurrentDateString
+import com.example.testing.utils.Utils.Companion.getFromFirebase
+import com.example.testing.utils.Utils.Companion.keyboardList
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.BarData
@@ -77,7 +77,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             startActivity(intent)
 
         }
-        ChartFragment.getFromFirebase(DateFragment.chosenDate)
+        getFromFirebase(DateFragment.chosenDate)
 
 
         var values1: ArrayList<BarEntry> = ArrayList()
@@ -138,11 +138,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
     }
 
-    fun getCurrentDateString(): String {
-        var time = Calendar.getInstance().time
-        return formatter.format(time)
-    }
-
     private fun updateKeyboardData() {
         if (keyboardList != null) {
             var totalErr = mutableListOf<Double>()
@@ -189,6 +184,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         chart!!.xAxis.axisMaximum = MAX_X_VALUE.toFloat()
     }
 
+    fun showPercentage(errorRate: Double, progressBar: ProgressBar, ): Double {
+        var successRate = (1.0 - errorRate) * 100
+        progressBar.progress = successRate.toInt()
+        return successRate
+    }
+
     companion object {
         /**
          * Use this factory method to create a new instance of
@@ -199,7 +200,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
          * @return A new instance of fragment HomeFragment.
          */
         var isLoggedInFitbit = false
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
             HomeFragment().apply {

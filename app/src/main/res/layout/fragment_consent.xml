@@ -2,8 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
-    android:background="@color/dark_purple">
+    android:background="@color/dark_purple"
+    tools:context="ui.onboarding.ConsentFragment">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -111,7 +113,7 @@
         android:layout_gravity="center_horizontal">
 
         <Button
-            android:id="@+id/con_btn_quit"
+            android:id="@+id/conBtnQuit"
             android:background="@drawable/roundstyle"
             android:backgroundTint="@color/light_grey"
             android:textColor="@color/dark_grey"
@@ -119,21 +121,21 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_weight="1"
-            android:onClick="onDenyConsent"
+            android:elevation="10dp"
             android:layout_margin="10dp"
             android:padding="5dp"
             android:text="@string/con_btn_not_now"
             android:textSize="12sp" />
 
         <Button
-            android:id="@+id/con_btn_give_consent"
+            android:id="@+id/conBtnGiveConsent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_weight="1"
-            android:onClick="onGiveConsent"
             android:textColor="@color/white"
             android:padding="5dp"
+            android:elevation="10dp"
             android:layout_margin="10dp"
             android:background="@drawable/roundstyle"
             android:backgroundTint="@color/light_purple"

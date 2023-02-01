@@ -4,8 +4,13 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     tools:context=".ui.onboarding.ConsentActivity"
-    android:backgroundTint="@color/dark_purple">
+    android:background="@color/dark_purple">
 
-    <include layout="@layout/fragment_consent"/>
+    <androidx.fragment.app.FragmentContainerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/container"
+        tools:layout="@layout/fragment_consent">
+    </androidx.fragment.app.FragmentContainerView>
 
 </FrameLayout>

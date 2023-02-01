@@ -12,11 +12,16 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
+import androidx.preference.PreferenceManager
 import com.example.testing.databinding.ActivityMainBinding
 import com.example.testing.fitbit.AuthenticationActivity
 import com.example.testing.ui.menu.ChartFragment
 import com.example.testing.ui.menu.HomeFragment
 import com.example.testing.ui.menu.SettingsFragment
+import com.example.testing.ui.onboarding.ConsentActivity
+import com.example.testing.ui.onboarding.OnboardingActivity
+import com.example.testing.utils.FragmentUtils.Companion.loadFragment
+import com.example.testing.utils.Utils.Companion.showSnackbar
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
@@ -68,110 +73,42 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         view = binding.root
         setContentView(view)
-        loadFragment(HomeFragment())
-        //chart = binding.barChart //this is our barchart
-        //binding.barChartTitleTV.text = "$year Sales"
-        /**
-        var values1: ArrayList<BarEntry> = ArrayList()
-        var values2: ArrayList<BarEntry> = ArrayList()
-        statValues.clear()
-        //
-            for (i in 0 until MAX_X_VALUE) {
-                values1.add(
-                        BarEntry(
-                            i.toFloat(),
-                            (Math.random() * 80).toFloat()
-                            )
-                        )
+        val sharedPrefs = getSharedPreferences("USER_INFO", MODE_PRIVATE)
+        sharedPrefs.apply {
+            // Check if we need to display our OnboardingSupportFragment
+            if (!getBoolean("onboarding_complete", false)) {
+                // The user hasn't seen the OnboardingSupportFragment yet, so show it
+                startActivity(Intent(this@MainActivity, ConsentActivity::class.java))
             }
-
-        for (i in 0 until MAX_X_VALUE) {
-            values2.add(
-                BarEntry(
-                    i.toFloat(),
-                    (Math.random() * 80).toFloat()
-                )
-            )
         }
-        //
-        ////After preparing our data set, we need to display the data in our bar chart
-        val dataSet1: BarDataSet = BarDataSet(values1, "Test")
-        val dataSet2: BarDataSet = BarDataSet(values2, "Test")
-        val data: BarData = BarData()
-            data.addDataSet(dataSet1)
-            data.addDataSet(dataSet2)
-        configureBarChart()
-        prepareChartData(data)*/
-
+        loadFragment(this, homeFragment, null, "homeFragment", true)
         bottomNav = binding.bottomNav
         bottomNav.selectedItemId = R.id.homeFragment
         bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.homeFragment ->
-                    loadFragment(HomeFragment())
+                    loadFragment(this, homeFragment, null, "homeFragment", true)
                 R.id.settingsFragment ->
-                    loadFragment(SettingsFragment())
+                    loadFragment(this, settingsFragment, null, "settingsFragment", true)
                 R.id.chartFragment ->
-                    loadFragment(ChartFragment())
+                    loadFragment(this, chartFragment, null, "chartFragment", true)
                 }
             true
         }
 
-        /**val navController = findNavController(R.id.nav_host_fragment)
-        val appBarConf = AppBarConfiguration(setOf(
-
-            R.id.homeFragment, R.id.navigation_chat
-
-        ))
-
-        setupActionBarWithNavController(navController, appBarConf)
-        navView.setupWithNavController(navController)*/
         checkAccessibilityPermission()
     }
-/**
-    private fun prepareChartData(data: BarData) {
-        chart!!.data = data
-        chart!!.barData.barWidth = BAR_WIDTH
-        val groupSpace = 1f - (BAR_SPACE + BAR_WIDTH)
-        chart!!.groupBars(0f, groupSpace, BAR_SPACE)
-        chart!!.invalidate()
-    }
 
-    private fun configureBarChart() {
-        chart!!.setPinchZoom(false)
-        chart!!.setDrawBarShadow(false)
-        chart!!.setDrawGridBackground(false)
-
-        chart!!.description.isEnabled = false
-        val xAxis = chart!!.xAxis
-        xAxis.granularity = 1f
-        xAxis.setCenterAxisLabels(true)
-        xAxis.setDrawGridLines(false)
-        val leftAxis = chart!!.axisLeft
-        leftAxis.setDrawGridLines(true)
-        leftAxis.spaceTop = 35f
-        leftAxis.axisMinimum = 0f
-        chart!!.axisRight.isEnabled = false
-        chart!!.xAxis.axisMinimum = 1f
-        chart!!.xAxis.axisMaximum = MAX_X_VALUE.toFloat()
-    }
-*/
-
-
-    /** Check accessibility permissions again if not provided when returning to the app **/
+    /**
+     * Check accessibility permissions & battery optimization
+     *  again if not provided when returning to the app
+     **/
     override fun onResume() {
         super.onResume()
         checkAccessibilityPermission()
     }
 
-    private fun loadFragment(fragment: Fragment) {
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.container, fragment)
-        transaction.commit()
-        transaction.addToBackStack(null)
-    }
-
-    /**Check for permissions **/
+    /** Check for accessibility permissions **/
     private fun checkAccessibilityPermission(): Boolean {
         var accessEnabled = 0
         try {
@@ -181,43 +118,24 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
         return if (accessEnabled == 0) {
-            /** if access not granted, construct intent to request permission  */
-            view.showSnackbar(
+            // if access not granted, construct intent to request permission
+            // don't use view to show snackbar if it should be above bottomNavigationView
+            binding.container.showSnackbar(
                 view, getString(R.string.permission_required),
                 Snackbar.LENGTH_INDEFINITE, "OK"
             ) {
                 val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                /** request permission via start activity for result  */
+                // request permission via start activity for result
                 startActivity(intent)
             }
             false
         } else {
-            view.showSnackbar(
+            binding.container.showSnackbar(
                 view, getString(R.string.permission_granted),
                 Snackbar.LENGTH_SHORT, null
             ) {}
             true
         }
     }
-
-    fun View.showSnackbar(
-        view: View,
-        msg: String,
-        length: Int,
-        actionMessage: CharSequence?,
-        action: (View) -> Unit,
-    ) {
-        val snackbar = Snackbar.make(view, msg, length)
-        if (actionMessage != null) {
-            snackbar.setAction(actionMessage) {
-                action(this)
-            }.show()
-        } else {
-            snackbar.show()
-        }
-    }
-
-
-
 }
