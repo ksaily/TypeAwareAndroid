@@ -37,6 +37,12 @@
     <string name="user_email">Email</string>
     <string name="save_user_info_consent">After saving your info you will be redirected to the onboarding pages. If you wish to change your info after pressing save, you will need to reinstall the app.</string>
     <string name="save_user_info">Save</string>
+    <string name="consent_prompt">In order to continue using the app, make sure that battery optimization is NOT enabled and that you have given consent to collect your data.</string>
+
+    <!-- Onboarding -->
+    <string name="skip_prompt">Are you sure you want to skip the onboarding? If you click skip, you will move straight to Home screen without onboarding.</string>
+    <string name="skip">Skip</string>
+    <string name="finish">Finish</string>
 
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>

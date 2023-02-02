@@ -17,10 +17,6 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-
-        <include layout="@layout/fragment_date"
-            android:id="@+id/homeDatePicker"/>
-
         <include layout="@layout/keyboard_data_card"
             android:id="@+id/keyboardChart"/>
 

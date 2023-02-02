@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.onboarding.OnboardingActivity">
+    tools:context=".ui.onboarding.OnboardingActivity"
+    android:theme="@style/Theme.Testing"
+    android:background="@color/dark_purple">
 
     <!-- For fragment container -->
     <FrameLayout
@@ -36,11 +38,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/fl_slider">
 
+        <Button
+            android:id="@+id/skip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Skip"
+            android:background="@drawable/roundstyle"
+            android:backgroundTint="@color/transparent"
+            android:textColor="@color/light_grey"
+            android:layout_marginRight="30dp"/>
+
         <ImageView
             android:id="@+id/iv_first_circle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="6dp"
+            android:layout_gravity="center"
             android:src="@drawable/comp_view_circle_gray" />
 
         <ImageView
@@ -48,6 +61,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="6dp"
+            android:layout_gravity="center"
             android:src="@drawable/comp_view_circle_gray" />
 
         <ImageView
@@ -55,7 +69,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="6dp"
+            android:layout_gravity="center"
             android:src="@drawable/comp_view_circle_gray" />
+
+        <Button
+            android:id="@+id/next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Next"
+            android:background="@drawable/roundstyle"
+            android:backgroundTint="@color/light_purple"
+            android:textColor="@color/white"
+            android:layout_marginLeft="30dp"/>
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

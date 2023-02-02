@@ -3,9 +3,13 @@ package com.example.testing.ui.onboarding
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.view.View
 import android.widget.Button
+import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
@@ -21,6 +25,8 @@ import com.ogaclejapan.smarttablayout.SmartTabLayout
 import com.example.testing.databinding.ActivityConsentBinding
 import com.example.testing.utils.FragmentUtils.Companion.loadFragment
 import com.example.testing.utils.FragmentUtils.Companion.removeFragmentByTag
+import com.example.testing.utils.Utils
+import com.example.testing.utils.Utils.Companion.showSnackbar
 
 /**
  * Activity to host fragments for getting consent
@@ -50,7 +56,7 @@ class ConsentActivity : AppCompatActivity() {
                 if (result) {
                     //Consent for data collection is given
                     //Change it in shared preferences
-                    editor.putBoolean("consentGiven", true).commit()
+                    editor.putBoolean("consent_given", true).commit()
                     loadFragment(this, userInfoFragment, null, "userInfoFragment", false)
                     removeFragmentByTag(this, "consentFragment")
                 } else {
@@ -64,10 +70,34 @@ class ConsentActivity : AppCompatActivity() {
             editor.putString("username", name)
                 .putString("email", email)
                 .putString("p_id", p_id)
+                .putBoolean("user_info_saved", true)
             editor.commit()
             //loadFragment(this, FirstFragment(), null, "firstFragment", true)
             //removeFragmentByTag(this, "userInfoFragment")
+            Utils.checkBattery(this)
+            var battery_opt = Utils.readSharedSettingBoolean(applicationContext, "battery_opt", true)
+            if (battery_opt == true) {
+                view.showSnackbar(
+                    view, getString(R.string.consent_prompt),
+                    Snackbar.LENGTH_INDEFINITE, "OK"
+                ) {
+                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    // request permission via start activity for result
+                    startActivity(intent)
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (Utils.checkConsent(applicationContext)) {
             startActivity(Intent(this, OnboardingActivity::class.java))
         }
     }
+
+
+
+
 }

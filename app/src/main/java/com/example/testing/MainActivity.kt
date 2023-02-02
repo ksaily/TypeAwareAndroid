@@ -5,6 +5,7 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
@@ -16,11 +17,13 @@ import androidx.preference.PreferenceManager
 import com.example.testing.databinding.ActivityMainBinding
 import com.example.testing.fitbit.AuthenticationActivity
 import com.example.testing.ui.menu.ChartFragment
+import com.example.testing.ui.menu.DateFragment
 import com.example.testing.ui.menu.HomeFragment
 import com.example.testing.ui.menu.SettingsFragment
 import com.example.testing.ui.onboarding.ConsentActivity
 import com.example.testing.ui.onboarding.OnboardingActivity
 import com.example.testing.utils.FragmentUtils.Companion.loadFragment
+import com.example.testing.utils.FragmentUtils.Companion.removeFragmentByTag
 import com.example.testing.utils.Utils.Companion.showSnackbar
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.data.BarData
@@ -66,6 +69,7 @@ class MainActivity : AppCompatActivity() {
     private val homeFragment = HomeFragment()
     private val chartFragment = ChartFragment()
     private val settingsFragment = SettingsFragment()
+    private val dateFragment = DateFragment()
     val database = Firebase.database("https://health-app-9c151-default-rtdb.europe-west1.firebasedatabase.app")
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,19 +81,24 @@ class MainActivity : AppCompatActivity() {
         sharedPrefs.apply {
             // Check if we need to display our OnboardingSupportFragment
             if (!getBoolean("onboarding_complete", false)) {
-                // The user hasn't seen the OnboardingSupportFragment yet, so show it
+                // The user hasn't seen the onboarding & consent screens yet, so show it
                 startActivity(Intent(this@MainActivity, ConsentActivity::class.java))
             }
         }
         loadFragment(this, homeFragment, null, "homeFragment", true)
+        var transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
+            .addToBackStack("dateFragment").commit()
         bottomNav = binding.bottomNav
         bottomNav.selectedItemId = R.id.homeFragment
         bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.homeFragment ->
                     loadFragment(this, homeFragment, null, "homeFragment", true)
-                R.id.settingsFragment ->
+                R.id.settingsFragment -> {
                     loadFragment(this, settingsFragment, null, "settingsFragment", true)
+                    removeFragmentByTag(this, "dateFragment")
+                }
                 R.id.chartFragment ->
                     loadFragment(this, chartFragment, null, "chartFragment", true)
                 }

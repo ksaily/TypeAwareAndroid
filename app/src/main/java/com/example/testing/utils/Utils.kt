@@ -8,6 +8,7 @@ import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.core.content.ContextCompat.startActivity
 import com.example.testing.R
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.database.DataSnapshot
@@ -74,7 +75,7 @@ class Utils {
             cal.time = date
             cal.add(Calendar.DATE, -1)
             var previousDate = formatter.format(cal.time)
-            Log.d("Dates", "Selected date: $inputDate")
+            Log.d("Dates", "Selected date: $previousDate")
             Log.d("Dates", "Previous date: $date")
             return previousDate
         }
@@ -87,10 +88,10 @@ class Utils {
             var date = formatter.parse(inputDate) as Date
             cal.time = date
             cal.add(Calendar.DATE, +1)
-            var inputDate = formatter.format(cal.time)
-            Log.d("Dates", "Selected date: $inputDate")
+            var nextDate = formatter.format(cal.time)
+            Log.d("Dates", "Selected date: $nextDate")
             Log.d("Dates", "Previous date: $date")
-            return inputDate
+            return nextDate
 
         }
 
@@ -99,42 +100,42 @@ class Utils {
             val ref = rootRef.child(date)
             val valueEventListener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.value != null) {
+                    if (snapshot.exists()) {
                         val children = snapshot.children
-                        if (children != null) {
                             children.forEach { dataSnapshot ->
                                 var child = dataSnapshot.children
-                                child.forEach {
-                                    var speeds = it.child("typingSpeed").value
-                                    var avgForOne = countAvgSpeed(speeds as MutableList<Double>)
-                                    errorsList.add(it.child("errorAmount").value as Long)
-                                    //Add the average for one instance to a new list
-                                    speedsList.add(avgForOne)
+                                    child.forEach {
+                                        var speeds = it.child("typingSpeed").value
+                                        if (speeds != null) {
+                                            var avgForOne = countAvgSpeed(speeds as MutableList<Double>)
+                                            errorsList.add(it.child("errorAmount").value as Long)
+                                            //Add the average for one instance to a new list
+                                            speedsList.add(avgForOne)
+                                        }
+                                    }
+                                    totalErrList = (totalErrList + errorsList).toMutableList()
+                                    Log.d("Firebase", child.toString())
+                                    totalSpeedsList.add(speedsList.toMutableList())
+                                    timeWindow = dataSnapshot.key.toString()
+                                    //avgSpeed = countAvgSpeed(totalAvgSpeed)
+                                    //var data = KeyboardStats(date, dataSnapshot.key, avgErrors, avgSpeed)
+                                    //println(data)
                                 }
-                                totalErrList = (totalErrList + errorsList).toMutableList()
-                                Log.d("Firebase", child.toString())
-                                totalSpeedsList.add(speedsList.toMutableList())
-                                timeWindow = dataSnapshot.key.toString()
-                                //avgSpeed = countAvgSpeed(totalAvgSpeed)
-                                //var data = KeyboardStats(date, dataSnapshot.key, avgErrors, avgSpeed)
-                                //println(data)
-                            }
-                            totalErr = countAvgErrors(totalErrList)
-                            var total: MutableList<Double> = mutableListOf()
-                            for (i in totalSpeedsList) {
-                                total.add(countAvgSpeed(i))
-                            }
-                            totalSpeed = countAvgSpeed(total)
-                            var data = KeyboardStats(
-                                currentDate,
-                                timeWindow,
-                                totalErr,
-                                totalSpeed)
-                            Log.d("Firebase", "Data fetched from firebase")
-                            println(data)
-                            keyboardList.add(data)
+                                totalErr = countAvgErrors(totalErrList)
+                                var total: MutableList<Double> = mutableListOf()
+                                for (i in totalSpeedsList) {
+                                    total.add(countAvgSpeed(i))
+                                }
+                                totalSpeed = countAvgSpeed(total)
+                                var data = KeyboardStats(
+                                    currentDate,
+                                    timeWindow,
+                                    totalErr,
+                                    totalSpeed)
+                                Log.d("Firebase", "Data fetched from firebase")
+                                println(data)
+                                keyboardList.add(data)
                         }
-                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -171,9 +172,15 @@ class Utils {
         fun isIgnoringBatteryOptimizations(context: Context): Boolean {
             val pwrm = context.applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
             val name = context.applicationContext.packageName
+            val sharedPref = context.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
+            val editor = sharedPref.edit()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                editor.putBoolean("battery_opt", false)
+                editor.apply()
                 return pwrm.isIgnoringBatteryOptimizations(name)
             }
+            editor.putBoolean("battery_opt", true)
+            editor.apply()
             return true
         }
 
@@ -183,14 +190,18 @@ class Utils {
         fun checkBattery(context: Context) {
             if (!isIgnoringBatteryOptimizations(context!!.applicationContext) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 val name = R.string.app_name
-                Toast.makeText(context!!.applicationContext, "Battery optimization -> All apps -> $name -> Don't optimize", Toast.LENGTH_LONG).show()
-
                 val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
-                context.applicationContext.startActivity(intent)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                context.startActivity(intent)
             }
         }
 
-        fun readSharedSetting(ctx: Context, settingName: String?, defaultValue: String?): String? {
+        fun readSharedSettingBoolean(ctx: Context, settingName: String?, defaultValue: Boolean): Boolean? {
+            val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
+            return sharedPref.getBoolean(settingName, defaultValue)
+        }
+
+        fun readSharedSettingString(ctx: Context, settingName: String?, defaultValue: String): String? {
             val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
             return sharedPref.getString(settingName, defaultValue)
         }
@@ -200,6 +211,17 @@ class Utils {
             val editor = sharedPref.edit()
             editor.putString(settingName, settingValue)
             editor.apply()
+        }
+
+        fun checkConsent(context: Context): Boolean {
+            val batteryOpt = readSharedSettingBoolean(context, "battery_opt", true)
+            val consent = readSharedSettingBoolean(context, "consent_given", true)
+            val userInfoSaved = readSharedSettingBoolean(context, "user_info_saved", true)
+            if (consent == true && batteryOpt == false && userInfoSaved == true) {
+                saveSharedSetting(context, "overall_consent", "OK")
+                return true
+            }
+            return false
         }
     }
 }

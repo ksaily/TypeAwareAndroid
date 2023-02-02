@@ -8,10 +8,16 @@
 
     <androidx.fragment.app.FragmentContainerView
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:id="@+id/dateContainer"
+        tools:layout="@layout/fragment_date">
+    </androidx.fragment.app.FragmentContainerView>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_below="@id/dateContainer"
         app:layout_constraintBottom_toTopOf="@id/bottomNav"
         android:id="@+id/container"
         android:layout_above="@id/bottomNav"
@@ -29,6 +35,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/nav_menu"
         android:background="@color/dark_purple"
+        app:itemTextColor="@drawable/bottom_nav_color"
+        app:itemIconTint="@drawable/bottom_nav_color"
         android:scrollIndicators="left"/>
 
 
