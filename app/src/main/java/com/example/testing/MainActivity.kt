@@ -85,6 +85,7 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this@MainActivity, ConsentActivity::class.java))
             }
         }
+
         loadFragment(this, homeFragment, null, "homeFragment", true)
         var transaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")

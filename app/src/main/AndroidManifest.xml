@@ -48,20 +48,6 @@
                 android:value="" />
         </activity>
         <activity
-            android:name=".ChartActivity"
-            android:exported="false"
-            android:label="@string/title_activity_chart">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
-            android:name=".SignInActivity"
-            android:exported="true" />
-        <activity
-            android:name=".SignUpActivity"
-            android:exported="true" />
-        <activity
             android:name=".fitbit.AuthenticationActivity"
             android:autoVerify="true"
             android:exported="true"

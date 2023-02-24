@@ -1,6 +1,7 @@
 package com.example.testing.utils
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -40,6 +41,11 @@ class KeyboardWorker(appContext: Context, workerParams: WorkerParameters):
         // Save data under the current timeslot with an unique id for each
         val dateString = "Date:" + event.date
         val timeSlotString = "Timeslot:$timeslot"
-        myRef.child("events").child(dateString).child(timeSlotString).child(event.id.toString()).setValue(event)
+        val participantId = Utils.readSharedSettingString(
+            applicationContext,
+            "p_id",
+            "")
+        myRef.child("events").child(participantId.toString())
+            .child(dateString).child(timeSlotString).child(event.id.toString()).setValue(event)
     }
 }

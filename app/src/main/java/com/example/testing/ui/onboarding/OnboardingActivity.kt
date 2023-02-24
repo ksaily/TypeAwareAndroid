@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.View.INVISIBLE
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -91,6 +92,7 @@ class OnboardingActivity : FragmentActivity() {
                 binding.ivSecondCircle.setImageDrawable(getDrawable(R.drawable.comp_view_circle_purple))
                 binding.ivFirstCircle.setImageDrawable(getDrawable(R.drawable.comp_view_circle_purple))
                 binding.next.text = "Finish"
+                binding.skip.visibility = INVISIBLE
             }
             3 -> {
                 binding.ivThirdCircle.setImageDrawable(getDrawable(R.drawable.comp_view_circle_gray))

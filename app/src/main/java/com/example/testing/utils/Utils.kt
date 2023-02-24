@@ -196,7 +196,7 @@ class Utils {
             }
         }
 
-        fun readSharedSettingBoolean(ctx: Context, settingName: String?, defaultValue: Boolean): Boolean? {
+        fun readSharedSettingBoolean(ctx: Context, settingName: String?, defaultValue: Boolean): Boolean {
             val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
             return sharedPref.getBoolean(settingName, defaultValue)
         }
@@ -217,7 +217,7 @@ class Utils {
             val batteryOpt = readSharedSettingBoolean(context, "battery_opt", true)
             val consent = readSharedSettingBoolean(context, "consent_given", true)
             val userInfoSaved = readSharedSettingBoolean(context, "user_info_saved", true)
-            if (consent == true && batteryOpt == false && userInfoSaved == true) {
+            if (consent && !batteryOpt && userInfoSaved) {
                 saveSharedSetting(context, "overall_consent", "OK")
                 return true
             }

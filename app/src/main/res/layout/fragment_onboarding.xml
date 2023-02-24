@@ -12,11 +12,12 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_baseline_home_24"
+            android:id="@+id/onboarding_image"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
             android:layout_gravity="center"
-            android:padding="20dp"/>
+            android:padding="20dp"
+            android:layout_marginTop="50dp"/>
 
         <TextView
             android:id="@+id/onboarding_title"
@@ -24,22 +25,23 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:maxLines="2"
-            android:padding="20dp"
+            android:padding="10dp"
             android:fontFamily="@font/roboto_black"
             android:textAlignment="center"
             android:textColor="@color/design_default_color_on_primary"
-            android:textSize="22sp" />
+            android:textSize="24sp" />
 
         <TextView
             android:id="@+id/onboarding_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="11dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp"
             android:justificationMode="inter_word"
             android:padding="20dp"
             android:textColor="@color/white"
-            android:textSize="14sp" />
+            android:textSize="20sp" />
 
 
     </LinearLayout>

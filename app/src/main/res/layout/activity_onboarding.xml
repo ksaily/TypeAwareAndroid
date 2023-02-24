@@ -33,7 +33,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="horizontal"
-        android:layout_marginVertical="24dp"
+        android:layout_marginVertical="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/fl_slider">
@@ -43,10 +43,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Skip"
+            android:textSize="20sp"
             android:background="@drawable/roundstyle"
             android:backgroundTint="@color/transparent"
             android:textColor="@color/light_grey"
-            android:layout_marginRight="30dp"/>
+            android:layout_marginRight="35dp"/>
 
         <ImageView
             android:id="@+id/iv_first_circle"
@@ -74,13 +75,15 @@
 
         <Button
             android:id="@+id/next"
+            android:textSize="20sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Next"
+            android:paddingHorizontal="30dp"
             android:background="@drawable/roundstyle"
             android:backgroundTint="@color/light_purple"
             android:textColor="@color/white"
-            android:layout_marginLeft="30dp"/>
+            android:layout_marginLeft="35dp"/>
 
     </LinearLayout>
 

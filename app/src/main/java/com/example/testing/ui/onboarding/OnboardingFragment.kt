@@ -1,16 +1,24 @@
 package com.example.testing.ui.onboarding
 
 import android.os.Bundle
+import android.content.Context
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat.getDrawable
 import androidx.core.os.bundleOf
 import com.example.testing.R
 import com.example.testing.databinding.FragmentOnboardingBinding
 
 /**
- * A simple [Fragment] subclass as the second destination in the navigation.
+ * Fragment to show onboarding information
+ * Image credits:
+ *
+ * <a href="https://www.freepik.com/free-vector/man-moving-clock-arrows-managing-time_11235693.
+ * htm#query=sleep&position=27&from_view=search&track=sph">Image by pch.vector</a> on Freepik
+ *
+ *
  */
 class OnboardingFragment : Fragment() {
 
@@ -43,6 +51,17 @@ class OnboardingFragment : Fragment() {
         with(binding)  {
             onboardingTitle.text = onBoardingTitles[position]
             onboardingContent.text = onBoardingTexts[position]
+            when (position) {
+                0 -> {
+                    onboardingImage.setImageDrawable(getDrawable(requireContext(),R.drawable.sleep_screen))
+                }
+                1 -> {
+                    onboardingImage.setImageDrawable(getDrawable(requireContext(),R.drawable.sleep_screen))
+                }
+                2 -> {
+                    onboardingImage.setImageDrawable(getDrawable(requireContext(),R.drawable.time_management))
+                }
+            }
         }
     }
 
