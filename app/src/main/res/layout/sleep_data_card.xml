@@ -31,14 +31,14 @@
 
         <Button
             android:id="@+id/FitbitBtn"
-            android:textColor="@color/white"
-            android:background="@drawable/roundstyle"
-            android:backgroundTint="@color/light_purple"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/roundstyle"
+            android:backgroundTint="#C2B6DF"
             android:padding="10dp"
             android:text="Fitbit Login"
-            android:layout_gravity="center_horizontal" />
+            android:textColor="@color/white" />
 
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/sleepDataChart"

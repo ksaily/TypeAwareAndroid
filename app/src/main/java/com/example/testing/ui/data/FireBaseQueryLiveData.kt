@@ -1,4 +1,4 @@
-package com.example.testing
+package com.example.testing.ui.data
 
 import android.app.Application
 import android.os.Bundle

@@ -34,6 +34,7 @@ class Utils {
         val formatter = SimpleDateFormat("yyyy-MM-dd")
         var currentDate: String = getCurrentDateString()
 
+
         /**
          * Count average for one instance in firebase database,
          * which is a list of typing speeds and

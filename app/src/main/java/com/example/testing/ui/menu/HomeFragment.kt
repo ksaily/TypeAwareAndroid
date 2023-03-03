@@ -10,11 +10,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import androidx.core.view.isVisible
+import androidx.fragment.app.viewModels
 import com.example.testing.MainActivity
 import com.example.testing.R
 import com.example.testing.databinding.FragmentHomeBinding
 import com.example.testing.fitbit.AuthenticationActivity
 import com.example.testing.fitbit.FitbitApiService
+import com.example.testing.ui.view.DateViewModel
 import com.example.testing.utils.Utils.Companion.countAvgSpeed
 import com.example.testing.utils.Utils.Companion.getCurrentDateString
 import com.example.testing.utils.Utils.Companion.getFromFirebase
@@ -57,8 +59,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val binding get() = _binding!!
     private var chosenDate: String = ""
     private val formatter = SimpleDateFormat("yyyy-MM-dd")
-    var currentDate: String = getCurrentDateString()
     var dateFragment = DateFragment()
+    private val dateViewModel: DateViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -76,8 +78,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             startActivity(intent)
 
         }
-        getFromFirebase(DateFragment.chosenDate)
-
+        dateViewModel.selectedDate.observe(viewLifecycleOwner) {
+            updateKeyboardData()
+        }
 
         var values1: ArrayList<BarEntry> = ArrayList()
         var values2: ArrayList<BarEntry> = ArrayList()
@@ -138,7 +141,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun updateKeyboardData() {
-        if (keyboardList != null) {
+        getFromFirebase(dateViewModel.selectedDate.value.toString())
+        if (keyboardList.isNotEmpty()) {
             var totalErr = mutableListOf<Double>()
             var totalSpeed = mutableListOf<Double>()
             for (i in keyboardList) {
@@ -207,5 +211,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     putString(ARG_PARAM2, param2)
                 }
             }
+
+
     }
 }
