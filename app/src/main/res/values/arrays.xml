@@ -1,0 +1,25 @@
+<resources>
+    <!-- Reply Preference -->
+    <string-array name="reply_entries">
+        <item>Reply</item>
+        <item>Reply to all</item>
+    </string-array>
+
+    <string-array name="reply_values">
+        <item>reply</item>
+        <item>reply_all</item>
+    </string-array>
+
+    <!-- Onboarding screens -->
+    <string-array name="onboarding_titles">
+        <item>Keyboard usage</item>
+        <item>Sleep data</item>
+        <item>Your wellbeing</item>
+    </string-array>
+
+    <string-array name="onboarding_texts">
+        <item>You can easily view your daily keyboard usage, for example how fast you have been typing.</item>
+        <item>Sleep data is also available so you can compare your keyboard usage with how well you have slept.</item>
+        <item>Access to all this information allows us to see whether your sleep quality affects your keyboard usage during the day.</item>
+    </string-array>
+</resources>
