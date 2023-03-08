@@ -16,6 +16,7 @@ import com.example.testing.databinding.FragmentHomeBinding
 import com.example.testing.fitbit.AuthenticationActivity
 import com.example.testing.fitbit.FitbitApiService
 import com.example.testing.ui.viewmodel.DateViewModel
+import com.example.testing.ui.viewmodel.FirebaseViewModel
 import com.example.testing.utils.Utils.Companion.countAvgSpeed
 import com.example.testing.utils.Utils.Companion.getFromFirebase
 import com.example.testing.utils.Utils.Companion.keyboardList
@@ -58,6 +59,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val formatter = SimpleDateFormat("yyyy-MM-dd")
     var dateFragment = DateFragment()
     private val dateViewModel: DateViewModel by viewModels()
+    private val firebaseViewModel: FirebaseViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -76,6 +78,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         }
         dateViewModel.selectedDate.observe(viewLifecycleOwner) {
+            firebaseViewModel.clearListOfFirebaseData()
             updateKeyboardData()
         }
 
@@ -153,6 +156,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             binding.keyboardChart.progressCircular).toString()
         }
         else {
+            binding.keyboardChart.speedData.text = "No keyboard data available"
+            binding.keyboardChart.ProgressTextView.isVisible = false
+            binding.keyboardChart.progressCircular.isVisible = false
             Log.d("UpdateUI", "No data on keyboardList")
         }
     }

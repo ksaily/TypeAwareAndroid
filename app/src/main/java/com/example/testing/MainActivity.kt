@@ -25,6 +25,7 @@ import com.example.testing.ui.menu.DateFragment
 import com.example.testing.ui.onboarding.ConsentActivity
 import com.example.testing.ui.onboarding.OnboardingActivity
 import com.example.testing.ui.viewmodel.PrefsViewModel
+import com.example.testing.utils.FragmentUtils
 import com.example.testing.utils.FragmentUtils.Companion.loadFragment
 import com.example.testing.utils.FragmentUtils.Companion.removeFragmentByTag
 import com.example.testing.utils.Utils.Companion.showSnackbar
@@ -43,6 +44,7 @@ import kotlin.collections.ArrayList
  * First week, show only survey for the user: How do you think you did this week
  * Second week, survey first and then reveal them the data
  * Q1: How much time did you spend typing during date x?
+ * (Compare the participant's performance to others, how they feel about it)
  * Q2: How often did you have to correct your typing? (Scale 1-7)
  * Q3: At what time of day were you most active with typing? (some kind of selector)
  */
@@ -82,6 +84,8 @@ class MainActivity : AppCompatActivity() {
         view = binding.root
         setContentView(view)
         val sharedPrefs = getSharedPreferences("USER_INFO", MODE_PRIVATE)
+        val transaction = supportFragmentManager.beginTransaction()
+
         sharedPrefs.apply {
             // Check if we need to display our OnboardingSupportFragment
             if (!getBoolean("onboarding_complete", false)) {
@@ -91,23 +95,34 @@ class MainActivity : AppCompatActivity() {
         }
 
         loadFragment(this, homeFragment, null, "homeFragment", true)
-        var transaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
             .addToBackStack("dateFragment").commit()
+
         bottomNav = binding.bottomNav
         bottomNav.selectedItemId = R.id.homeFragment
         bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.homeFragment ->
+                R.id.homeFragment -> {
+                    Log.d("BottomNav", "homefragment selected")
+                    transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
+                        .addToBackStack("dateFragment").commit()
                     loadFragment(this, homeFragment, null, "homeFragment", true)
+                }
                 R.id.settingsFragment -> {
+                    Log.d("BottomNav", "settingfragment selected")
+                    removeFragmentByTag(this, "dateFragment")
                     loadFragment(this, settingsFragment, null, "settingsFragment", true)
                 }
-                R.id.chartFragment ->
+                R.id.chartFragment -> {
+                    Log.d("BottomNav", "chartfragment selected")
+                    transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
+                        .addToBackStack("dateFragment").commit()
                     loadFragment(this, chartFragment, null, "chartFragment", true)
                 }
+            }
             true
         }
+
         prefsViewModel.checkPermissions()
         prefsViewModel.accessibilityEnabled.observe(this) {
             if (it == false) {

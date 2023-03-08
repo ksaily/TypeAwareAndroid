@@ -1,5 +1,7 @@
 package com.example.testing.ui.viewmodel
 
+import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -7,6 +9,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.view.View
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,9 +21,9 @@ import com.example.testing.utils.Utils
 
 class PrefsViewModel : ViewModel() {
 
-    val context = Graph.appContext
+
     private val sharedPrefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(
-        context)
+        Graph.appContext)
 
     private val _batteryOpt = MutableLiveData(true)
     val batteryOpt: LiveData<Boolean>
@@ -79,7 +82,7 @@ class PrefsViewModel : ViewModel() {
         var accessEnabled = 0
         try {
             accessEnabled =
-                Settings.Secure.getInt(context.contentResolver, Settings.Secure.ACCESSIBILITY_ENABLED)
+                Settings.Secure.getInt(Graph.appContext.contentResolver, Settings.Secure.ACCESSIBILITY_ENABLED)
         } catch (e: Settings.SettingNotFoundException) {
             e.printStackTrace()
         }
@@ -99,7 +102,7 @@ class PrefsViewModel : ViewModel() {
 
     fun checkPermissions() {
         checkAccessibilityPermission()
-        checkBatteryOptimization(context)
+        checkBatteryOptimization(Graph.appContext)
         isOnboardingCompleted()
         isConsentGiven()
         _permissionsOk.value = _accessibilityEnabled.value == true && _batteryOpt.value == false &&

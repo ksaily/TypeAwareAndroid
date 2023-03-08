@@ -19,22 +19,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private val binding get() = _binding!!
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        //setPreferencesFromResource(R.xml.root_preferences, rootKey)
-        addPreferencesFromResource(R.xml.root_preferences)
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return super.onCreateView(inflater, container, savedInstanceState)
-    }
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            SettingsFragment().apply {
-                addPreferencesFromResource(R.xml.root_preferences)
-                }
+        setPreferencesFromResource(R.xml.root_preferences, rootKey)
     }
 }

@@ -26,7 +26,7 @@ class Utils {
         var totalErrList: MutableList<Long> = mutableListOf()
         var totalSpeedsList: MutableList<MutableList<Double>> = mutableListOf()
         var totalAvgErrors: ArrayList<Long> = arrayListOf()
-        var timeWindow: String = ""
+        var timeWindow: Int = 0
         var totalErr: Double = 0.0
         var totalSpeed: Double = 0.0
         var speedsList: MutableList<Double> = mutableListOf()
@@ -103,40 +103,40 @@ class Utils {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
                         val children = snapshot.children
-                            children.forEach { dataSnapshot ->
-                                var child = dataSnapshot.children
-                                    child.forEach {
-                                        var speeds = it.child("typingSpeed").value
-                                        if (speeds != null) {
-                                            var avgForOne = countAvgSpeed(speeds as MutableList<Double>)
-                                            errorsList.add(it.child("errorAmount").value as Long)
-                                            //Add the average for one instance to a new list
-                                            speedsList.add(avgForOne)
-                                        }
-                                    }
-                                    totalErrList = (totalErrList + errorsList).toMutableList()
-                                    Log.d("Firebase", child.toString())
-                                    totalSpeedsList.add(speedsList.toMutableList())
-                                    timeWindow = dataSnapshot.key.toString()
-                                    //avgSpeed = countAvgSpeed(totalAvgSpeed)
-                                    //var data = KeyboardStats(date, dataSnapshot.key, avgErrors, avgSpeed)
-                                    //println(data)
+                        children.forEach { dataSnapshot ->
+                            var child = dataSnapshot.children
+                            child.forEach {
+                                var speeds = it.child("typingSpeed").value
+                                if (speeds != null) {
+                                    var avgForOne = countAvgSpeed(speeds as MutableList<Double>)
+                                    errorsList.add(it.child("errorAmount").value as Long)
+                                    //Add the average for one instance to a new list
+                                    speedsList.add(avgForOne)
                                 }
-                                totalErr = countAvgErrors(totalErrList)
-                                var total: MutableList<Double> = mutableListOf()
-                                for (i in totalSpeedsList) {
-                                    total.add(countAvgSpeed(i))
-                                }
-                                totalSpeed = countAvgSpeed(total)
-                                var data = KeyboardStats(
-                                    currentDate,
-                                    timeWindow,
-                                    totalErr,
-                                    totalSpeed)
-                                Log.d("Firebase", "Data fetched from firebase")
-                                println(data)
-                                keyboardList.add(data)
+                            }
+                            totalErrList = (totalErrList + errorsList).toMutableList()
+                            Log.d("Firebase", child.toString())
+                            totalSpeedsList.add(speedsList.toMutableList())
+                            timeWindow = dataSnapshot.key?.toInt()!!
+                        //avgSpeed = countAvgSpeed(totalAvgSpeed)
+                        //var data = KeyboardStats(date, dataSnapshot.key, avgErrors, avgSpeed)
+                        //println(data)
+                            totalErr = countAvgErrors(totalErrList)
+                            var total: MutableList<Double> = mutableListOf()
+                            for (i in totalSpeedsList) {
+                                total.add(countAvgSpeed(i))
+                            }
+                            totalSpeed = countAvgSpeed(total)
+                            var data = KeyboardStats(
+                                date,
+                                timeWindow,
+                                totalErr,
+                                totalSpeed)
+                            keyboardList.add(data)
                         }
+                        Log.d("Firebase", "Data fetched from firebase")
+                        println(keyboardList)
+                    }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -144,7 +144,7 @@ class Utils {
                 }
             }
             if (date != currentDate) {
-                rootRef.addListenerForSingleValueEvent(valueEventListener)
+                ref.addListenerForSingleValueEvent(valueEventListener)
             } else {
                 ref.addValueEventListener(valueEventListener)
             }

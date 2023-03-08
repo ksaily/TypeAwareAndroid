@@ -66,7 +66,7 @@
     <string name="show_sleep_data">Show sleep data</string>
     <string name="battery_optimization_options">Battery optimization</string>
     <string name="accessibility_pref">Accessibility permission granted</string>
-    <string name="keyboard_data_to_show">Choose typing data to show on graph</string>
+    <string name="keyboard_data_to_show">Choose typing metrics to show on graph</string>
     <string name="battery_opt_on_prompt">Battery optimization should be unabled</string>
     <string name="battery_opt_off_propmt">Battery optimization is off (this is preferred)</string>
     <string name="mobile_data_usage_off_prompt">It is not recommended to limit mobile data usage</string>
