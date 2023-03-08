@@ -31,7 +31,6 @@ import java.util.*
 class MyAccessibilityService : AccessibilityService() {
     private var startTime: Long = 0
     private var endTime: Long = 0
-    private var firstChar: Boolean = true
 
     override fun onInterrupt() {
         TODO("Not yet implemented")
@@ -43,6 +42,7 @@ class MyAccessibilityService : AccessibilityService() {
             if (startTime == 0L) {
                 //First character in a session, don't add to typing times
                 thisPackage = event.packageName.toString()
+                timeElapsed = 0.0
                 Log.d("KeyboardEvents", "This is the first char of this session")
             } else {
                 endTime = nanoTime()
@@ -61,12 +61,13 @@ class MyAccessibilityService : AccessibilityService() {
     private fun checkSession(event: AccessibilityEvent) {
 
         if (sameSession(event.packageName.toString(), timeElapsed)) {
-            if (!firstChar) {
+            //Same session as before
+            if (timeElapsed != 0.0) {
                 typingTimes.add(timeElapsed)
             }
             addToString(event.text.toString().removeSurrounding("[", "]"),
                 event.beforeText.toString(), true)
-        } else { // Ignore typing time when session has changed
+        } else { // Session has changed
             newPackage = event.packageName.toString()
             //startTime = nanoTime()
             addToString(event.text.toString().removeSurrounding("[", "]"),
@@ -100,8 +101,6 @@ class MyAccessibilityService : AccessibilityService() {
     }
 
     private fun resetValues() {
-        deletedChars = 0
-        timeElapsed = 0.0
         previousTimeSlot = currentTimeSlot
         typingTimes = arrayListOf()
         thisPackage = newPackage

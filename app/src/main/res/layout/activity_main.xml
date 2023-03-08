@@ -12,6 +12,7 @@
         android:layout_alignParentTop="true"
         android:id="@+id/dateContainer"
         tools:layout="@layout/fragment_date">
+
     </androidx.fragment.app.FragmentContainerView>
 
     <androidx.fragment.app.FragmentContainerView

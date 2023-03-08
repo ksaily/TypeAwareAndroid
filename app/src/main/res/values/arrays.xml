@@ -22,4 +22,26 @@
         <item>Sleep data is also available so you can compare your keyboard usage with how well you have slept.</item>
         <item>Access to all this information allows us to see whether your sleep quality affects your keyboard usage during the day.</item>
     </string-array>
+
+    <!-- Preferences -->
+    <string-array name="pref_uploads">
+        <item>Only when on Wi-Fi</item>
+        <item>On any network</item>
+    </string-array>
+    <string-array name="pref_uploads_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="pref_keyboard_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="pref_choose_keyboard_stats">
+        <item>Errors</item>
+        <item>Speed</item>
+        <item>Apps</item>
+    </string-array>
 </resources>

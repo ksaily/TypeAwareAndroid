@@ -8,7 +8,9 @@ import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -16,12 +18,13 @@ import androidx.navigation.ui.setupWithNavController
 import androidx.preference.PreferenceManager
 import com.example.testing.databinding.ActivityMainBinding
 import com.example.testing.fitbit.AuthenticationActivity
-import com.example.testing.ui.menu.ChartFragment
-import com.example.testing.ui.menu.DateFragment
 import com.example.testing.ui.menu.HomeFragment
 import com.example.testing.ui.menu.SettingsFragment
+import com.example.testing.ui.menu.ChartFragment
+import com.example.testing.ui.menu.DateFragment
 import com.example.testing.ui.onboarding.ConsentActivity
 import com.example.testing.ui.onboarding.OnboardingActivity
+import com.example.testing.ui.viewmodel.PrefsViewModel
 import com.example.testing.utils.FragmentUtils.Companion.loadFragment
 import com.example.testing.utils.FragmentUtils.Companion.removeFragmentByTag
 import com.example.testing.utils.Utils.Companion.showSnackbar
@@ -64,6 +67,7 @@ class MainActivity : AppCompatActivity() {
     protected val statsTitles = arrayOf(
         "Orders", "Inventory"
     )
+    private val prefsViewModel: PrefsViewModel by viewModels()
     private val calendar: Calendar = Calendar.getInstance()
     private val year = calendar.get(Calendar.YEAR)
     private val homeFragment = HomeFragment()
@@ -98,15 +102,35 @@ class MainActivity : AppCompatActivity() {
                     loadFragment(this, homeFragment, null, "homeFragment", true)
                 R.id.settingsFragment -> {
                     loadFragment(this, settingsFragment, null, "settingsFragment", true)
-                    removeFragmentByTag(this, "dateFragment")
                 }
                 R.id.chartFragment ->
                     loadFragment(this, chartFragment, null, "chartFragment", true)
                 }
             true
         }
+        prefsViewModel.checkPermissions()
+        prefsViewModel.accessibilityEnabled.observe(this) {
+            if (it == false) {
+                // if access not granted, construct intent to request permission
+                // don't use view to show snackbar if it should be above bottomNavigationView
+                binding.container.showSnackbar(
+                    view, getString(R.string.accessibility_permission_required),
+                    Snackbar.LENGTH_INDEFINITE, "OK"
+                ) {
+                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    // request permission via start activity for result
+                    startActivity(intent)
+                }
+            } else {
+                binding.container.showSnackbar(
+                    view, getString(R.string.accessibility_permission_granted),
+                    Snackbar.LENGTH_SHORT, null
+                ) {}
+                true
+            }
+        }
 
-        checkAccessibilityPermission()
     }
 
     /**
@@ -115,10 +139,10 @@ class MainActivity : AppCompatActivity() {
      **/
     override fun onResume() {
         super.onResume()
-        checkAccessibilityPermission()
+        prefsViewModel.checkPermissions()
     }
 
-    /** Check for accessibility permissions **/
+    /** Check for accessibility permissions
     private fun checkAccessibilityPermission(): Boolean {
         var accessEnabled = 0
         try {
@@ -131,7 +155,7 @@ class MainActivity : AppCompatActivity() {
             // if access not granted, construct intent to request permission
             // don't use view to show snackbar if it should be above bottomNavigationView
             binding.container.showSnackbar(
-                view, getString(R.string.permission_required),
+                view, getString(R.string.accessibility_permission_required),
                 Snackbar.LENGTH_INDEFINITE, "OK"
             ) {
                 val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
@@ -142,10 +166,10 @@ class MainActivity : AppCompatActivity() {
             false
         } else {
             binding.container.showSnackbar(
-                view, getString(R.string.permission_granted),
+                view, getString(R.string.accessibility_permission_granted),
                 Snackbar.LENGTH_SHORT, null
             ) {}
             true
         }
-    }
+    }**/
 }

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.example.testing.MainActivity
 import com.example.testing.fitbit.CodeChallenge.Companion.CLIENT_ID
@@ -29,6 +30,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
 import java.util.logging.Level.parse
+import kotlin.coroutines.coroutineContext
 
 /**
  * Fitbit's OAuth2 client's implementation

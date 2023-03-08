@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/BoxLayout"
+        android:layout_width="300dp"
+        android:layout_height="250dp"
+        android:layout_centerInParent="true"
+        android:layout_margin="15dp"
+        android:alpha="0.5"
+        android:elevation="60dp"
+        android:padding="10dp"
+        android:background="@color/dark_grey"
+        app:cornerRadius="15dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.009"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/FitbitLoginPrompt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:minWidth="70dp"
+            android:text="To view the full data, you need to log in to your Fitbit account"
+            android:textAlignment="center"
+            android:textColor="#757575"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/FitbitBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerInParent="true"
+            android:backgroundTint="#66469E"
+            android:minWidth="48dp"
+            android:text="Fitbit Login"
+            android:textColor="@color/white"
+            app:cornerRadius="15dp"
+            tools:ignore="TouchTargetSizeCheck" />
+
+
+    </RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

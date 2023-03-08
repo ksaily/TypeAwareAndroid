@@ -10,6 +10,7 @@ import android.provider.Settings
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.viewModels
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
@@ -23,6 +24,7 @@ import com.example.testing.R
 import com.ogaclejapan.smarttablayout.SmartTabLayout
 
 import com.example.testing.databinding.ActivityConsentBinding
+import com.example.testing.ui.viewmodel.PrefsViewModel
 import com.example.testing.utils.FragmentUtils.Companion.loadFragment
 import com.example.testing.utils.FragmentUtils.Companion.removeFragmentByTag
 import com.example.testing.utils.Utils
@@ -41,6 +43,7 @@ class ConsentActivity : AppCompatActivity() {
     private val userInfoFragment = UserInfoFragment()
     private lateinit var view: View
     private lateinit var editor: SharedPreferences.Editor
+    val prefsViewModel: PrefsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

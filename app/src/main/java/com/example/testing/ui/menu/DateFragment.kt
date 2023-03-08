@@ -10,12 +10,8 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.example.testing.R
 import com.example.testing.databinding.FragmentDateBinding
-import com.example.testing.databinding.FragmentHomeBinding
-import com.example.testing.ui.view.DateViewModel
-import com.example.testing.utils.Utils.Companion.currentDate
+import com.example.testing.ui.viewmodel.DateViewModel
 import com.example.testing.utils.Utils.Companion.getFromFirebase
-import com.example.testing.utils.Utils.Companion.getNextDateString
-import com.example.testing.utils.Utils.Companion.getPreviousDateString
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"

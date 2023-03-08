@@ -53,7 +53,7 @@ class OnboardingFragment : Fragment() {
             onboardingContent.text = onBoardingTexts[position]
             when (position) {
                 0 -> {
-                    onboardingImage.setImageDrawable(getDrawable(requireContext(),R.drawable.sleep_screen))
+                    onboardingImage.setImageDrawable(getDrawable(requireContext(),R.drawable.coffee_break_02_compressed))
                 }
                 1 -> {
                     onboardingImage.setImageDrawable(getDrawable(requireContext(),R.drawable.sleep_screen))

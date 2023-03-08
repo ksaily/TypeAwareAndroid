@@ -7,7 +7,7 @@
             android:thickness="7dp">
 
             <gradient
-                android:startColor="@color/light_grey"
+                android:startColor="@color/cardview_light_background"
                 android:endColor="@color/cardview_shadow_start_color"
                 android:type="sweep"/>
         </shape>

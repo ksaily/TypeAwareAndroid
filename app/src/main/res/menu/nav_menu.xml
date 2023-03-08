@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/homeFragment"
+        android:id="@+id/home"
         android:icon="@drawable/ic_baseline_home_24"
         android:title="Home"  />
     <item
-        android:id="@+id/chartFragment"
+        android:id="@+id/charts"
         android:icon="@drawable/ic_baseline_bar_chart_24"
         android:title="Charts" />
     <item
-        android:id="@+id/settingsFragment"
+        android:id="@+id/settings"
         android:icon="@drawable/ic_baseline_settings_24"
         android:title="Settings" />
 

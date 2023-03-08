@@ -53,7 +53,7 @@ class AuthenticationActivity : AppCompatActivity() {
         Log.d("Authorization", "On new intent")
         val code = intent?.data?.getQueryParameter("code")
         val state = intent?.data?.getQueryParameter("state")
-        val redirect = intent?.data?.getQueryParameter("r")
+        val redirect = intent?.data?.getQueryParameter("redirect")
         if (code != null && state != null) {
             Log.d("Authorization", "Authorization code is: $code")
             Log.d("Authorization", "Authorization state is: $state")

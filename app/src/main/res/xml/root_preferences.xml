@@ -1,35 +1,51 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="@string/messages_header">
+    <PreferenceCategory app:title="@string/pref_header">
 
-        <EditTextPreference
-            app:key="signature"
-            app:title="@string/signature_title"
-            app:useSimpleSummaryProvider="true" />
+        <MultiSelectListPreference
+            app:key="@string/keyboard_data_key"
+            app:title="@string/keyboard_data_to_show"
+            app:entryValues="@array/pref_keyboard_values"
+            app:entries="@array/pref_choose_keyboard_stats"
+            />
+
+        <SwitchPreferenceCompat
+            app:key="@string/sleep_data_key"
+            app:title="@string/show_sleep_data"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/data_header">
+
+        <SwitchPreferenceCompat
+            app:key="@string/mobile_data_key"
+            app:title="@string/limit_mobile_data_usage"
+            app:summary="@string/mobile_data_usage_off_prompt"/>
 
         <ListPreference
-            app:defaultValue="reply"
-            app:entries="@array/reply_entries"
-            app:entryValues="@array/reply_values"
-            app:key="reply"
-            app:title="@string/reply_title"
-            app:useSimpleSummaryProvider="true" />
+            app:dependency="@string/mobile_data_key"
+            app:title="@string/network_prefs"
+            app:defaultValue="0"
+            app:entries="@array/pref_uploads"
+            app:entryValues="@array/pref_keyboard_values"
+            />
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/sync_header">
+    <PreferenceCategory app:title="@string/permissions_header">
 
         <SwitchPreferenceCompat
-            app:key="sync"
-            app:title="@string/sync_title" />
+            app:title="@string/accessibility_pref"
+            app:key="@string/access_permission_key"
+            app:summaryOff="@string/accessibility_permission_required" />
 
         <SwitchPreferenceCompat
-            app:dependency="sync"
-            app:key="attachment"
-            app:summaryOff="@string/attachment_summary_off"
-            app:summaryOn="@string/attachment_summary_on"
-            app:title="@string/attachment_title" />
+            app:title="@string/battery_optimization_options"
+            app:key="@string/battery_opt_key"
+            app:summaryOn="@string/battery_opt_on_prompt"
+            app:summaryOff="@string/battery_opt_off_propmt"/>
 
     </PreferenceCategory>
+
 
 </PreferenceScreen>
