@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:background="@color/transparent"
-    android:outlineAmbientShadowColor="@color/dark_purple">
+    app:cardCornerRadius="30dp"
+    app:cardPreventCornerOverlap="true"
+    app:cardElevation="2dp"
+    android:clipChildren="false"
+    android:layout_margin="5dp"
+    android:clipToPadding="false"
+    app:cardUseCompatPadding="true"
+    app:cardBackgroundColor="@color/light_purple">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingVertical="20dp">
-
+        android:padding="20dp">
 
         <TextView
             android:id="@+id/FitbitLoginPrompt"
@@ -24,10 +28,11 @@
             android:layout_marginEnd="91dp"
             android:layout_marginVertical="20dp"
             android:paddingVertical="15dp"
-            android:text="To view your sleep data, you need to log in to your Fitbit account"
+            android:text="@string/to_view_your_sleep_data_you_need_to_log_in_to_your_fitbit_account"
             android:textAlignment="center"
             android:textSize="18sp"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:visibility="gone"/>
 
         <Button
             android:id="@+id/FitbitBtn"
@@ -37,16 +42,171 @@
             android:background="@drawable/roundstyle"
             android:backgroundTint="#C2B6DF"
             android:padding="10dp"
-            android:text="Fitbit Login"
-            android:textColor="@color/white" />
+            android:text="@string/fitbit_login"
+            android:textColor="@color/white"
+            android:visibility="gone"/>
 
-        <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/sleepDataChart"
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:padding="2dp"
-            android:visibility="visible">
-        </com.github.mikephil.charting.charts.LineChart>
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_black"
+            android:padding="10dp"
+            android:text="@string/sleep_data_title"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:id="@+id/hideThis"/>
+
+    <TableLayout
+        android:id="@+id/sleepData"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="3dp">
+
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingVertical="3dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Wakeup"
+                android:fontFamily="@font/roboto"
+                android:layout_column="0"
+                android:textAlignment="center"
+                android:textColor="@color/light_grey"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_column="1"
+                android:text="Time asleep"
+                android:textAlignment="center"
+                android:textColor="@color/light_grey"
+                android:textSize="18sp"
+                android:fontFamily="@font/roboto"/>
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_column="0"
+                android:layout_margin="5dp"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/wakeUpImage"
+                    android:layout_column="0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="5dp"
+                    android:paddingLeft="5dp"
+                    android:src="@drawable/wake_up_40" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/wakeUpTime"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginVertical="5dp"
+                    android:fontFamily="@font/roboto"
+                    android:padding="5dp"
+                    android:text="9.00"
+                    android:textColor="@color/white"
+                    android:textSize="24sp"
+                    android:layout_alignBottom="@id/wakeUpImage"
+                    android:layout_toRightOf="@id/wakeUpImage"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal"/>
+
+                <TextView
+                    android:id="@+id/bedTimeText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="10dp"
+                    android:text="Bedtime"
+                    android:fontFamily="@font/roboto"
+                    android:textColor="@color/light_grey"
+                    android:textSize="18sp"
+                    android:textAlignment="center"
+                    android:layout_below="@id/wakeUpImage"
+                    />
+
+                <ImageView
+                    android:id="@+id/bedTimeImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="center"
+                    android:padding="5dp"
+                    android:paddingLeft="5dp"
+                    android:src="@drawable/sleeping_in_bed_40"
+                    android:layout_below="@id/bedTimeText"/>
+
+                <TextView
+                    android:id="@+id/bedTime"
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:text="23.00"
+                    android:layout_marginVertical="5dp"
+                    android:textColor="@color/white"
+                    android:textSize="24sp"
+                    android:textAlignment="center"
+                    android:fontFamily="@font/roboto"
+                    android:layout_gravity="center_vertical"
+                    android:layout_below="@id/bedTimeText"
+                    android:layout_alignBottom="@id/bedTimeImage"
+                    android:layout_toRightOf="@id/bedTimeImage"
+                    android:gravity="center"/>
+
+            </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_height="match_parent"
+            android:layout_width="160dp"
+            android:layout_column="1"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/sleepAmountImage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginVertical="10dp"
+                android:padding="10dp"
+                android:src="@drawable/sleep_64" />
+
+            <TextView
+                android:id="@+id/sleepAmount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/sleepAmountImage"
+                android:fontFamily="@font/roboto_black"
+                android:text="7h 30m"
+                android:textAlignment="center"
+                android:gravity="center_horizontal"
+                android:textColor="@color/light_grey"
+                android:textSize="26sp" />
+
+
+        </RelativeLayout>
+
+        </TableRow>
+
+
+    </TableLayout>
     </LinearLayout>
 
-</LinearLayout>
+
+</androidx.cardview.widget.CardView>

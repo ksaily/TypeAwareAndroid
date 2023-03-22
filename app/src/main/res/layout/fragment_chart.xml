@@ -18,6 +18,14 @@
         android:layout_width="match_parent"
         android:layout_height="300dp" />
 
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/sleepDataChart"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:padding="2dp"
+        android:visibility="visible">
+    </com.github.mikephil.charting.charts.LineChart>
+
 
 
 

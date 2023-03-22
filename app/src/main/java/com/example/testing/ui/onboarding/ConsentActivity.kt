@@ -43,7 +43,6 @@ class ConsentActivity : AppCompatActivity() {
     private val userInfoFragment = UserInfoFragment()
     private lateinit var view: View
     private lateinit var editor: SharedPreferences.Editor
-    val prefsViewModel: PrefsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,32 +74,15 @@ class ConsentActivity : AppCompatActivity() {
                 .putString("p_id", p_id)
                 .putBoolean("user_info_saved", true)
             editor.commit()
-            //loadFragment(this, FirstFragment(), null, "firstFragment", true)
             //removeFragmentByTag(this, "userInfoFragment")
-            Utils.checkBattery(this)
-            var battery_opt = Utils.readSharedSettingBoolean(applicationContext, "battery_opt", true)
-            if (battery_opt == true) {
-                view.showSnackbar(
-                    view, getString(R.string.consent_prompt),
-                    Snackbar.LENGTH_INDEFINITE, "OK"
-                ) {
-                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    // request permission via start activity for result
-                    startActivity(intent)
-                }
-            }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        if (Utils.checkConsent(applicationContext)) {
+        if (Utils.checkPermissions(applicationContext)) {
             startActivity(Intent(this, OnboardingActivity::class.java))
         }
     }
-
-
-
 
 }

@@ -28,6 +28,7 @@ import com.example.testing.ui.viewmodel.PrefsViewModel
 import com.example.testing.utils.FragmentUtils
 import com.example.testing.utils.FragmentUtils.Companion.loadFragment
 import com.example.testing.utils.FragmentUtils.Companion.removeFragmentByTag
+import com.example.testing.utils.Utils
 import com.example.testing.utils.Utils.Companion.showSnackbar
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.data.BarData
@@ -123,29 +124,7 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        prefsViewModel.checkPermissions()
-        prefsViewModel.accessibilityEnabled.observe(this) {
-            if (it == false) {
-                // if access not granted, construct intent to request permission
-                // don't use view to show snackbar if it should be above bottomNavigationView
-                binding.container.showSnackbar(
-                    view, getString(R.string.accessibility_permission_required),
-                    Snackbar.LENGTH_INDEFINITE, "OK"
-                ) {
-                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    // request permission via start activity for result
-                    startActivity(intent)
-                }
-            } else {
-                binding.container.showSnackbar(
-                    view, getString(R.string.accessibility_permission_granted),
-                    Snackbar.LENGTH_SHORT, null
-                ) {}
-                true
-            }
-        }
-
+        //Utils.checkPermissions(this@MainActivity)
     }
 
     /**
@@ -154,37 +133,6 @@ class MainActivity : AppCompatActivity() {
      **/
     override fun onResume() {
         super.onResume()
-        prefsViewModel.checkPermissions()
+        Utils.checkPermissions(this@MainActivity)
     }
-
-    /** Check for accessibility permissions
-    private fun checkAccessibilityPermission(): Boolean {
-        var accessEnabled = 0
-        try {
-            accessEnabled =
-                Settings.Secure.getInt(this.contentResolver, Settings.Secure.ACCESSIBILITY_ENABLED)
-        } catch (e: Settings.SettingNotFoundException) {
-            e.printStackTrace()
-        }
-        return if (accessEnabled == 0) {
-            // if access not granted, construct intent to request permission
-            // don't use view to show snackbar if it should be above bottomNavigationView
-            binding.container.showSnackbar(
-                view, getString(R.string.accessibility_permission_required),
-                Snackbar.LENGTH_INDEFINITE, "OK"
-            ) {
-                val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                // request permission via start activity for result
-                startActivity(intent)
-            }
-            false
-        } else {
-            binding.container.showSnackbar(
-                view, getString(R.string.accessibility_permission_granted),
-                Snackbar.LENGTH_SHORT, null
-            ) {}
-            true
-        }
-    }**/
 }

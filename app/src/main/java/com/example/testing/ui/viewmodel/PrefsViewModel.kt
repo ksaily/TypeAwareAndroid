@@ -1,6 +1,7 @@
 package com.example.testing.ui.viewmodel
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -25,9 +26,9 @@ class PrefsViewModel : ViewModel() {
     private val sharedPrefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(
         Graph.appContext)
 
-    private val _batteryOpt = MutableLiveData(true)
-    val batteryOpt: LiveData<Boolean>
-        get() = _batteryOpt
+    private val _batteryOptOff = MutableLiveData(true)
+    val batteryOptOff: LiveData<Boolean>
+        get() = _batteryOptOff
 
     private val _accessibilityEnabled = MutableLiveData(true)
     val accessibilityEnabled: LiveData<Boolean>
@@ -50,12 +51,8 @@ class PrefsViewModel : ViewModel() {
      * Check if optimization is enabled
      */
     fun checkBatteryOptimization(context: Context) {
-        if (!isIgnoringBatteryOptimizations(context.applicationContext) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val name = R.string.app_name
-            val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivity(intent)
-        }
+        _batteryOptOff.value =
+            !(!isIgnoringBatteryOptimizations(context.applicationContext) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
     }
 
     /**
@@ -66,14 +63,14 @@ class PrefsViewModel : ViewModel() {
         val name = context.applicationContext.packageName
         val editor = sharedPrefs.edit()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            editor.putBoolean("battery_opt", false)
+            editor.putBoolean("battery_opt_off", false)
             editor.apply()
-            _batteryOpt.value = false
+            //_batteryOptOff.value = false
             return pwrm.isIgnoringBatteryOptimizations(name)
         }
-        editor.putBoolean("battery_opt", true)
+        editor.putBoolean("battery_opt_off", true)
         editor.apply()
-        _batteryOpt.value = true
+        //_batteryOptOff.value = true
         return true
     }
 
@@ -91,13 +88,20 @@ class PrefsViewModel : ViewModel() {
     }
 
 
-
-    fun isOnboardingCompleted() {
-        _onboardingCompleted.value = sharedPrefs.getBoolean("onboarding_complete", false)
+    fun isOnboardingCompleted(): Boolean? {
+        return _onboardingCompleted.value
     }
 
-    fun isConsentGiven() {
-        _consentGiven.value = sharedPrefs.getBoolean("consent_given", false)
+    fun setConsentGivenValue(bool: Boolean) {
+        _consentGiven.value = bool
+    }
+
+    fun isConsentGiven(): Boolean? {
+        return _consentGiven.value
+    }
+
+    fun setOnboardingCompleteValue(bool: Boolean) {
+        _onboardingCompleted.value = bool
     }
 
     fun checkPermissions() {
@@ -105,7 +109,7 @@ class PrefsViewModel : ViewModel() {
         checkBatteryOptimization(Graph.appContext)
         isOnboardingCompleted()
         isConsentGiven()
-        _permissionsOk.value = _accessibilityEnabled.value == true && _batteryOpt.value == false &&
+        _permissionsOk.value = _accessibilityEnabled.value == true && _batteryOptOff.value == true &&
                 _consentGiven.value == true && _onboardingCompleted.value == true
     }
 }

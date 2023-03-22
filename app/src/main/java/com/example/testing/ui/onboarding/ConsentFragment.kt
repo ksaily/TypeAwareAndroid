@@ -42,9 +42,7 @@ class ConsentFragment : Fragment(R.layout.fragment_consent) {
         super.onViewCreated(view, savedInstanceState)
         var result = false
 
-        var btn1: Button = binding.conBtnGiveConsent
-
-        btn1.setOnClickListener {
+        binding.conBtnGiveConsent.setOnClickListener {
             result = true
             Log.d("Consent", "Consent given")
             setFragmentResult("consentGiven", bundleOf("consent" to result))
@@ -52,7 +50,7 @@ class ConsentFragment : Fragment(R.layout.fragment_consent) {
         binding.conBtnQuit.setOnClickListener {
             view.showSnackbar(
                 view, getString(R.string.con_not_now_prompt),
-                Snackbar.LENGTH_SHORT, null
+                Snackbar.LENGTH_SHORT, "Continue"
             ) {}
         }
     }

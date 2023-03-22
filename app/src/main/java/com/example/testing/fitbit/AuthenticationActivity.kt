@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
+import com.example.testing.Graph
 import com.example.testing.MainActivity
 import java.net.URI
 import java.net.URL
@@ -19,6 +20,7 @@ import com.example.testing.fitbit.CodeChallenge.Companion.CLIENT_ID
 import com.example.testing.fitbit.CodeChallenge.Companion.REDIRECT_URL
 import com.example.testing.fitbit.CodeChallenge.Companion.CODE_VERIFIER
 import com.example.testing.fitbit.FitbitApiService.Companion.runningThread
+import com.example.testing.utils.Utils
 import java.util.Base64
 
 /**
@@ -67,6 +69,7 @@ class AuthenticationActivity : AppCompatActivity() {
                     }
                     FitbitApiService.authorizeRequestToken(code, state)
                     FitbitApiService.getSleepData("2022-12-10")
+                    Utils.saveSharedSettingBoolean(Graph.appContext, "loggedInFitbit", true)
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 }

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.View.INVISIBLE
+import androidx.activity.viewModels
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -12,6 +13,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.testing.MainActivity
 import com.example.testing.R
 import com.example.testing.databinding.ActivityOnboardingBinding
+import com.example.testing.ui.viewmodel.PrefsViewModel
 import com.example.testing.utils.Utils.Companion.showSnackbar
 import com.google.android.material.snackbar.Snackbar
 
@@ -25,6 +27,7 @@ class OnboardingActivity : FragmentActivity() {
 
     private lateinit var binding: ActivityOnboardingBinding
     private lateinit var view: View
+    var onboardingDone: Boolean = false
 
     private var onBoardingPageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
@@ -43,16 +46,16 @@ class OnboardingActivity : FragmentActivity() {
         binding.vp2Pager.adapter = pagerAdapter
         binding.vp2Pager.registerOnPageChangeCallback(onBoardingPageChangeCallback)
         binding.next.setOnClickListener {
-            if (binding.vp2Pager.currentItem < 2) {
+            if (!onboardingDone) {
                 binding.vp2Pager.currentItem = binding.vp2Pager.currentItem + 1
             } else {
                 editor.putBoolean("onboarding_complete", true).commit()
-                startActivity(Intent(applicationContext, MainActivity::class.java))
-            }
+                startActivity(Intent(applicationContext, MainActivity::class.java))            }
         }
+
         binding.skip.setOnClickListener {
             view.showSnackbar(view, getString(R.string.skip_prompt), Snackbar.LENGTH_INDEFINITE,
-            getString(R.string.skip)) {
+                getString(R.string.skip)) {
                 editor.putBoolean("onboarding_complete", true).commit()
                 startActivity(Intent(applicationContext, MainActivity::class.java))
             }
@@ -60,8 +63,8 @@ class OnboardingActivity : FragmentActivity() {
     }
 
     override fun onDestroy() {
-        binding.vp2Pager.unregisterOnPageChangeCallback(onBoardingPageChangeCallback)
         super.onDestroy()
+        binding.vp2Pager.unregisterOnPageChangeCallback(onBoardingPageChangeCallback)
     }
 
     override fun onBackPressed() {
@@ -93,6 +96,7 @@ class OnboardingActivity : FragmentActivity() {
                 binding.ivFirstCircle.setImageDrawable(getDrawable(R.drawable.comp_view_circle_purple))
                 binding.next.text = "Finish"
                 binding.skip.visibility = INVISIBLE
+                onboardingDone = true
             }
             3 -> {
                 binding.ivThirdCircle.setImageDrawable(getDrawable(R.drawable.comp_view_circle_gray))

@@ -6,11 +6,14 @@ import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import com.example.testing.Graph
 import com.example.testing.MainActivity
 import com.example.testing.fitbit.CodeChallenge.Companion.CLIENT_ID
 import com.example.testing.fitbit.CodeChallenge.Companion.CODE_VERIFIER
 import com.example.testing.fitbit.CodeChallenge.Companion.REDIRECT_URL
 import com.example.testing.fitbit.CodeChallenge.Companion.getCodeChallenge
+import com.example.testing.ui.data.SleepData
+import com.example.testing.utils.Utils
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
@@ -28,6 +31,8 @@ import org.json.JSONTokener
 import org.xml.sax.Parser
 import java.net.HttpURLConnection
 import java.net.URL
+import java.text.ParseException
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.logging.Level.parse
 import kotlin.coroutines.coroutineContext
@@ -105,7 +110,7 @@ class FitbitApiService {
             }
         }
 
-        fun getSleepData(date: String) {
+        fun getSleepData(date: String): SleepData {
             FuelManager.instance.basePath = "https://api.fitbit.com/1.2/user/-"
             val url = "/sleep/date/$date.json"
 
@@ -117,17 +122,25 @@ class FitbitApiService {
             Log.d("SleepData", "Request: $request")
             val (sleepData, error) = result
             if (error == null) {
+                Utils.saveSharedSettingBoolean(Graph.appContext, "loggedInFitbit", true)
                 //Print the sleep data
                 val jsonObject = JSONTokener(sleepData).nextValue() as JSONObject
                 val jsonArray = jsonObject.getJSONArray("sleep")
+                val summary = jsonObject.getJSONObject("summary")
+                val minutesAsleep = summary.getInt("totalMinutesAsleep")
+                var endDateTime = jsonArray.getJSONObject(0).getString("endTime")
+                var startDateTime = jsonArray.getJSONObject(0).getString("startTime")
+                var startTime = convertISOTimeToTime(startDateTime)
+                var endTime = convertISOTimeToTime(endDateTime)
                 val duration = jsonArray.getJSONObject(0).getString("duration")
                 val dateOfSleep = jsonArray.getJSONObject(0).getString("dateOfSleep")
                 Log.i("Sleep", "Duration: $duration")
                 Log.i("Sleep", "Date of sleep : $dateOfSleep")
                 runningThread = false
+                return SleepData(minutesAsleep,startTime,endTime)
             } else {
-                println(error)
                 runningThread = false
+                return SleepData(0, "-", "-")
             }
         }
 
@@ -152,6 +165,20 @@ class FitbitApiService {
                     "refresh_token" to refreshToken
                 )).responseString()
             }
+        }
+
+        fun convertISOTimeToTime(isoTime: String): String? {
+            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
+            var convertedDate: Date? = null
+            var formattedDate: String? = null
+            try {
+                convertedDate = sdf.parse(isoTime)
+                formattedDate = SimpleDateFormat("HH:mm").format(convertedDate)
+            } catch (e: ParseException) {
+                e.printStackTrace()
+            }
+
+            return formattedDate
         }
 
     }

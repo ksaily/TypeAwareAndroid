@@ -10,11 +10,6 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
 
-    <!-- Permissions -->
-    <string name="accessibility_permission_required">Accessibility permission is required for the app to function properly.</string>
-    <string name="accessibility_permission_granted">Accessibility permission is granted. The app can track your typing speed now.</string>
-    <string name="battery_optimization_prompt">Battery optimization should NOT be enabled.</string>
-
     <!-- Menu -->
     <string name="title_home">Home</string>
     <string name="title_charts">Charts</string>
@@ -57,19 +52,20 @@
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="title_activity_settings">SettingsActivity</string>
 
-    <!-- Preference Titles -->
+    <!-- Preference Titles and prompts-->
     <string name="data_header">Data</string>
     <string name="pref_header">Preference settings</string>
     <string name="permissions_header">Permissions</string>
     <string name="limit_mobile_data_usage">Limit mobile data usage</string>
     <string name="network_prefs">Specify network preferences for data updates</string>
     <string name="show_sleep_data">Show sleep data</string>
-    <string name="battery_optimization_options">Battery optimization</string>
-    <string name="accessibility_pref">Accessibility permission granted</string>
+    <string name="battery_optimization_options">Battery optimization is DISABLED</string>
+    <string name="accessibility_pref">Accessibility permission is enabled</string>
     <string name="keyboard_data_to_show">Choose typing metrics to show on graph</string>
-    <string name="battery_opt_on_prompt">Battery optimization should be unabled</string>
-    <string name="battery_opt_off_propmt">Battery optimization is off (this is preferred)</string>
+    <string name="battery_opt_on_prompt">Battery optimization is enabled</string>
+    <string name="battery_opt_off_propmt">Battery optimization is disabled</string>
     <string name="mobile_data_usage_off_prompt">It is not recommended to limit mobile data usage</string>
+    <string name="accessibility_permission_change">Accessibility permission should be enabled for the app to run as intended. Click here if you wish to make changes.</string>
 
     <!-- Pref keys -->
     <string name="keyboard_data_key">keyboard_data_selections</string>
@@ -78,6 +74,12 @@
     <string name="battery_opt_key">battery_optimization</string>
     <string name="sleep_data_key">show_sleep_data</string>
 
+    <!-- Permissions -->
+    <string name="accessibility_permission_required">Accessibility permission is required for the app to function properly.</string>
+    <string name="accessibility_permission_granted">Accessibility permission is granted. The app can track your typing speed now.</string>
+    <string name="battery_optimization_prompt">Battery optimization should be disabled. Click here if you wish to make changes.</string>
+    <string name="all_permissions_granted">All necessary permissions are granted. Click OK to continue.</string>
+
 
     <!-- Sync Preferences -->
     <string name="sync_title">Sync email periodically</string>
@@ -85,4 +87,9 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="to_view_your_sleep_data_you_need_to_log_in_to_your_fitbit_account">To view your sleep data, you need to log in to your Fitbit account</string>
+    <string name="fitbit_login">Fitbit Login</string>
+    <string name="sleep_data_title">Last night\'s sleep</string>
+    <string name="speed_avg">Speed (avg)</string>
+    <string name="accuracy">Accuracy</string>
 </resources>

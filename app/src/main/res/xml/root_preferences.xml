@@ -34,16 +34,18 @@
 
     <PreferenceCategory app:title="@string/permissions_header">
 
-        <SwitchPreferenceCompat
+        <Preference
             app:title="@string/accessibility_pref"
+            app:enabled="true"
             app:key="@string/access_permission_key"
-            app:summaryOff="@string/accessibility_permission_required" />
+            app:summary="@string/accessibility_permission_change"/>
 
-        <SwitchPreferenceCompat
-            app:title="@string/battery_optimization_options"
+        <Preference
+            app:title="@string/battery_opt_on_prompt"
+            app:enabled="true"
             app:key="@string/battery_opt_key"
-            app:summaryOn="@string/battery_opt_on_prompt"
-            app:summaryOff="@string/battery_opt_off_propmt"/>
+            app:summary="@string/battery_optimization_prompt"
+            />
 
     </PreferenceCategory>
 

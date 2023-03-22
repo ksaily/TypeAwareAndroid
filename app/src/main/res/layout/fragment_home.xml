@@ -20,15 +20,6 @@
         <include layout="@layout/keyboard_data_card"
             android:id="@+id/keyboardChart"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Weekly sleep"
-            android:textColor="@color/white"
-            android:fontFamily="@font/roboto_black"
-            android:textSize="22sp"
-            android:layout_marginTop="10dp"
-            android:layout_marginLeft="35dp"/>
 
         <include layout="@layout/sleep_data_card"
             android:id="@+id/sleepDataContainer"/>

@@ -1,5 +1,6 @@
 package com.example.testing.utils
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -8,7 +9,9 @@ import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
+import com.example.testing.MainActivity
 import com.example.testing.R
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.database.DataSnapshot
@@ -176,11 +179,11 @@ class Utils {
             val sharedPref = context.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
             val editor = sharedPref.edit()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                editor.putBoolean("battery_opt", false)
+                editor.putBoolean("battery_opt_off", true)
                 editor.apply()
                 return pwrm.isIgnoringBatteryOptimizations(name)
             }
-            editor.putBoolean("battery_opt", true)
+            editor.putBoolean("battery_opt_off", false)
             editor.apply()
             return true
         }
@@ -193,6 +196,8 @@ class Utils {
                 val name = R.string.app_name
                 val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                Toast.makeText(context, R.string.battery_optimization_prompt,
+                    Toast.LENGTH_SHORT).show()
                 context.startActivity(intent)
             }
         }
@@ -214,15 +219,50 @@ class Utils {
             editor.apply()
         }
 
-        fun checkConsent(context: Context): Boolean {
-            val batteryOpt = readSharedSettingBoolean(context, "battery_opt", true)
+        fun saveSharedSettingBoolean(ctx: Context, settingName: String?, settingValue: Boolean) {
+            val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
+            val editor = sharedPref.edit()
+            editor.putBoolean(settingName, settingValue)
+            editor.apply()
+        }
+
+        fun checkPermissions(context: Context): Boolean {
+            checkBattery(context)
+            val batteryOptOff = readSharedSettingBoolean(context, "battery_opt_off", false)
             val consent = readSharedSettingBoolean(context, "consent_given", true)
             val userInfoSaved = readSharedSettingBoolean(context, "user_info_saved", true)
-            if (consent && !batteryOpt && userInfoSaved) {
-                saveSharedSetting(context, "overall_consent", "OK")
+            val accessibilityPermission = checkAccessibilityPermission(context)
+            if (consent && batteryOptOff && userInfoSaved && accessibilityPermission) {
+                val sharedPref = context.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
+                val editor = sharedPref.edit()
+                editor.putBoolean("permissions_granted", true).apply()
                 return true
             }
             return false
+        }
+
+        private fun checkAccessibilityPermission(context: Context): Boolean {
+            var accessEnabled = 0
+            try {
+                accessEnabled =
+                    Settings.Secure.getInt(context.contentResolver, Settings.Secure.ACCESSIBILITY_ENABLED)
+            } catch (e: Settings.SettingNotFoundException) {
+                e.printStackTrace()
+            }
+            return if (accessEnabled == 0) {
+                // if access not granted, construct intent to request permission
+                Toast.makeText(context, R.string.accessibility_permission_required,
+                    Toast.LENGTH_SHORT).show()
+                val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                // request permission via start activity for result
+                context.startActivity(intent)
+                false
+            } else {
+                Toast.makeText(context, R.string.accessibility_permission_granted,
+                    Toast.LENGTH_SHORT).show()
+                true
+            }
         }
     }
 }

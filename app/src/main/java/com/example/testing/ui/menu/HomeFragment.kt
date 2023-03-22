@@ -11,12 +11,14 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import com.example.testing.Graph
 import com.example.testing.R
 import com.example.testing.databinding.FragmentHomeBinding
 import com.example.testing.fitbit.AuthenticationActivity
 import com.example.testing.fitbit.FitbitApiService
 import com.example.testing.ui.viewmodel.DateViewModel
 import com.example.testing.ui.viewmodel.FirebaseViewModel
+import com.example.testing.utils.Utils
 import com.example.testing.utils.Utils.Companion.countAvgSpeed
 import com.example.testing.utils.Utils.Companion.getFromFirebase
 import com.example.testing.utils.Utils.Companion.keyboardList
@@ -72,6 +74,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.sleepDataContainer.FitbitBtn.isVisible = true
+        binding.sleepDataContainer.FitbitLoginPrompt.isVisible = true
+        binding.sleepDataContainer.hideThis.isVisible = false
+        binding.sleepDataContainer.sleepData.isVisible = false
+
         binding.sleepDataContainer.FitbitBtn.setOnClickListener {
             val intent = Intent(activity, AuthenticationActivity::class.java)
             startActivity(intent)
@@ -121,30 +129,28 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     override fun onResume() {
         super.onResume()
-        /**
-        binding.currentDateTextView.text = ChartFragment.currentDate
-        binding.arrowLeft.setOnClickListener {
-            chosenDate = ChartFragment.getPreviousDateString(chosenDate)
-            binding.arrowRight.isVisible = true
-            binding.currentDate.text = chosenDate
-            ChartFragment.getFromFirebase(chosenDate)**/
-            updateKeyboardData()
-            //Set up LiveData listener: Changes in chosenDate -> Update UI
+        updateKeyboardData()
 
-        if (isLoggedInFitbit) {
+        if (Utils.readSharedSettingBoolean(Graph.appContext, "loggedInFitbit", false)) {
             binding.sleepDataContainer.FitbitBtn.isVisible = false
             binding.sleepDataContainer.FitbitLoginPrompt.isVisible = false
-            binding.sleepDataContainer.sleepDataChart.isVisible = true
-            //Show Fitbit sleep data in a chart, replace SleepDataContainer with chart fragment
-            FitbitApiService.getSleepData(chosenDate)
+            binding.sleepDataContainer.sleepData.isVisible = true
+            val sleepData = FitbitApiService.getSleepData(dateViewModel.selectedDate.value.toString())
+            binding.sleepDataContainer.wakeUpTime.text = sleepData.endTime
+            binding.sleepDataContainer.bedTime.text = sleepData.startTime
+            val t: Int = sleepData.totalMinutesAsleep
+            val hours = t / 60
+            val minutes = t % 60
+            val asleepString = "$hours h $minutes m"
+            binding.sleepDataContainer.sleepAmount.text = asleepString
         }
     }
 
     private fun updateKeyboardData() {
         getFromFirebase(dateViewModel.selectedDate.value.toString())
         if (keyboardList.isNotEmpty()) {
-            var totalErr = mutableListOf<Double>()
-            var totalSpeed = mutableListOf<Double>()
+            val totalErr = mutableListOf<Double>()
+            val totalSpeed = mutableListOf<Double>()
             for (i in keyboardList) {
                 if (i.date == chosenDate) {
                     totalErr.add(i.errors)
@@ -156,7 +162,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             binding.keyboardChart.progressCircular).toString()
         }
         else {
-            binding.keyboardChart.speedData.text = "No keyboard data available"
+            binding.keyboardChart.speedData.text = "---"
             binding.keyboardChart.ProgressTextView.isVisible = false
             binding.keyboardChart.progressCircular.isVisible = false
             Log.d("UpdateUI", "No data on keyboardList")
@@ -205,7 +211,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
          * @param param2 Parameter 2.
          * @return A new instance of fragment HomeFragment.
          */
-        var isLoggedInFitbit = false
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
             HomeFragment().apply {
