@@ -3,6 +3,7 @@ package com.example.testing.ui.onboarding
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.View.INVISIBLE
 import androidx.activity.viewModels
@@ -10,10 +11,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.example.testing.Graph
 import com.example.testing.MainActivity
 import com.example.testing.R
 import com.example.testing.databinding.ActivityOnboardingBinding
 import com.example.testing.ui.viewmodel.PrefsViewModel
+import com.example.testing.utils.Utils
 import com.example.testing.utils.Utils.Companion.showSnackbar
 import com.google.android.material.snackbar.Snackbar
 
@@ -40,27 +43,42 @@ class OnboardingActivity : FragmentActivity() {
         view = binding.root
         setContentView(view)
 
-        val sharedPrefs = getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
-        val editor = sharedPrefs.edit()
         val pagerAdapter = ScreenSlidePagerAdapter(this)
         binding.vp2Pager.adapter = pagerAdapter
         binding.vp2Pager.registerOnPageChangeCallback(onBoardingPageChangeCallback)
         binding.next.setOnClickListener {
-            if (!onboardingDone) {
+            if (!Utils.readSharedSettingBoolean(
+                    Graph.appContext, "onboarding_complete", false)
+            ) {
                 binding.vp2Pager.currentItem = binding.vp2Pager.currentItem + 1
             } else {
-                editor.putBoolean("onboarding_complete", true).commit()
-                startActivity(Intent(applicationContext, MainActivity::class.java))            }
+                Utils.saveSharedSettingBoolean(
+                    Graph.appContext, "onboarding_complete", true)
+            }
         }
 
         binding.skip.setOnClickListener {
             view.showSnackbar(view, getString(R.string.skip_prompt), Snackbar.LENGTH_INDEFINITE,
                 getString(R.string.skip)) {
-                editor.putBoolean("onboarding_complete", true).commit()
-                startActivity(Intent(applicationContext, MainActivity::class.java))
+                Utils.saveSharedSettingBoolean(
+                    Graph.appContext, "onboarding_complete",true)
+            }
+        }
+
+        //Register listener
+        Utils.getSharedPrefs().registerOnSharedPreferenceChangeListener { sharedPreferences, key ->
+            if (key == "onboarding_complete") {
+                if (Utils.readSharedSettingBoolean(
+                        Graph.appContext, "onboarding_complete", false)
+                ) {
+                    Log.d("OnboardingActivity", "Start mainActivity")
+                    startActivity(Intent(applicationContext, MainActivity::class.java))
+                    finish()
+                }
             }
         }
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -96,7 +114,8 @@ class OnboardingActivity : FragmentActivity() {
                 binding.ivFirstCircle.setImageDrawable(getDrawable(R.drawable.comp_view_circle_purple))
                 binding.next.text = "Finish"
                 binding.skip.visibility = INVISIBLE
-                onboardingDone = true
+                Utils.saveSharedSettingBoolean(
+                    Graph.appContext, "onboarding_complete",true)
             }
             3 -> {
                 binding.ivThirdCircle.setImageDrawable(getDrawable(R.drawable.comp_view_circle_gray))

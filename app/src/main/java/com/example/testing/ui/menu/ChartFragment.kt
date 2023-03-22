@@ -17,6 +17,7 @@ private const val ARG_PARAM2 = "param2"
 class ChartFragment : Fragment(R.layout.fragment_chart) {
     private var _binding: FragmentChartBinding? = null
     private val binding get() = _binding!!
+    private val dateFragment = DateFragment()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,9 +30,9 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //layoutManager = LinearLayoutManager(activity)
-        //adapter = KeyboardAdapter()
-        //Set date to today
+        val transaction = childFragmentManager.beginTransaction()
+        transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
+            .addToBackStack("dateFragment").commit()
         }
 
     override fun onResume() {

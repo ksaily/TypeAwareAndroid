@@ -74,6 +74,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val transaction = childFragmentManager.beginTransaction()
+        transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
+            .addToBackStack("dateFragment").commit()
 
         binding.sleepDataContainer.FitbitBtn.isVisible = true
         binding.sleepDataContainer.FitbitLoginPrompt.isVisible = true
@@ -83,7 +86,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         binding.sleepDataContainer.FitbitBtn.setOnClickListener {
             val intent = Intent(activity, AuthenticationActivity::class.java)
             startActivity(intent)
-
         }
         dateViewModel.selectedDate.observe(viewLifecycleOwner) {
             firebaseViewModel.clearListOfFirebaseData()
@@ -129,7 +131,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     override fun onResume() {
         super.onResume()
-        updateKeyboardData()
 
         if (Utils.readSharedSettingBoolean(Graph.appContext, "loggedInFitbit", false)) {
             binding.sleepDataContainer.FitbitBtn.isVisible = false

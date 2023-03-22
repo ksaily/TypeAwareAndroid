@@ -11,6 +11,7 @@
 
         <SwitchPreferenceCompat
             app:key="@string/sleep_data_key"
+            app:defaultValue="true"
             app:title="@string/show_sleep_data"/>
 
     </PreferenceCategory>
@@ -35,14 +36,16 @@
     <PreferenceCategory app:title="@string/permissions_header">
 
         <Preference
-            app:title="@string/accessibility_pref"
+            app:title="@string/accessibility_perm_enabled"
             app:enabled="true"
             app:key="@string/access_permission_key"
-            app:summary="@string/accessibility_permission_change"/>
+            app:summary="@string/accessibility_permission_change"
+            app:icon="@drawable/ic_baseline_check_circle_outline_24" />
 
         <Preference
-            app:title="@string/battery_opt_on_prompt"
+            app:title="@string/battery_opt_off_prompt"
             app:enabled="true"
+            app:icon="@drawable/ic_outline_error_outline_24"
             app:key="@string/battery_opt_key"
             app:summary="@string/battery_optimization_prompt"
             />

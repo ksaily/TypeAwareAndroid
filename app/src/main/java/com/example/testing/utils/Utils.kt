@@ -3,6 +3,7 @@ package com.example.testing.utils
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
@@ -11,6 +12,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.startActivity
+import androidx.preference.PreferenceManager
+import com.example.testing.Graph
 import com.example.testing.MainActivity
 import com.example.testing.R
 import com.google.android.material.snackbar.Snackbar
@@ -176,15 +179,11 @@ class Utils {
         fun isIgnoringBatteryOptimizations(context: Context): Boolean {
             val pwrm = context.applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
             val name = context.applicationContext.packageName
-            val sharedPref = context.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
-            val editor = sharedPref.edit()
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                editor.putBoolean("battery_opt_off", true)
-                editor.apply()
+                saveSharedSettingBoolean(Graph.appContext, "battery_opt_off", true)
                 return pwrm.isIgnoringBatteryOptimizations(name)
             }
-            editor.putBoolean("battery_opt_off", false)
-            editor.apply()
+            saveSharedSettingBoolean(Graph.appContext, "battery_opt_off", true)
             return true
         }
 
@@ -203,37 +202,45 @@ class Utils {
         }
 
         fun readSharedSettingBoolean(ctx: Context, settingName: String?, defaultValue: Boolean): Boolean {
+            val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
             val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
-            return sharedPref.getBoolean(settingName, defaultValue)
+            return s.getBoolean(settingName, defaultValue)
         }
 
         fun readSharedSettingString(ctx: Context, settingName: String?, defaultValue: String): String? {
+            val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
             val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
-            return sharedPref.getString(settingName, defaultValue)
+            return s.getString(settingName, defaultValue)
+        }
+
+        fun getSharedPrefs(): SharedPreferences {
+            return PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
         }
 
         fun saveSharedSetting(ctx: Context, settingName: String?, settingValue: String?) {
+            val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
             val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
-            val editor = sharedPref.edit()
+            val editor = s.edit()
             editor.putString(settingName, settingValue)
             editor.apply()
         }
 
         fun saveSharedSettingBoolean(ctx: Context, settingName: String?, settingValue: Boolean) {
-            val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
-            val editor = sharedPref.edit()
+            val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
+            //val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
+            val editor = s.edit()
             editor.putBoolean(settingName, settingValue)
             editor.apply()
         }
 
         fun checkPermissions(context: Context): Boolean {
-            checkBattery(context)
+            isIgnoringBatteryOptimizations(context)
             val batteryOptOff = readSharedSettingBoolean(context, "battery_opt_off", false)
             val consent = readSharedSettingBoolean(context, "consent_given", true)
             val userInfoSaved = readSharedSettingBoolean(context, "user_info_saved", true)
-            val accessibilityPermission = checkAccessibilityPermission(context)
+            val accessibilityPermission = checkAccessibilityPermission(context, false)
             if (consent && batteryOptOff && userInfoSaved && accessibilityPermission) {
-                val sharedPref = context.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
+                val sharedPref = getSharedPrefs()
                 val editor = sharedPref.edit()
                 editor.putBoolean("permissions_granted", true).apply()
                 return true
@@ -241,7 +248,7 @@ class Utils {
             return false
         }
 
-        private fun checkAccessibilityPermission(context: Context): Boolean {
+        fun checkAccessibilityPermission(context: Context, openSettings: Boolean): Boolean {
             var accessEnabled = 0
             try {
                 accessEnabled =
@@ -249,7 +256,7 @@ class Utils {
             } catch (e: Settings.SettingNotFoundException) {
                 e.printStackTrace()
             }
-            return if (accessEnabled == 0) {
+            return if (accessEnabled == 0 && openSettings) {
                 // if access not granted, construct intent to request permission
                 Toast.makeText(context, R.string.accessibility_permission_required,
                     Toast.LENGTH_SHORT).show()
@@ -258,7 +265,13 @@ class Utils {
                 // request permission via start activity for result
                 context.startActivity(intent)
                 false
+            } else if (accessEnabled == 0) {
+                saveSharedSettingBoolean(context, "accessibility_permission", false)
+                Toast.makeText(context, R.string.accessibility_permission_granted,
+                    Toast.LENGTH_SHORT).show()
+                false
             } else {
+                saveSharedSettingBoolean(context, "accessibility_permission", true)
                 Toast.makeText(context, R.string.accessibility_permission_granted,
                     Toast.LENGTH_SHORT).show()
                 true

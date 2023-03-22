@@ -84,20 +84,23 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         view = binding.root
         setContentView(view)
-        val sharedPrefs = getSharedPreferences("USER_INFO", MODE_PRIVATE)
+        val sharedPrefs = Utils.getSharedPrefs()
         val transaction = supportFragmentManager.beginTransaction()
 
         sharedPrefs.apply {
             // Check if we need to display our OnboardingSupportFragment
-            if (!getBoolean("onboarding_complete", false)) {
+            edit().putBoolean("battery_opt_off",
+                Utils.isIgnoringBatteryOptimizations(applicationContext))
+            if (!getBoolean("onboarding_complete", false) ||
+                    !getBoolean("user_info_saved", false) || !getBoolean("consent_given", false)) {
+                Log.d("MainActivity", "Start consent activity")
                 // The user hasn't seen the onboarding & consent screens yet, so show it
                 startActivity(Intent(this@MainActivity, ConsentActivity::class.java))
             }
         }
 
+
         loadFragment(this, homeFragment, null, "homeFragment", true)
-        transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
-            .addToBackStack("dateFragment").commit()
 
         bottomNav = binding.bottomNav
         bottomNav.selectedItemId = R.id.homeFragment
@@ -105,26 +108,21 @@ class MainActivity : AppCompatActivity() {
             when (it.itemId) {
                 R.id.homeFragment -> {
                     Log.d("BottomNav", "homefragment selected")
-                    transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
-                        .addToBackStack("dateFragment").commit()
                     loadFragment(this, homeFragment, null, "homeFragment", true)
                 }
                 R.id.settingsFragment -> {
                     Log.d("BottomNav", "settingfragment selected")
-                    removeFragmentByTag(this, "dateFragment")
                     loadFragment(this, settingsFragment, null, "settingsFragment", true)
                 }
                 R.id.chartFragment -> {
                     Log.d("BottomNav", "chartfragment selected")
-                    transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
-                        .addToBackStack("dateFragment").commit()
                     loadFragment(this, chartFragment, null, "chartFragment", true)
                 }
             }
             true
         }
 
-        //Utils.checkPermissions(this@MainActivity)
+        Utils.checkPermissions(applicationContext)
     }
 
     /**
@@ -133,6 +131,7 @@ class MainActivity : AppCompatActivity() {
      **/
     override fun onResume() {
         super.onResume()
-        Utils.checkPermissions(this@MainActivity)
+        //Register on shared preference change listener in onCreate and check for permissions?
+        Utils.checkPermissions(applicationContext)
     }
 }

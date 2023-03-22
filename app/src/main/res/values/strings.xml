@@ -60,12 +60,14 @@
     <string name="network_prefs">Specify network preferences for data updates</string>
     <string name="show_sleep_data">Show sleep data</string>
     <string name="battery_optimization_options">Battery optimization is DISABLED</string>
-    <string name="accessibility_pref">Accessibility permission is enabled</string>
+    <string name="accessibility_perm_enabled">Accessibility permission is enabled</string>
+    <string name="accessibility_perm_disabled">Accessibility permission is disabled</string>
     <string name="keyboard_data_to_show">Choose typing metrics to show on graph</string>
     <string name="battery_opt_on_prompt">Battery optimization is enabled</string>
-    <string name="battery_opt_off_propmt">Battery optimization is disabled</string>
+    <string name="battery_opt_off_prompt">Battery optimization is disabled</string>
     <string name="mobile_data_usage_off_prompt">It is not recommended to limit mobile data usage</string>
     <string name="accessibility_permission_change">Accessibility permission should be enabled for the app to run as intended. Click here if you wish to make changes.</string>
+    <string name="click_here_to_make_changes">Click here to make changes</string>
 
     <!-- Pref keys -->
     <string name="keyboard_data_key">keyboard_data_selections</string>

@@ -10,8 +10,12 @@
     android:id="@+id/chartFragmentView"
     android:background="@color/dark_purple">
 
-    <include layout="@layout/fragment_date"
-        android:id="@+id/chartDatePicker"/>
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/dateContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        tools:layout="@layout/fragment_date" />
 
     <include layout="@layout/keyboard_chart_card"
         android:id="@+id/keyboardChart"

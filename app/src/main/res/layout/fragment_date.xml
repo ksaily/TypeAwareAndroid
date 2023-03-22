@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:paddingTop="20dp"
-        android:paddingBottom="10dp">
+        android:paddingBottom="5dp">
 
     <ImageView
         android:id="@+id/arrowLeft"
@@ -29,7 +29,7 @@
         android:id="@+id/currentDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="date"
+        android:text="Today"
         android:gravity="center_horizontal"
         android:textColor="@color/white"
         android:textSize="22sp"

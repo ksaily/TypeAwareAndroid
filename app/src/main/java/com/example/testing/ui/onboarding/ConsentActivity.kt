@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
@@ -20,6 +21,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.viewpager.widget.ViewPager
+import com.example.testing.Graph
 import com.example.testing.R
 import com.ogaclejapan.smarttablayout.SmartTabLayout
 
@@ -28,6 +30,7 @@ import com.example.testing.ui.viewmodel.PrefsViewModel
 import com.example.testing.utils.FragmentUtils.Companion.loadFragment
 import com.example.testing.utils.FragmentUtils.Companion.removeFragmentByTag
 import com.example.testing.utils.Utils
+import com.example.testing.utils.Utils.Companion.getSharedPrefs
 import com.example.testing.utils.Utils.Companion.showSnackbar
 
 /**
@@ -49,7 +52,7 @@ class ConsentActivity : AppCompatActivity() {
         binding = ActivityConsentBinding.inflate(layoutInflater)
         view = binding.root
         setContentView(view)
-        val sharedPrefs = getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
+        val sharedPrefs = Utils.getSharedPrefs()
         editor = sharedPrefs.edit()
         loadFragment(this, consentFragment, null, "consentFragment", false)
         supportFragmentManager
@@ -74,15 +77,23 @@ class ConsentActivity : AppCompatActivity() {
                 .putString("p_id", p_id)
                 .putBoolean("user_info_saved", true)
             editor.commit()
-            //removeFragmentByTag(this, "userInfoFragment")
+            removeFragmentByTag(this, "userInfoFragment")
         }
-    }
 
-    override fun onResume() {
-        super.onResume()
-        if (Utils.checkPermissions(applicationContext)) {
-            startActivity(Intent(this, OnboardingActivity::class.java))
-        }
+            //Register listener
+            sharedPrefs.registerOnSharedPreferenceChangeListener { sharedPreferences, key ->
+                if (key == "user_info_saved" || key == "consent_given") {
+                    if (Utils.readSharedSettingBoolean(
+                            Graph.appContext, "consent_given", false)
+                        && Utils.readSharedSettingBoolean(
+                            Graph.appContext, "user_info_saved", false)
+                    ) {
+                        Log.d("ConsentActivity", "Start onboarding")
+                        startActivity(Intent(this, OnboardingActivity::class.java))
+                        finish()
+                    }
+                }
+            }
     }
 
 }

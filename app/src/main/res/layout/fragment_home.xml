@@ -17,12 +17,21 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <include layout="@layout/keyboard_data_card"
-            android:id="@+id/keyboardChart"/>
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/dateContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            tools:layout="@layout/fragment_date" />
+
+        <include
+            android:id="@+id/keyboardChart"
+            layout="@layout/keyboard_data_card" />
 
 
-        <include layout="@layout/sleep_data_card"
-            android:id="@+id/sleepDataContainer"/>
+        <include
+            android:id="@+id/sleepDataContainer"
+            layout="@layout/sleep_data_card" />
 
 
     </LinearLayout>
