@@ -180,11 +180,12 @@ class Utils {
             val pwrm = context.applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
             val name = context.applicationContext.packageName
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                saveSharedSettingBoolean(Graph.appContext, "battery_opt_off", true)
+                saveSharedSettingBoolean(Graph.appContext, "battery_opt_off",
+                    pwrm.isIgnoringBatteryOptimizations(name))
                 return pwrm.isIgnoringBatteryOptimizations(name)
             }
-            saveSharedSettingBoolean(Graph.appContext, "battery_opt_off", true)
-            return true
+            saveSharedSettingBoolean(Graph.appContext, "battery_opt_off", false)
+            return false
         }
 
         /**
@@ -256,25 +257,34 @@ class Utils {
             } catch (e: Settings.SettingNotFoundException) {
                 e.printStackTrace()
             }
-            return if (accessEnabled == 0 && openSettings) {
-                // if access not granted, construct intent to request permission
-                Toast.makeText(context, R.string.accessibility_permission_required,
-                    Toast.LENGTH_SHORT).show()
-                val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                // request permission via start activity for result
-                context.startActivity(intent)
-                false
-            } else if (accessEnabled == 0) {
-                saveSharedSettingBoolean(context, "accessibility_permission", false)
-                Toast.makeText(context, R.string.accessibility_permission_granted,
-                    Toast.LENGTH_SHORT).show()
-                false
-            } else {
-                saveSharedSettingBoolean(context, "accessibility_permission", true)
-                Toast.makeText(context, R.string.accessibility_permission_granted,
-                    Toast.LENGTH_SHORT).show()
-                true
+            Log.d("AccessibilitySettings", accessEnabled.toString())
+            when (accessEnabled) {
+                0 -> return if (openSettings) {
+                    Toast.makeText(context, R.string.accessibility_permission_required,
+                        Toast.LENGTH_SHORT).show()
+                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    // request permission via start activity for result
+                    context.startActivity(intent)
+                    false
+                } else {
+                    Log.d("AccessibilitySettings", "value false")
+                    saveSharedSettingBoolean(
+                        context, "accessibility_permission", false)
+                    false
+                }
+                else -> return if (openSettings) {
+                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(intent)
+                    true
+                } else {
+                    Log.d("AccessibilitySettings", "value true")
+
+                    saveSharedSettingBoolean(
+                        context, "accessibility_permission", true)
+                    true
+                }
             }
         }
     }
