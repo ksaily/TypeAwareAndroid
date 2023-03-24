@@ -75,6 +75,10 @@ class FitbitApiService {
                     refreshToken = jsonObject.getString("refresh_token")
                     println(response)
                     Log.d("Authorization: ", "Access token: $accessToken")
+                    Utils.saveSharedSetting(Graph.appContext,
+                    "access_token", accessToken)
+                    Utils.saveSharedSetting(Graph.appContext,
+                    "refresh_token", refreshToken)
                     Log.d("Authorization: ", "Refresh token: $refreshToken")
                     fitbitPermission = true
                 }
@@ -93,6 +97,10 @@ class FitbitApiService {
                                     refreshToken = jsonObject.getString("refresh_token")
                                     userId = jsonObject.getString("user_id")
                                     Log.d("Authorization", "Access token updated")
+                                    Utils.saveSharedSetting(Graph.appContext,
+                                        "access_token", accessToken)
+                                    Utils.saveSharedSetting(Graph.appContext,
+                                        "refresh_token", refreshToken)
                                     fitbitPermission = true
                                 }
                                 is Result.Failure -> {
@@ -139,8 +147,15 @@ class FitbitApiService {
                 runningThread = false
                 return SleepData(minutesAsleep,startTime,endTime)
             } else {
-                runningThread = false
-                return SleepData(0, "-", "-")
+                var code =  Utils.readSharedSettingString(Graph.appContext,
+                    "authorization_code", "")
+                var state = Utils.readSharedSettingString(
+                    Graph.appContext, "state", "")
+                return if (code != null && state != null) {
+                    authorizeRequestToken(code, state)
+                    getSleepData(date)
+                } else
+                    SleepData(0, "-", "-")
             }
         }
 

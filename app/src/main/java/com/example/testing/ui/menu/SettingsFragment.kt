@@ -1,5 +1,6 @@
 package com.example.testing.ui.menu
 
+import android.app.NotificationManager
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
@@ -37,6 +38,7 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         Log.d("Prefs", preferenceManager.sharedPreferencesName)
         accessibilityPref = findPref(R.string.access_permission_key)
         batteryPref = findPref(R.string.battery_opt_key)
+        //NotificationManager.areNotificationsEnabled?
 
         Utils.checkAccessibilityPermission(Graph.appContext, false)
         Utils.isIgnoringBatteryOptimizations(Graph.appContext)

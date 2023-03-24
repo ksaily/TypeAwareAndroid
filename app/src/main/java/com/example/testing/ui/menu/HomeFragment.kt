@@ -90,6 +90,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         dateViewModel.selectedDate.observe(viewLifecycleOwner) {
             firebaseViewModel.clearListOfFirebaseData()
             updateKeyboardData()
+            updateSleepData()
         }
 
         var values1: ArrayList<BarEntry> = ArrayList()
@@ -129,23 +130,62 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         _binding = null
     }
 
-    override fun onResume() {
-        super.onResume()
+    private fun updateSleepData() {
+        if (Utils.readSharedSettingBoolean(
+                Graph.appContext, "loggedInFitbit", false) &&
+                checkSleepDataSetting())
+        {
+                binding.sleepDataContainer.apply {
+                    FitbitBtn.isVisible = false
+                    FitbitLoginPrompt.isVisible = false
+                    sleepData.isVisible = true
+                    val sleepData = FitbitApiService.getSleepData(dateViewModel.selectedDate.value.toString())
+                    wakeUpTime.text = sleepData.endTime
+                    bedTime.text = sleepData.startTime
+                    val t: Int = sleepData.totalMinutesAsleep
+                    val hours = t / 60
+                    val minutes = t % 60
+                    val asleepString = "$hours h $minutes m"
+                    sleepAmount.text = asleepString
 
-        if (Utils.readSharedSettingBoolean(Graph.appContext, "loggedInFitbit", false)) {
-            binding.sleepDataContainer.FitbitBtn.isVisible = false
-            binding.sleepDataContainer.FitbitLoginPrompt.isVisible = false
-            binding.sleepDataContainer.sleepData.isVisible = true
-            val sleepData = FitbitApiService.getSleepData(dateViewModel.selectedDate.value.toString())
-            binding.sleepDataContainer.wakeUpTime.text = sleepData.endTime
-            binding.sleepDataContainer.bedTime.text = sleepData.startTime
-            val t: Int = sleepData.totalMinutesAsleep
-            val hours = t / 60
-            val minutes = t % 60
-            val asleepString = "$hours h $minutes m"
-            binding.sleepDataContainer.sleepAmount.text = asleepString
+                }
+        }
+
+        else if (!Utils.readSharedSettingBoolean(
+                Graph.appContext, "loggedInFitbit", false) &&
+                    checkSleepDataSetting())
+        {
+                    binding.sleepDataContainer.apply {
+                        FitbitBtn.isVisible = true
+                        FitbitLoginPrompt.isVisible = true
+                        sleepData.isVisible = false
+                    }
+        }
+
+    }
+
+    /**
+     * Checks whether 'show sleep data' is on or off
+     * returns true if on and false sleep data will not be shown
+     */
+    private fun checkSleepDataSetting(): Boolean {
+        return if (!Utils.readSharedSettingBoolean(Graph.appContext,
+                getString(R.string.sleep_data_key), true)) {
+            //Hide sleep data
+            binding.sleepDataContainer.apply {
+                SleepDataView.isVisible = false
+                SleepDataViewHidden.isVisible = true
+            }
+            false
+        } else {
+            binding.sleepDataContainer.apply {
+                SleepDataViewHidden.isVisible = false
+                sleepData.isVisible = true
+            }
+            true
         }
     }
+
 
     private fun updateKeyboardData() {
         getFromFirebase(dateViewModel.selectedDate.value.toString())

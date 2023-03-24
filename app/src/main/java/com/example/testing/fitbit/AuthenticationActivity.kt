@@ -60,6 +60,10 @@ class AuthenticationActivity : AppCompatActivity() {
             Log.d("Authorization", "Authorization code is: $code")
             Log.d("Authorization", "Authorization state is: $state")
             Log.d("Authorization", "Redirect uri is $intent")
+            Utils.saveSharedSetting(Graph.appContext,
+            "authorization_code", code)
+            Utils.saveSharedSetting(Graph.appContext,
+                "state", state)
             AUTH_CODE = code
             uniqueState = state
             Thread(Runnable {
@@ -68,7 +72,7 @@ class AuthenticationActivity : AppCompatActivity() {
                         return@Runnable
                     }
                     FitbitApiService.authorizeRequestToken(code, state)
-                    FitbitApiService.getSleepData("2022-12-10")
+                    //FitbitApiService.getSleepData("2022-12-10")
                     Utils.saveSharedSettingBoolean(Graph.appContext, "loggedInFitbit", true)
                 } catch (e: InterruptedException) {
                     e.printStackTrace()

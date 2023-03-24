@@ -14,6 +14,7 @@
     app:cardBackgroundColor="@color/light_purple">
 
     <LinearLayout
+        android:id="@+id/SleepDataView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -206,6 +207,35 @@
 
 
     </TableLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/SleepDataViewHidden"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_black"
+            android:padding="10dp"
+            android:text="@string/home_sleep_data_hidden_title"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:id="@+id/SleepDataViewHiddenTitle"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/roboto"
+            android:padding="20dp"
+            android:text="@string/home_sleep_data_hidden_content"
+            android:textColor="@color/light_grey"
+            android:textSize="18sp"
+            android:textAlignment="center"/>
+
     </LinearLayout>
 
 

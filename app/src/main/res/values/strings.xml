@@ -53,12 +53,13 @@
     <string name="title_activity_settings">SettingsActivity</string>
 
     <!-- Preference Titles and prompts-->
-    <string name="data_header">Data</string>
+    <string name="notifications_header">Notifications</string>
     <string name="pref_header">Preference settings</string>
     <string name="permissions_header">Permissions</string>
     <string name="limit_mobile_data_usage">Limit mobile data usage</string>
     <string name="network_prefs">Specify network preferences for data updates</string>
     <string name="show_sleep_data">Show sleep data</string>
+    <string name="notifications_enabled">Allow this app to send notifications</string>
     <string name="battery_optimization_options">Battery optimization is DISABLED</string>
     <string name="accessibility_perm_enabled">Accessibility permission is enabled</string>
     <string name="accessibility_perm_disabled">Accessibility permission is disabled</string>
@@ -70,11 +71,14 @@
     <string name="click_here_to_make_changes">Click here to make changes</string>
 
     <!-- Pref keys -->
+    <string name="notifications_header_key">notifications_header</string>
     <string name="keyboard_data_key">keyboard_data_selections</string>
     <string name="mobile_data_key">limit_mobile_data_usage</string>
     <string name="access_permission_key">accessibility_permission_boolean</string>
     <string name="battery_opt_key">battery_optimization</string>
     <string name="sleep_data_key">show_sleep_data</string>
+    <string name="network_pref_key">network_prefs</string>
+    <string name="notifications_key">notifications_enabled</string>
 
     <!-- Permissions -->
     <string name="accessibility_permission_required">Accessibility permission is required for the app to function properly.</string>
@@ -94,4 +98,9 @@
     <string name="sleep_data_title">Last night\'s sleep</string>
     <string name="speed_avg">Speed (avg)</string>
     <string name="accuracy">Accuracy</string>
+
+    <!-- Home Fragment -->
+    <string name="home_sleep_data_hidden_title">Sleep data is hidden</string>
+    <string name="home_sleep_data_hidden_content">If you wish to see your sleep data, go to settings and enable \'Show sleep data\'.</string>
+
 </resources>

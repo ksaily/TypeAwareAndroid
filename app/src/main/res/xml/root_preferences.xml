@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory app:title="@string/pref_header">
 
@@ -16,20 +17,12 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/data_header">
+    <PreferenceCategory app:title="@string/notifications_header">
 
         <SwitchPreferenceCompat
-            app:key="@string/mobile_data_key"
-            app:title="@string/limit_mobile_data_usage"
-            app:summary="@string/mobile_data_usage_off_prompt"/>
-
-        <ListPreference
-            app:dependency="@string/mobile_data_key"
-            app:title="@string/network_prefs"
-            app:defaultValue="0"
-            app:entries="@array/pref_uploads"
-            app:entryValues="@array/pref_keyboard_values"
-            />
+            app:key="@string/notifications_key"
+            app:title="@string/notifications_enabled"
+            android:defaultValue="true"/>
 
     </PreferenceCategory>
 
@@ -45,7 +38,7 @@
         <Preference
             app:title="@string/battery_opt_off_prompt"
             app:enabled="true"
-            app:icon="@drawable/ic_outline_error_outline_24"
+            app:icon="@drawable/ic_baseline_check_circle_outline_24"
             app:key="@string/battery_opt_key"
             app:summary="@string/battery_optimization_prompt"
             />
