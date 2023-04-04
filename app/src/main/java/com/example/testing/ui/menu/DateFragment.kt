@@ -1,5 +1,6 @@
 package com.example.testing.ui.menu
 
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -8,10 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import com.example.testing.Graph
 import com.example.testing.R
 import com.example.testing.databinding.FragmentDateBinding
 import com.example.testing.ui.viewmodel.DateViewModel
 import com.example.testing.utils.Utils.Companion.getFromFirebase
+import java.util.*
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -22,6 +25,7 @@ class DateFragment : Fragment(R.layout.fragment_date) {
     private val binding get() = _binding!!
     //Initialize the viewmodel
     private val viewModel: DateViewModel by viewModels()
+    private var date: String? = null
 
     companion object {
         var chosenDate: String = ""
@@ -51,6 +55,7 @@ class DateFragment : Fragment(R.layout.fragment_date) {
         //chosenDate = currentDate
         binding.arrowLeft.setOnClickListener {
             viewModel.previousDay()
+            //date = viewModel.checkDate()
             binding.currentDate.text = viewModel.checkDate()
             //Get data from Firebase
             getFromFirebase(viewModel.selectedDate.value.toString())
@@ -64,9 +69,43 @@ class DateFragment : Fragment(R.layout.fragment_date) {
             getFromFirebase(viewModel.selectedDate.value.toString())
         }
 
+        binding.PickDate.setOnClickListener {
+            val c = Calendar.getInstance()
+
+            // on below line we are getting
+            // our day, month and year.
+            val year = c.get(Calendar.YEAR)
+            val month = c.get(Calendar.MONTH)
+            val day = c.get(Calendar.DAY_OF_MONTH)
+
+            // on below line we are creating a
+            // variable for date picker dialog.
+            val datePickerDialog = DatePickerDialog(
+                // on below line we are passing context.
+                Graph.appContext,
+                { view, year, monthOfYear, dayOfMonth ->
+                    // on below line we are setting
+                    // date to our text view.
+                    binding.currentDate.text =
+                        (dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year)
+
+                },
+                // on below line we are passing year, month
+                // and day for the selected date in our date picker.
+                year,
+                month,
+                day
+            )
+            // at last we are calling show
+            // to display our date picker dialog.
+            datePickerDialog.show()
+            TODO("Change the way viewmodel shows dates and update date here")
+        }
+
         viewModel.isToday.observe(viewLifecycleOwner
         ) { // Check if date is today, if yes, remove right arrow
             binding.arrowRight.isVisible = viewModel.isToday.value != true
+            binding.arrowRightText.isVisible = viewModel.isToday.value != true
         }
     }
 

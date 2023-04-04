@@ -23,6 +23,7 @@ import com.example.testing.ui.viewmodel.DateViewModel
 import com.example.testing.ui.viewmodel.FirebaseViewModel
 import com.example.testing.utils.Utils
 import com.example.testing.utils.Utils.Companion.countAvgSpeed
+import com.example.testing.utils.Utils.Companion.getCurrentDateString
 import com.example.testing.utils.Utils.Companion.getFromFirebase
 import com.example.testing.utils.Utils.Companion.keyboardList
 import com.example.testing.utils.Utils.Companion.readSharedSettingBoolean
@@ -65,7 +66,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     )
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private var chosenDate: String = ""
+    private var currentDate = getCurrentDateString()
     private val formatter = SimpleDateFormat("yyyy-MM-dd")
     var dateFragment = DateFragment()
     private val dateViewModel: DateViewModel by viewModels()
@@ -89,17 +90,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         if (!readSharedSettingBoolean(Graph.appContext, "loggedInFitbit", false)) {
             showFitbitLogin()
         } else {
-            hideFitbitLogin()
+            updateSleepData()
         }
 
         binding.sleepDataContainer.FitbitBtn.setOnClickListener {
             val intent = Intent(activity, AuthenticationActivity::class.java)
             startActivity(intent)
         }
+
         dateViewModel.selectedDate.observe(viewLifecycleOwner) {
-            firebaseViewModel.clearListOfFirebaseData()
-            updateKeyboardData()
-            updateSleepData()
+            if (currentDate != dateViewModel.selectedDate.value) {
+                firebaseViewModel.clearListOfFirebaseData()
+                updateKeyboardData()
+                updateSleepData()
+                currentDate = dateViewModel.selectedDate.value.toString()
+            }
         }
 
 
@@ -154,6 +159,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             sleepData.isVisible = true
             if (checkSleepDataSetting()) {
                 lifecycleScope.launchWhenStarted {
+                    Log.d("GetSleepData", "Sleep data requested")
                     val sleepData =
                         FitbitApiService.getSleepData(dateViewModel.selectedDate.value.toString())
                     if (sleepData.dataAvailable) {

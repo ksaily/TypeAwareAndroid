@@ -1,5 +1,6 @@
 package com.example.testing.ui.menu
 
+import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -12,10 +13,10 @@ import com.example.testing.charts.CustomMarker
 import com.example.testing.databinding.FragmentChartBinding
 import com.example.testing.utils.Utils.Companion.getFromFirebase
 import com.github.mikephil.charting.animation.Easing
+import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.data.*
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import java.util.*
 
 private const val ARG_PARAM1 = "param1"
@@ -26,6 +27,21 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
     private val binding get() = _binding!!
     private val dateFragment = DateFragment()
     private var lineChart: LineChart? = null
+
+    // Chart variables:
+    private val MAX_X_VALUE = 20
+    private val GROUPS = 2
+    private val GROUP_1_LABEL = "Sessions"
+    private val GROUP_2_LABEL = "Time window"
+    private val BAR_SPACE = 0.1f
+    private val BAR_WIDTH = 0.8f
+    private var chart: BarChart? = null
+    protected var tfRegular: Typeface? = null
+    protected var tfLight: Typeface? = null
+    private val statValues: ArrayList<Float> = ArrayList()
+    protected val statsTitles = arrayOf(
+        "Sessions", "Time window"
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -42,30 +58,62 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
         transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
             .addToBackStack("dateFragment").commit()
         lineChart = binding.sleepDataChart
+        var values1: ArrayList<Entry> = ArrayList()
+        var values2: ArrayList<Entry> = ArrayList()
+        statValues.clear()
+        //
+        for (i in 0 until MAX_X_VALUE) {
+            values1.add(
+                Entry(
+                    i.toFloat(),
+                    (Math.random() * 80).toFloat()
+                )
+            )
+        }
 
-        val entries = ArrayList<Entry>()
-
-        //Add dummy values
-        entries.add(Entry(1f, 10f))
-        entries.add(Entry(2f, 2f))
-        entries.add(Entry(3f, 7f))
-        entries.add(Entry(4f, 20f))
-        entries.add(Entry(5f, 16f))
-
-        //Assign our list to LineDataSet and label it
-        val v1 = LineDataSet(entries, "My type")
-
+        for (i in 0 until MAX_X_VALUE) {
+            values2.add(
+                BarEntry(
+                    i.toFloat(),
+                    (Math.random() * 80).toFloat()
+                )
+            )
+        }
+        //
+        ////After preparing our data set, we need to display the data in our bar chart
+        val v1: LineDataSet = LineDataSet(values1, "Test")
+        val v2: LineDataSet = LineDataSet(values2, "Test")
+        //val v1: LineData = LineData()
+        //val v2: LineData = LineData()
+        //v1.addDataSet(dataSet1)
+        //v2.addDataSet(dataSet2)
         //Set draw values to false (to avoid mess)
         v1.setDrawValues(false)
         v1.setDrawFilled(true)
         v1.lineWidth = 3f
         v1.fillColor = R.color.light_purple
 
+        v2.setDrawValues(false)
+        v2.setDrawFilled(false)
+        v2.lineWidth = 3f
+        v2.fillColor = R.color.white
+
+        val entries = ArrayList<ILineDataSet>()
+        entries.add(v1)
+        entries.add(v2)
+
+        //Make first dataset dashed
+        entries.get(0).formLineDashEffect
+
+        //Assign our list to LineDataSet and label it
+        //val v1 = LineDataSet(entries, "My type")
+
         //Set label rotation angle to x axis
         lineChart!!.xAxis.labelRotationAngle = 0f
 
         //Assign dataset to line chart
-        lineChart!!.data = LineData(v1)
+        lineChart!!.data = LineData(entries)
+        //lineChart!!.data = LineData(v2)
 
         val j = 0
         //To remove right side y axis from chart:
@@ -90,6 +138,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart) {
         // Remember to create a layout for this
         val markerView = CustomMarker(Graph.appContext, R.layout.marker_view)
         lineChart!!.marker = markerView
+        lineChart!!.invalidate()
         }
 
     override fun onResume() {
