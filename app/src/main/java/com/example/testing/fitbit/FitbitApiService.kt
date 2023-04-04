@@ -65,97 +65,116 @@ class FitbitApiService {
                 "authorization_code", code, state)
             Log.d("HTTP Result", "Result: $result")
             Log.d("HTTP Response", "Result: $response")
-            val (auth, err) = result
-            val jsonObject = JSONTokener(auth).nextValue() as JSONObject
-            when (result) {
-                is Result.Success -> {
-                    val (auth, err) = result
-                    val jsonObject = JSONTokener(auth).nextValue() as JSONObject
-                    accessToken = jsonObject.getString("access_token")
-                    refreshToken = jsonObject.getString("refresh_token")
-                    println(response)
-                    Log.d("Authorization: ", "Access token: $accessToken")
-                    Utils.saveSharedSetting(Graph.appContext,
-                    "access_token", accessToken)
-                    Utils.saveSharedSetting(Graph.appContext,
-                    "refresh_token", refreshToken)
-                    Log.d("Authorization: ", "Refresh token: $refreshToken")
-                    fitbitPermission = true
-                }
-                is Result.Failure -> {
-                    val errObject = JSONTokener(err.toString()).nextValue() as JSONObject
-                    val error = errObject.getString("errorType")
-                    Log.d("HTTP request", response.toString())
-                    try {
-                        if (error == "expired_token") {
-                            val (_, refreshResponse, refreshResult) = buildTokenRequest(
-                                "refresh_token", code, state)
-                            val (refresh, err) = refreshResult
-                            when (refreshResult) {
-                                is Result.Success -> {
-                                    accessToken = jsonObject.getString("access_token")
-                                    refreshToken = jsonObject.getString("refresh_token")
-                                    userId = jsonObject.getString("user_id")
-                                    Log.d("Authorization", "Access token updated")
-                                    Utils.saveSharedSetting(Graph.appContext,
-                                        "access_token", accessToken)
-                                    Utils.saveSharedSetting(Graph.appContext,
-                                        "refresh_token", refreshToken)
-                                    fitbitPermission = true
-                                }
-                                is Result.Failure -> {
-                                    Log.d("Authorization", "Error, Access token not updated")
-                                    fitbitPermission = false
-                                }
-                            }
-                        } else {
-                            Log.d("Authorization", "Redirecting user back to main screen")
-                        }
-                    } catch (e: Exception) {
-                        Log.d("Authorization", "Error: $e")
+            try {
+                val (auth, err) = result
+                val jsonObject = JSONTokener(auth).nextValue() as JSONObject
+                when (result) {
+                    is Result.Success -> {
+                        //val (auth, err) = result
+                        //val jsonObject = JSONTokener(auth).nextValue() as JSONObject
+                        accessToken = jsonObject.getString("access_token")
+                        refreshToken = jsonObject.getString("refresh_token")
+                        println(response)
+                        Log.d("Authorization: ", "Access token: $accessToken")
+                        Utils.saveSharedSetting(Graph.appContext,
+                        "access_token", accessToken)
+                        Utils.saveSharedSetting(Graph.appContext,
+                        "refresh_token", refreshToken)
+                        Utils.saveSharedSettingBoolean(Graph.appContext,
+                        "loggedInFitbit", true)
+                        Log.d("Authorization: ", "Refresh token: $refreshToken")
+                        fitbitPermission = true
                     }
-                }
+                    is Result.Failure -> {
+                        val errObject = JSONTokener(err.toString()).nextValue() as JSONObject
+                        val error = errObject.getString("errorType")
+                        Log.d("HTTP request", response.toString())
+                            if (error == "expired_token") {
+                                val (_, refreshResponse, refreshResult) = buildTokenRequest(
+                                    "refresh_token", code, state)
+                                val (refresh, err) = refreshResult
+                                when (refreshResult) {
+                                    is Result.Success -> {
+                                        accessToken = jsonObject.getString("access_token")
+                                        refreshToken = jsonObject.getString("refresh_token")
+                                        userId = jsonObject.getString("user_id")
+                                        Log.d("Authorization", "Access token updated")
+                                        Utils.saveSharedSetting(Graph.appContext,
+                                            "access_token", accessToken)
+                                        Utils.saveSharedSetting(Graph.appContext,
+                                            "refresh_token", refreshToken)
+                                        Utils.saveSharedSettingBoolean(Graph.appContext,
+                                            "loggedInFitbit", true)
+                                        fitbitPermission = true
+                                    }
+                                    is Result.Failure -> {
+                                        Log.d("Authorization", "Error, Access token not updated")
+                                        Utils.saveSharedSettingBoolean(Graph.appContext,
+                                        "loggedInFitbit", false)
+                                        fitbitPermission = false
+                                    }
+                                }
+                            } else {
+                                Log.d("Authorization", "Redirecting user back to main screen")
+                            }
+                        }
+                    }
+            } catch (e: Exception) {
+                Log.d("Fitbit Authorization", "Error: $e")
             }
         }
 
         fun getSleepData(date: String): SleepData {
-            FuelManager.instance.basePath = "https://api.fitbit.com/1.2/user/-"
-            val url = "/sleep/date/$date.json"
+            try {
+                FuelManager.instance.basePath = "https://api.fitbit.com/1.2/user/-"
+                val url = "/sleep/date/$date.json"
 
-            val (request, response, result) = url.httpGet().header(
-                "Authorization" to
-                        "Bearer $accessToken"
-            ).responseString()
-            //.responseObject(SleepDataDeserializer())
-            Log.d("SleepData", "Request: $request")
-            val (sleepData, error) = result
-            if (error == null) {
-                Utils.saveSharedSettingBoolean(Graph.appContext, "loggedInFitbit", true)
-                //Print the sleep data
-                val jsonObject = JSONTokener(sleepData).nextValue() as JSONObject
-                val jsonArray = jsonObject.getJSONArray("sleep")
-                val summary = jsonObject.getJSONObject("summary")
-                val minutesAsleep = summary.getInt("totalMinutesAsleep")
-                var endDateTime = jsonArray.getJSONObject(0).getString("endTime")
-                var startDateTime = jsonArray.getJSONObject(0).getString("startTime")
-                var startTime = convertISOTimeToTime(startDateTime)
-                var endTime = convertISOTimeToTime(endDateTime)
-                val duration = jsonArray.getJSONObject(0).getString("duration")
-                val dateOfSleep = jsonArray.getJSONObject(0).getString("dateOfSleep")
-                Log.i("Sleep", "Duration: $duration")
-                Log.i("Sleep", "Date of sleep : $dateOfSleep")
-                runningThread = false
-                return SleepData(minutesAsleep,startTime,endTime)
-            } else {
-                var code =  Utils.readSharedSettingString(Graph.appContext,
-                    "authorization_code", "")
-                var state = Utils.readSharedSettingString(
-                    Graph.appContext, "state", "")
-                return if (code != null && state != null) {
-                    authorizeRequestToken(code, state)
-                    getSleepData(date)
-                } else
-                    SleepData(0, "-", "-")
+                val (_, response, result) = url.httpGet().header(
+                    "Authorization" to
+                            "Bearer $accessToken"
+                ).responseString()
+                //.responseObject(SleepDataDeserializer())
+                Log.d("SleepData", "Response: $response")
+                val (sleepData, error) = result
+                Log.d("GetSleepData", "Error: $error")
+                val errObject = JSONTokener(error.toString()).nextValue() as JSONObject
+                Log.d("GetSleepData", "ErrorObject: $errObject")
+                val err = errObject.getString("errorType")
+                Log.d("GetSleepData", "ErrorType: $err")
+                if (err == null) {
+                    Utils.saveSharedSettingBoolean(Graph.appContext, "loggedInFitbit", true)
+                    //Print the sleep data
+                    val jsonObject = JSONTokener(sleepData).nextValue() as JSONObject
+                    val jsonArray = jsonObject.getJSONArray("sleep")
+                    val summary = jsonObject.getJSONObject("summary")
+                    val minutesAsleep = summary.getInt("totalMinutesAsleep")
+                    var endDateTime = jsonArray.getJSONObject(0).getString("endTime")
+                    var startDateTime = jsonArray.getJSONObject(0).getString("startTime")
+                    var startTime = convertISOTimeToTime(startDateTime)
+                    var endTime = convertISOTimeToTime(endDateTime)
+                    val duration = jsonArray.getJSONObject(0).getString("duration")
+                    val dateOfSleep = jsonArray.getJSONObject(0).getString("dateOfSleep")
+                    Log.i("Sleep", "Duration: $duration")
+                    Log.i("Sleep", "Date of sleep : $dateOfSleep")
+                    runningThread = false
+                    return SleepData(true, minutesAsleep, startTime, endTime)
+                } else {
+                    var code = Utils.readSharedSettingString(
+                        Graph.appContext,
+                        "authorization_code", ""
+                    )
+                    var state = Utils.readSharedSettingString(
+                        Graph.appContext, "state", ""
+                    )
+                    return if (code != null && state != null) {
+                        authorizeRequestToken(code, state)
+                        getSleepData(date)
+                    } else
+                        SleepData(false, 0, "-", "-",)
+                }
+            } catch (e: Exception) {
+                Log.d("Fitbit Authorization", "Error: $e")
+                return SleepData(false, 0, "-", "-",)
             }
         }
 

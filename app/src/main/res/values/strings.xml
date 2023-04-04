@@ -83,7 +83,7 @@
     <!-- Permissions -->
     <string name="accessibility_permission_required">Accessibility permission is required for the app to function properly.</string>
     <string name="accessibility_permission_granted">Accessibility permission is granted. The app can track your typing speed now.</string>
-    <string name="battery_optimization_prompt">Battery optimization should be disabled. Click here if you wish to make changes.</string>
+    <string name="battery_optimization_prompt">Battery optimization should be disabled.</string>
     <string name="all_permissions_granted">All necessary permissions are granted. Click OK to continue.</string>
 
 
@@ -102,5 +102,7 @@
     <!-- Home Fragment -->
     <string name="home_sleep_data_hidden_title">Sleep data is hidden</string>
     <string name="home_sleep_data_hidden_content">If you wish to see your sleep data, go to settings and enable \'Show sleep data\'.</string>
+    <string name="home_sleep_data_not_found_title">Sleep data could not be found</string>
+    <string name="home_sleep_data_not_found_content">Sleep data could not be found for this date, please try another date.</string>
 
 </resources>

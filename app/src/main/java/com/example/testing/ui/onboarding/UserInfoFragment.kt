@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -14,9 +15,14 @@ import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.findNavController
+import com.example.testing.Graph
+import com.example.testing.MainActivity
 import com.example.testing.R
 import com.example.testing.databinding.FragmentUserInfoBinding
 import com.example.testing.ui.menu.DateFragment
+import com.example.testing.utils.FragmentUtils.Companion.loadFragment
+import com.example.testing.utils.FragmentUtils.Companion.removeFragmentByTag
+import com.example.testing.utils.Utils
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -47,8 +53,18 @@ class UserInfoFragment : Fragment(R.layout.fragment_user_info) {
             var p_id = binding.participantId.text.toString()
             var username = binding.textView14.text.toString()
             var email = binding.userEmail.text.toString()
-            setFragmentResult("userInfo", bundleOf("username" to username,
-            "email" to email, "p_id" to p_id))
+            //setFragmentResult("userInfo", bundleOf("username" to username,
+            //"email" to email, "p_id" to p_id))
+            Utils.getSharedPrefs().edit()
+                .putString("username", username)
+                .putString("email", email)
+                .putString("p_id", p_id)
+                .putBoolean("user_info_saved", true)
+                .commit()
+            Log.d("UserInfoFragment", "Start onboarding")
+            parentFragmentManager.beginTransaction().remove(this).commit()
+            //startActivity(Intent(Graph.appContext, OnboardingActivity::class.java))
+            //removeFragmentByTag(MainActivity, "userInfoFragment")
         }
     }
 

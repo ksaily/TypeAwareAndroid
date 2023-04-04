@@ -63,7 +63,7 @@ class ConsentActivity : AppCompatActivity() {
                     //Change it in shared preferences
                     editor.putBoolean("consent_given", true).commit()
                     loadFragment(this, userInfoFragment, null, "userInfoFragment", false)
-                    removeFragmentByTag(this, "consentFragment")
+                   //removeFragmentByTag(this, "consentFragment")
                 } else {
                     //Do nothing?
                 }
@@ -77,7 +77,7 @@ class ConsentActivity : AppCompatActivity() {
                 .putString("p_id", p_id)
                 .putBoolean("user_info_saved", true)
             editor.commit()
-            removeFragmentByTag(this, "userInfoFragment")
+            //removeFragmentByTag(this, "userInfoFragment")
         }
 
             //Register listener

@@ -9,10 +9,14 @@ import android.widget.Button
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
+import com.example.testing.Graph
+import com.example.testing.MainActivity
 import com.example.testing.R
 import com.example.testing.databinding.FragmentConsentBinding
 import com.example.testing.ui.menu.DateFragment
 import com.example.testing.utils.FragmentUtils.Companion.loadFragment
+import com.example.testing.utils.FragmentUtils.Companion.removeFragmentByTag
+import com.example.testing.utils.Utils
 import com.example.testing.utils.Utils.Companion.showSnackbar
 import com.google.android.material.snackbar.Snackbar
 
@@ -41,12 +45,20 @@ class ConsentFragment : Fragment(R.layout.fragment_consent) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         var result = false
+        val sharedPrefs = Utils.getSharedPrefs()
 
         binding.conBtnGiveConsent.setOnClickListener {
             result = true
             Log.d("Consent", "Consent given")
-            setFragmentResult("consentGiven", bundleOf("consent" to result))
+            //setFragmentResult("consentGiven", bundleOf("consent" to result))
+            Utils.saveSharedSettingBoolean(Graph.appContext,
+                "consent_given", true)
+            //loadFragment(MainActivity, UserInfoFragment(),
+              //  null, "userInfoFragment", false)
+            //removeFragmentByTag(MainActivity, "consentFragment")
+            parentFragmentManager.beginTransaction().remove(this).commit()
         }
+
         binding.conBtnQuit.setOnClickListener {
             view.showSnackbar(
                 view, getString(R.string.con_not_now_prompt),
@@ -63,6 +75,7 @@ class ConsentFragment : Fragment(R.layout.fragment_consent) {
     companion object {
         fun newInstance() = ConsentFragment()
     }
+
 
 
 }

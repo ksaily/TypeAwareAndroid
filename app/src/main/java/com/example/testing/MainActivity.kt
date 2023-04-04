@@ -1,6 +1,8 @@
 package com.example.testing
 
 import android.content.Intent
+import android.content.SharedPreferences
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
@@ -22,13 +24,15 @@ import com.example.testing.ui.menu.HomeFragment
 import com.example.testing.ui.menu.SettingsFragment
 import com.example.testing.ui.menu.ChartFragment
 import com.example.testing.ui.menu.DateFragment
-import com.example.testing.ui.onboarding.ConsentActivity
-import com.example.testing.ui.onboarding.OnboardingActivity
+import com.example.testing.ui.onboarding.*
 import com.example.testing.ui.viewmodel.PrefsViewModel
 import com.example.testing.utils.FragmentUtils
 import com.example.testing.utils.FragmentUtils.Companion.loadFragment
 import com.example.testing.utils.FragmentUtils.Companion.removeFragmentByTag
 import com.example.testing.utils.Utils
+import com.example.testing.utils.Utils.Companion.checkBattery
+import com.example.testing.utils.Utils.Companion.getSharedPrefs
+import com.example.testing.utils.Utils.Companion.readSharedSettingBoolean
 import com.example.testing.utils.Utils.Companion.showSnackbar
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.data.BarData
@@ -49,7 +53,7 @@ import kotlin.collections.ArrayList
  * Q2: How often did you have to correct your typing? (Scale 1-7)
  * Q3: At what time of day were you most active with typing? (some kind of selector)
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
 
     private lateinit var view: View
     private lateinit var binding: ActivityMainBinding
@@ -70,13 +74,11 @@ class MainActivity : AppCompatActivity() {
     protected val statsTitles = arrayOf(
         "Orders", "Inventory"
     )
-    private val prefsViewModel: PrefsViewModel by viewModels()
     private val calendar: Calendar = Calendar.getInstance()
     private val year = calendar.get(Calendar.YEAR)
     private val homeFragment = HomeFragment()
     private val chartFragment = ChartFragment()
     private val settingsFragment = SettingsFragment()
-    private val dateFragment = DateFragment()
     val database = Firebase.database("https://health-app-9c151-default-rtdb.europe-west1.firebasedatabase.app")
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,18 +89,14 @@ class MainActivity : AppCompatActivity() {
         val sharedPrefs = Utils.getSharedPrefs()
         val transaction = supportFragmentManager.beginTransaction()
 
-        sharedPrefs.apply {
-            // Check if we need to display our OnboardingSupportFragment
-            edit().putBoolean("battery_opt_off",
-                Utils.isIgnoringBatteryOptimizations(applicationContext))
-            if (!getBoolean("onboarding_complete", false) ||
-                    !getBoolean("user_info_saved", false) || !getBoolean("consent_given", false)) {
-                Log.d("MainActivity", "Start consent activity")
-                // The user hasn't seen the onboarding & consent screens yet, so show it
-                startActivity(Intent(this@MainActivity, ConsentActivity::class.java))
-            }
-        }
+        //Utils.checkBattery(applicationContext)
 
+        if (!readSharedSettingBoolean(applicationContext,
+                "consent_given",
+                false)) {
+            loadFragment(this, ConsentFragment(), null,
+                "consentFragment", false)
+        }
 
         loadFragment(this, homeFragment, null, "homeFragment", true)
 
@@ -121,6 +119,8 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
+        sharedPrefs.registerOnSharedPreferenceChangeListener(this)
+        onFirstLogin()
 
         Utils.checkPermissions(applicationContext)
     }
@@ -133,5 +133,59 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         //Register on shared preference change listener in onCreate and check for permissions?
         Utils.checkPermissions(applicationContext)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        getSharedPrefs().unregisterOnSharedPreferenceChangeListener(this)
+    }
+
+    override fun onSharedPreferenceChanged(sharedPref: SharedPreferences?, key: String?) {
+        onFirstLogin()
+        if (key == "accessibility_permission") {
+            Log.d("CheckPref", "Accessibility")
+            Utils.checkAccessibilityPermission(applicationContext, true)
+        }
+        if (key == "battery_opt_off") {
+            Log.d("CheckPref", "Battery")
+            checkBattery(applicationContext)
+        }
+    }
+
+    fun onFirstLogin() {
+        if (!readSharedSettingBoolean(applicationContext,
+                "consent_given",
+                false)
+        ) {
+            Log.d("MainActivity", "Start consent fragment")
+            // The user hasn't seen the onboarding & consent screens yet, so show it
+            loadFragment(this, ConsentFragment(), null,
+                "consentFragment", false)
+            bottomNav.isVisible = false
+        }
+
+        else if (!readSharedSettingBoolean(applicationContext,
+            "user_info_saved", false)
+        ) {
+            Log.d("MainActivity", "Start userinfo fragment")
+            // The user hasn't seen the onboarding & consent screens yet, so show it
+            loadFragment(this, UserInfoFragment(), null,
+                "userInfoFragment", false)
+            bottomNav.isVisible = false
+        }
+
+        else if (!readSharedSettingBoolean(applicationContext,
+            "onboarding_complete", false)
+        ) {
+            Log.d("MainActivity", "Start onboarding activity")
+            // The user hasn't seen the onboarding & consent screens yet, so show it
+            loadFragment(this, OnboardingFragment(), null,
+            "onboardingFragment", true)
+            bottomNav.isVisible = false
+        }
+        else {
+            val consentFragment = supportFragmentManager.findFragmentByTag("consentFragment")
+            bottomNav.isVisible = true
+        }
     }
 }

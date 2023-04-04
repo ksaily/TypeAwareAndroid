@@ -49,6 +49,45 @@ class FragmentUtils {
             }
         }
 
+        fun loadFullScreenFragment(activity: AppCompatActivity, fragment: Fragment, bundle: Bundle?, tag: String, addToBackStack: Boolean) {
+            try {
+                Log.d("Fragment", "Loading fragment")
+                if (fragment == null) { return }
+                if (bundle != null) { fragment.arguments = bundle }
+
+                var transaction = activity.supportFragmentManager.beginTransaction()
+
+                if (addToBackStack) { transaction.addToBackStack(tag) }
+                if (!fragment.isAdded) {
+                    Log.d("Fragment", "Fragment added)")
+                    transaction.replace(R.id.fullscreen_container, fragment, tag).commit()
+                }
+            } catch (e: java.lang.IllegalStateException) {
+                e.printStackTrace()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        fun loadChildFragment(child: FragmentManager, container: Int, fragment: Fragment, tag: String, addToBackStack: Boolean) {
+            try {
+                Log.d("Fragment", "Loading fragment")
+                if (fragment == null) { return }
+
+                val transaction = child.beginTransaction()
+
+                if (addToBackStack) { transaction.addToBackStack(tag) }
+                if (!fragment.isAdded) {
+                    Log.d("Fragment", "$fragment added")
+                    transaction.replace(container, fragment, tag).commit()
+                }
+            } catch (e: java.lang.IllegalStateException) {
+                e.printStackTrace()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
         /**
          * Remove fragment from container
          *

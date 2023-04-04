@@ -11,8 +11,11 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.lifecycleScope
 import com.example.testing.Graph
 import com.example.testing.R
+import com.example.testing.charts.CustomMarker
 import com.example.testing.databinding.FragmentHomeBinding
 import com.example.testing.fitbit.AuthenticationActivity
 import com.example.testing.fitbit.FitbitApiService
@@ -22,11 +25,15 @@ import com.example.testing.utils.Utils
 import com.example.testing.utils.Utils.Companion.countAvgSpeed
 import com.example.testing.utils.Utils.Companion.getFromFirebase
 import com.example.testing.utils.Utils.Companion.keyboardList
+import com.example.testing.utils.Utils.Companion.readSharedSettingBoolean
+import com.github.mikephil.charting.animation.Easing
+import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -48,7 +55,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val GROUP_2_LABEL = ""
     private val BAR_SPACE = 0.1f
     private val BAR_WIDTH = 0.8f
-    private var chart: LineChart? = null
+    private var lineChart: LineChart? = null
+    private var chart: BarChart? = null
     protected var tfRegular: Typeface? = null
     protected var tfLight: Typeface? = null
     private val statValues: ArrayList<Float> = ArrayList()
@@ -78,10 +86,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
             .addToBackStack("dateFragment").commit()
 
-        binding.sleepDataContainer.FitbitBtn.isVisible = true
-        binding.sleepDataContainer.FitbitLoginPrompt.isVisible = true
-        binding.sleepDataContainer.hideThis.isVisible = false
-        binding.sleepDataContainer.sleepData.isVisible = false
+        if (!readSharedSettingBoolean(Graph.appContext, "loggedInFitbit", false)) {
+            showFitbitLogin()
+        } else {
+            hideFitbitLogin()
+        }
 
         binding.sleepDataContainer.FitbitBtn.setOnClickListener {
             val intent = Intent(activity, AuthenticationActivity::class.java)
@@ -92,6 +101,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             updateKeyboardData()
             updateSleepData()
         }
+
 
         var values1: ArrayList<BarEntry> = ArrayList()
         var values2: ArrayList<BarEntry> = ArrayList()
@@ -130,38 +140,64 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         _binding = null
     }
 
+    private fun showFitbitLogin() {
+        binding.sleepDataContainer.FitbitBtn.isVisible = true
+        binding.sleepDataContainer.FitbitLoginPrompt.isVisible = true
+        binding.sleepDataContainer.hideThis.isVisible = false
+        binding.sleepDataContainer.sleepData.isVisible = false
+    }
+
+    private fun hideFitbitLogin() {
+        binding.sleepDataContainer.apply {
+            FitbitBtn.isVisible = false
+            FitbitLoginPrompt.isVisible = false
+            sleepData.isVisible = true
+            if (checkSleepDataSetting()) {
+                lifecycleScope.launchWhenStarted {
+                    val sleepData =
+                        FitbitApiService.getSleepData(dateViewModel.selectedDate.value.toString())
+                    if (sleepData.dataAvailable) {
+                        wakeUpTime.text = sleepData.endTime
+                        bedTime.text = sleepData.startTime
+                        val t: Int = sleepData.totalMinutesAsleep
+                        val hours = t / 60
+                        val minutes = t % 60
+                        val asleepString = "$hours h $minutes m"
+                        sleepAmount.text = asleepString
+                    } else {
+                        SleepDataView.isVisible = false
+                        SleepDataViewHidden.isVisible = true
+                        SleepDataViewHiddenTitle.text = getString(R.string.home_sleep_data_not_found_title)
+                        SleepDataViewHiddenContent.text = getString(R.string.home_sleep_data_not_found_content)
+
+                    }
+                }
+            }
+        }
+    }
+
     private fun updateSleepData() {
         if (Utils.readSharedSettingBoolean(
                 Graph.appContext, "loggedInFitbit", false) &&
                 checkSleepDataSetting())
         {
-                binding.sleepDataContainer.apply {
-                    FitbitBtn.isVisible = false
-                    FitbitLoginPrompt.isVisible = false
-                    sleepData.isVisible = true
-                    val sleepData = FitbitApiService.getSleepData(dateViewModel.selectedDate.value.toString())
-                    wakeUpTime.text = sleepData.endTime
-                    bedTime.text = sleepData.startTime
-                    val t: Int = sleepData.totalMinutesAsleep
-                    val hours = t / 60
-                    val minutes = t % 60
-                    val asleepString = "$hours h $minutes m"
-                    sleepAmount.text = asleepString
-
-                }
-        }
-
-        else if (!Utils.readSharedSettingBoolean(
+            hideFitbitLogin()
+        } else if (!Utils.readSharedSettingBoolean(
                 Graph.appContext, "loggedInFitbit", false) &&
-                    checkSleepDataSetting())
+            checkSleepDataSetting())
         {
-                    binding.sleepDataContainer.apply {
-                        FitbitBtn.isVisible = true
-                        FitbitLoginPrompt.isVisible = true
-                        sleepData.isVisible = false
-                    }
+            binding.sleepDataContainer.apply {
+                FitbitBtn.isVisible = true
+                FitbitLoginPrompt.isVisible = true
+                sleepData.isVisible = false
+            }
+        } else if (!checkSleepDataSetting())
+        {
+            binding.sleepDataContainer.apply {
+                SleepDataViewHiddenTitle.text = getString(R.string.home_sleep_data_hidden_title)
+                SleepDataViewHiddenContent.text = getString(R.string.home_sleep_data_hidden_content)
+            }
         }
-
     }
 
     /**
@@ -188,12 +224,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
 
     private fun updateKeyboardData() {
-        getFromFirebase(dateViewModel.selectedDate.value.toString())
+        lifecycleScope.launchWhenStarted {
+            getFromFirebase(dateViewModel.selectedDate.value.toString())
+        }
         if (keyboardList.isNotEmpty()) {
             val totalErr = mutableListOf<Double>()
             val totalSpeed = mutableListOf<Double>()
             for (i in keyboardList) {
-                if (i.date == chosenDate) {
+                if (i.date == dateViewModel.selectedDate.value) {
                     totalErr.add(i.errors)
                     totalSpeed.add(i.speed)
                 }
@@ -203,14 +241,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             binding.keyboardChart.progressCircular).toString()
         }
         else {
-            binding.keyboardChart.speedData.text = "---"
-            binding.keyboardChart.ProgressTextView.isVisible = false
+            binding.keyboardChart.speedData.text = "No data"
+            binding.keyboardChart.ProgressTextView.text == "--"
             binding.keyboardChart.progressCircular.isVisible = false
             Log.d("UpdateUI", "No data on keyboardList")
         }
     }
 
-    private fun prepareChartData(data: LineData) {
+    private fun prepareChartData(data: BarData) {
         chart!!.data = data
         //chart!!.barData.barWidth = BAR_WIDTH
         val groupSpace = 1f - (BAR_SPACE + BAR_WIDTH)
