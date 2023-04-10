@@ -40,6 +40,10 @@ class DateViewModel : ViewModel() {
         }
     }
 
+    fun changeDate(date: String) {
+        _selectedDate.value = date
+    }
+
     override fun onCleared() {
         super.onCleared()
         Log.d("DateFragment", "DateViewModel destroyed!")

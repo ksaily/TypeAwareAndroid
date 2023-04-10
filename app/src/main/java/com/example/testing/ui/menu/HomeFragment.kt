@@ -19,6 +19,7 @@ import com.example.testing.charts.CustomMarker
 import com.example.testing.databinding.FragmentHomeBinding
 import com.example.testing.fitbit.AuthenticationActivity
 import com.example.testing.fitbit.FitbitApiService
+import com.example.testing.ui.data.SleepData
 import com.example.testing.ui.viewmodel.DateViewModel
 import com.example.testing.ui.viewmodel.FirebaseViewModel
 import com.example.testing.utils.Utils
@@ -27,6 +28,7 @@ import com.example.testing.utils.Utils.Companion.getCurrentDateString
 import com.example.testing.utils.Utils.Companion.getFromFirebase
 import com.example.testing.utils.Utils.Companion.keyboardList
 import com.example.testing.utils.Utils.Companion.readSharedSettingBoolean
+import com.example.testing.utils.Utils.Companion.readSharedSettingString
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
@@ -37,6 +39,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.Executors
 import kotlin.collections.ArrayList
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -66,11 +69,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     )
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-    private var currentDate = getCurrentDateString()
+    private var currentDate = ""
     private val formatter = SimpleDateFormat("yyyy-MM-dd")
     var dateFragment = DateFragment()
     private val dateViewModel: DateViewModel by viewModels()
     private val firebaseViewModel: FirebaseViewModel by viewModels()
+    val executor = Executors.newSingleThreadExecutor()
+    var data = SleepData(false, 0, "", "")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -86,6 +91,18 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val transaction = childFragmentManager.beginTransaction()
         transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
             .addToBackStack("dateFragment").commit()
+        var code = Utils.readSharedSettingString(
+            Graph.appContext,
+            "authorization_code", ""
+        )
+        var state = Utils.readSharedSettingString(
+            Graph.appContext, "state", ""
+        )
+        if (code != null && state != null) {
+            FitbitApiService.authorizeRequestToken(code, state)
+        } else {
+            showFitbitLogin()
+        }
 
         if (!readSharedSettingBoolean(Graph.appContext, "loggedInFitbit", false)) {
             showFitbitLogin()
@@ -99,12 +116,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
 
         dateViewModel.selectedDate.observe(viewLifecycleOwner) {
-            if (currentDate != dateViewModel.selectedDate.value) {
                 firebaseViewModel.clearListOfFirebaseData()
                 updateKeyboardData()
                 updateSleepData()
                 currentDate = dateViewModel.selectedDate.value.toString()
-            }
         }
 
 
@@ -140,6 +155,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         //prepareChartData(data)
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (!readSharedSettingBoolean(Graph.appContext, "loggedInFitbit", false)) {
+            showFitbitLogin()
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -158,14 +180,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             FitbitLoginPrompt.isVisible = false
             sleepData.isVisible = true
             if (checkSleepDataSetting()) {
-                lifecycleScope.launchWhenStarted {
+                executor.execute {
                     Log.d("GetSleepData", "Sleep data requested")
-                    val sleepData =
-                        FitbitApiService.getSleepData(dateViewModel.selectedDate.value.toString())
-                    if (sleepData.dataAvailable) {
-                        wakeUpTime.text = sleepData.endTime
-                        bedTime.text = sleepData.startTime
-                        val t: Int = sleepData.totalMinutesAsleep
+                    val formattedDate = Utils.formatForFitbit(
+                        dateViewModel.selectedDate.value.toString()
+                    )
+                    data = FitbitApiService.getSleepData(formattedDate)
+                }
+                    if (data.dataAvailable) {
+                        wakeUpTime.text = data.endTime
+                        bedTime.text = data.startTime
+                        val t: Int = data.totalMinutesAsleep
                         val hours = t / 60
                         val minutes = t % 60
                         val asleepString = "$hours h $minutes m"
@@ -173,13 +198,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     } else {
                         SleepDataView.isVisible = false
                         SleepDataViewHidden.isVisible = true
-                        SleepDataViewHiddenTitle.text = getString(R.string.home_sleep_data_not_found_title)
+                        SleepDataViewHiddenTitle.text = getString(R.string.sleep_data_title)
                         SleepDataViewHiddenContent.text = getString(R.string.home_sleep_data_not_found_content)
 
                     }
                 }
             }
-        }
+
     }
 
     private fun updateSleepData() {

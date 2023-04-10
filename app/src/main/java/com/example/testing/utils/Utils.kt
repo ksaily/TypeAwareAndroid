@@ -37,7 +37,7 @@ class Utils {
         var totalSpeed: Double = 0.0
         var speedsList: MutableList<Double> = mutableListOf()
         val calendar = Calendar.getInstance()
-        val formatter = SimpleDateFormat("yyyy-MM-dd")
+        val formatter = SimpleDateFormat("dd-MM-yyyy")
         var currentDate: String = getCurrentDateString()
 
 
@@ -67,11 +67,25 @@ class Utils {
             return total / errors.size
         }
 
+        fun formatForFitbit(inputDate: String): String {
+            val cal = Calendar.getInstance()
+            val date = formatter.parse(inputDate) as Date
+            cal.time = date
+            return formatter.format(cal.time)
+        }
+
         fun getCurrentDateString(): String {
             var time = Calendar.getInstance().time
             return formatter.format(time)
         }
 
+        fun formatDateString(inputDate: String): String {
+            val cal = Calendar.getInstance()
+            var date = formatter.parse(inputDate) as Date
+            var thisDate = formatter.format(date)
+            Log.d("Dates", "Date formatted from $inputDate to: $thisDate")
+            return thisDate
+        }
 
         /**
          * Get the date previous to the currently SELECTED date
@@ -96,7 +110,7 @@ class Utils {
             cal.time = date
             cal.add(Calendar.DATE, +1)
             var nextDate = formatter.format(cal.time)
-            Log.d("Dates", "Selected date: $nextDate")
+            Log.d("Dates", "Current date: $nextDate")
             Log.d("Dates", "Previous date: $date")
             return nextDate
 
