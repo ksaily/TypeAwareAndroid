@@ -2,6 +2,7 @@ package com.example.testing
 
 import android.accessibilityservice.AccessibilityService
 import android.util.Log
+import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -33,12 +34,26 @@ class MyAccessibilityService : AccessibilityService() {
     private var endTime: Long = 0
 
     override fun onInterrupt() {
-        TODO("Not yet implemented")
+        TODO("restart after 5 minutes")
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        if (event == null) return
+        if (event == null) { return }
         if (event.eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+            /**
+            try {
+                val setUpKeyboardWork = OneTimeWorkRequestBuilder<SaveKeyboardDataWorker>()
+                    .setInputData(workDataOf(
+                        "packageName" to event.packageName.toString(),
+                        "text" to event.text.toString(),
+                        "beforeText" to event.beforeText.toString()
+                    ))
+                    .build()
+                WorkManager.getInstance(applicationContext).enqueue(setUpKeyboardWork)
+            } catch (e: Exception) {
+                Log.d("MyAccessibilityEvent", "Exception: $e")
+            }
+            **/
             if (startTime == 0L) {
                 //First character in a session, don't add to typing times
                 thisPackage = event.packageName.toString()
@@ -49,65 +64,67 @@ class MyAccessibilityService : AccessibilityService() {
                 // Time elapsed in seconds:
                 timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
                 //typingTimes.add(timeElapsed)
-            }
+                }
             startTime = nanoTime()
             timeStampBeginning = System.currentTimeMillis()
             checkSession(event)
         }
     }
 
-    /** Check if session remains the same.
-     * If yes, add written character to string and typing time to an arraylist. **/
-    private fun checkSession(event: AccessibilityEvent) {
+            /** Check if session remains the same.
+             * If yes, add written character to string and typing time to an arraylist. **/
 
-        if (sameSession(event.packageName.toString(), timeElapsed)) {
+            fun checkSession(event: AccessibilityEvent) {
+
+            if (sameSession(event.packageName.toString(), timeElapsed)) {
             //Same session as before
-            if (timeElapsed != 0.0) {
+                if (timeElapsed != 0.0) {
                 typingTimes.add(timeElapsed)
-            }
-            addToString(event.text.toString().removeSurrounding("[", "]"),
+                }
+                addToString(event.text.toString().removeSurrounding("[", "]"),
                 event.beforeText.toString(), true)
-        } else { // Session has changed
-            newPackage = event.packageName.toString()
-            //startTime = nanoTime()
-            addToString(event.text.toString().removeSurrounding("[", "]"),
+            } else { // Session has changed
+                newPackage = event.packageName.toString()
+                //startTime = nanoTime()
+                addToString(event.text.toString().removeSurrounding("[", "]"),
                 event.beforeText.toString(),false)
-            onSessionChange()
-        }
-    }
+                val saveKeyboardDataWork = OneTimeWorkRequestBuilder<SaveKeyboardDataWorker>()
+                onSessionChange()
+            }
+            }
 
-    /** Session has changed, save the current info as KeyboardEvents data class
-     * and if the timeslot has changed, also set up a worker that saves info to Firebase.
-     * After that, reset values. **/
-    private fun onSessionChange() {
-        val date = KeyboardHelper.dateFormatter(Date())
-        currentTimeSlot = countTimeSlot()
-        val keyboardEvent = KeyboardEvents(UUID.randomUUID().toString(), countWords(), typingTimes, deletedChars,
-            countErrorRate(), timeStampBeginning, System.currentTimeMillis(), thisPackage,
-            beforeString, currentTimeSlot, date
-        )
-        if (currentTimeSlot != previousTimeSlot) {
-            val setUpWork = OneTimeWorkRequestBuilder<KeyboardWorker>()
-                .setInputData(workDataOf(
+            /** Session has changed, save the current info as KeyboardEvents data class
+             * and if the timeslot has changed, also set up a worker that saves info to Firebase.
+             * After that, reset values. **/
+            private fun onSessionChange() {
+                val date = KeyboardHelper.dateFormatter(Date())
+                currentTimeSlot = countTimeSlot()
+                val keyboardEvent = KeyboardEvents(UUID.randomUUID().toString(), countWords(), typingTimes, deletedChars,
+                countErrorRate(), timeStampBeginning, System.currentTimeMillis(), thisPackage,
+                beforeString, currentTimeSlot, date
+                )
+                if (currentTimeSlot != previousTimeSlot) {
+                    val setUpWork = OneTimeWorkRequestBuilder<KeyboardWorker>()
+                    .setInputData(workDataOf(
                     "TIMESLOT" to previousTimeSlot
-                ))
-                .build()
-            WorkManager.getInstance(applicationContext).enqueue(setUpWork)
-        }
-        //Add the current event to a list of KeyboardEvents
-        dataList.add(keyboardEvent)
-        Log.d("KeyboardEvents", "$dataList")
-        resetValues()
-    }
+                    ))
+                    .build()
+                    WorkManager.getInstance(applicationContext).enqueue(setUpWork)
+                    }
+                    //Add the current event to a list of KeyboardEvents
+                    dataList.add(keyboardEvent)
+                    Log.d("KeyboardEvents", "$dataList")
+                    resetValues()
+            }
 
-    private fun resetValues() {
-        previousTimeSlot = currentTimeSlot
-        typingTimes = arrayListOf()
-        thisPackage = newPackage
-       //beforeString = beforeString.substring(beforeString.length - 1)
-        beforeString = newString
-        newString = ""
-    }
+            private fun resetValues() {
+                previousTimeSlot = currentTimeSlot
+                typingTimes = arrayListOf()
+                thisPackage = newPackage
+                //beforeString = beforeString.substring(beforeString.length - 1)
+                beforeString = newString
+                newString = ""
+            }
 
 }
 

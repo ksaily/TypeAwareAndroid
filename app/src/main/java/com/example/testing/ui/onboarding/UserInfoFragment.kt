@@ -51,7 +51,7 @@ class UserInfoFragment : Fragment(R.layout.fragment_user_info) {
         binding.saveUserInfo.setOnClickListener {
             //Save user info to shared pref
             var p_id = binding.participantId.text.toString()
-            var username = binding.textView14.text.toString()
+            var username = binding.userFullName.text.toString()
             var email = binding.userEmail.text.toString()
             //setFragmentResult("userInfo", bundleOf("username" to username,
             //"email" to email, "p_id" to p_id))

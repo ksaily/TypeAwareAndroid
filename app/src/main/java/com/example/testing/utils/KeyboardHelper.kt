@@ -93,11 +93,11 @@ class KeyboardHelper {
         }
 
         fun countErrorRate(): Double {
-            return  deletedChars.toDouble() / (beforeString.length - 1)
+            return  deletedChars.toDouble() / (deletedChars + (beforeString.length - 1))
         }
 
         fun dateFormatter(date: Date): String {
-            val formatter = SimpleDateFormat("yyyy-MM-dd")
+            val formatter = SimpleDateFormat("dd-MM-yyyy")
             return formatter.format(date)
         }
     }

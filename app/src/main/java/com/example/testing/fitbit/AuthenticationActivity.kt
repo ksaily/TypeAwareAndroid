@@ -29,6 +29,7 @@ import java.util.Base64
  * It will then make a request to the Fitbit API to retrieve the access token for this account
  * and pass the token back to the MainActivity
  */
+
 class AuthenticationActivity : AppCompatActivity() {
     private val fitbitAuthUrl = "https://www.fitbit.com/oauth2/authorize"
     private var uniqueState: String? = null
@@ -40,10 +41,11 @@ class AuthenticationActivity : AppCompatActivity() {
         val authorizationUrl = buildUrl(fitbitAuthUrl)
         val builder = CustomTabsIntent.Builder()
         val customTabsIntent = builder.build()
-        intent.flags = FLAG_ACTIVITY_NEW_TASK
+        customTabsIntent.intent.flags = FLAG_ACTIVITY_NEW_TASK
         Log.d("Authorization", "Activity started")
         try {
             Log.d("Authorization", "$authorizationUrl")
+
             customTabsIntent.launchUrl(this, Uri.parse(authorizationUrl))
         } catch (e: Exception) {
             Log.d("Error", "$e")
@@ -55,7 +57,7 @@ class AuthenticationActivity : AppCompatActivity() {
         Log.d("Authorization", "On new intent")
         val code = intent?.data?.getQueryParameter("code")
         val state = intent?.data?.getQueryParameter("state")
-        val redirect = intent?.data?.getQueryParameter("redirect")
+        //val redirect = intent?.data?.getQueryParameter("redirect")
         if (code != null && state != null) {
             Log.d("Authorization", "Authorization code is: $code")
             Log.d("Authorization", "Authorization state is: $state")
@@ -73,7 +75,7 @@ class AuthenticationActivity : AppCompatActivity() {
                     }
                     FitbitApiService.authorizeRequestToken(code, state)
                     //FitbitApiService.getSleepData("2022-12-10")
-                    Utils.saveSharedSettingBoolean(Graph.appContext, "loggedInFitbit", true)
+                    //Utils.saveSharedSettingBoolean(Graph.appContext, "loggedInFitbit", true)
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 }

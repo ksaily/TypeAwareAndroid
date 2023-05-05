@@ -15,9 +15,10 @@ class DateViewModel : ViewModel() {
     val isToday: LiveData<Boolean>
         get() = _isToday
 
-    fun currentDay() {
+    fun setCurrentDay() {
         _selectedDate.value = currentDate
     }
+
 
     fun nextDay() {
         _selectedDate.value = Utils.getNextDateString(_selectedDate.value!!)
@@ -36,7 +37,7 @@ class DateViewModel : ViewModel() {
             "Today"
         } else {
             _isToday.value = false
-            _selectedDate.value.toString()
+            _selectedDate.value?.replace("-", ".").toString()
         }
     }
 

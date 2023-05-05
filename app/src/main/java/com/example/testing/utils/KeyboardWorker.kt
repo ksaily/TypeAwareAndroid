@@ -39,13 +39,13 @@ class KeyboardWorker(appContext: Context, workerParams: WorkerParameters):
     private fun saveToFirebase(timeslot: Int, event: KeyboardEvents) {
         val myRef = Firebase.database.getReference("KeyboardEvents")
         // Save data under the current timeslot with an unique id for each
-        val dateString = "Date:" + event.date
-        val timeSlotString = "Timeslot:$timeslot"
+        val dateString = event.date
         val participantId = Utils.readSharedSettingString(
             applicationContext,
             "p_id",
             "")
-        myRef.child("events").child(participantId.toString())
-            .child(dateString).child(timeSlotString).child(event.id.toString()).setValue(event)
+        myRef.child(participantId.toString())
+            .child(dateString).child(timeslot.toString())
+                .child(event.id.toString()).setValue(event)
     }
 }

@@ -4,18 +4,18 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import androidx.core.view.isVisible
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.testing.Graph
+import com.example.testing.MainActivity
 import com.example.testing.R
-import com.example.testing.charts.CustomMarker
 import com.example.testing.databinding.FragmentHomeBinding
 import com.example.testing.fitbit.AuthenticationActivity
 import com.example.testing.fitbit.FitbitApiService
@@ -23,24 +23,21 @@ import com.example.testing.ui.data.SleepData
 import com.example.testing.ui.viewmodel.DateViewModel
 import com.example.testing.ui.viewmodel.FirebaseViewModel
 import com.example.testing.utils.Utils
+import com.example.testing.utils.Utils.Companion.checkAccessibilityPermission
 import com.example.testing.utils.Utils.Companion.countAvgSpeed
-import com.example.testing.utils.Utils.Companion.getCurrentDateString
-import com.example.testing.utils.Utils.Companion.getFromFirebase
-import com.example.testing.utils.Utils.Companion.keyboardList
 import com.example.testing.utils.Utils.Companion.readSharedSettingBoolean
-import com.example.testing.utils.Utils.Companion.readSharedSettingString
-import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
-import kotlin.collections.ArrayList
+import kotlin.math.roundToInt
+
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
@@ -72,9 +69,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private var currentDate = ""
     private val formatter = SimpleDateFormat("yyyy-MM-dd")
     var dateFragment = DateFragment()
-    private val dateViewModel: DateViewModel by viewModels()
-    private val firebaseViewModel: FirebaseViewModel by viewModels()
-    val executor = Executors.newSingleThreadExecutor()
+    private val dateViewModel: DateViewModel by activityViewModels()
+    private val firebaseViewModel: FirebaseViewModel by activityViewModels()
     var data = SleepData(false, 0, "", "")
 
     override fun onCreateView(
@@ -91,11 +87,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val transaction = childFragmentManager.beginTransaction()
         transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
             .addToBackStack("dateFragment").commit()
-        var code = Utils.readSharedSettingString(
+        val code = Utils.readSharedSettingString(
             Graph.appContext,
             "authorization_code", ""
         )
-        var state = Utils.readSharedSettingString(
+        val state = Utils.readSharedSettingString(
             Graph.appContext, "state", ""
         )
         if (code != null && state != null) {
@@ -106,8 +102,18 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         if (!readSharedSettingBoolean(Graph.appContext, "loggedInFitbit", false)) {
             showFitbitLogin()
+            //Replace with shared setting listener
         } else {
             updateSleepData()
+        }
+
+        binding.keyboardChart.openAccessibilitySettingsBtn.setOnClickListener {
+            checkAccessibilityPermission(Graph.appContext, true)
+        }
+
+        firebaseViewModel.keyboardData.observe(viewLifecycleOwner) {
+            Log.d("FirebaseDebug", "Changes in firebase data")
+            setFirebaseDataToUI()
         }
 
         binding.sleepDataContainer.FitbitBtn.setOnClickListener {
@@ -116,43 +122,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
 
         dateViewModel.selectedDate.observe(viewLifecycleOwner) {
-                firebaseViewModel.clearListOfFirebaseData()
-                updateKeyboardData()
-                updateSleepData()
-                currentDate = dateViewModel.selectedDate.value.toString()
+            Log.d("Dateviewmodel", "Date changed to: " +
+            dateViewModel.selectedDate.value)
+            //firebaseViewModel.clearListOfFirebaseData()
+            updateKeyboardData()
+            updateSleepData()
+            currentDate = dateViewModel.selectedDate.value.toString()
         }
 
-
-        var values1: ArrayList<BarEntry> = ArrayList()
-        var values2: ArrayList<BarEntry> = ArrayList()
-        statValues.clear()
-        //
-        for (i in 0 until MAX_X_VALUE) {
-            values1.add(
-                BarEntry(
-                    i.toFloat(),
-                    (Math.random() * 80).toFloat()
-                )
-            )
-        }
-
-        for (i in 0 until MAX_X_VALUE) {
-            values2.add(
-                BarEntry(
-                    i.toFloat(),
-                    (Math.random() * 80).toFloat()
-                )
-            )
-        }
-        //
-        ////After preparing our data set, we need to display the data in our bar chart
-        val dataSet1: BarDataSet = BarDataSet(values1, "Test")
-        val dataSet2: BarDataSet = BarDataSet(values2, "Test")
-        val data: BarData = BarData()
-        data.addDataSet(dataSet1)
-        data.addDataSet(dataSet2)
-        //configureBarChart()
-        //prepareChartData(data)
     }
 
     override fun onResume() {
@@ -180,28 +157,33 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             FitbitLoginPrompt.isVisible = false
             sleepData.isVisible = true
             if (checkSleepDataSetting()) {
-                executor.execute {
-                    Log.d("GetSleepData", "Sleep data requested")
-                    val formattedDate = Utils.formatForFitbit(
-                        dateViewModel.selectedDate.value.toString()
-                    )
+                Log.d("GetSleepData", "Sleep data requested")
+                val formattedDate = Utils.formatForFitbit(
+                    dateViewModel.selectedDate.value.toString()
+                )
+                lifecycleScope.launch(Dispatchers.IO) {
                     data = FitbitApiService.getSleepData(formattedDate)
-                }
-                    if (data.dataAvailable) {
-                        wakeUpTime.text = data.endTime
-                        bedTime.text = data.startTime
-                        val t: Int = data.totalMinutesAsleep
-                        val hours = t / 60
-                        val minutes = t % 60
-                        val asleepString = "$hours h $minutes m"
-                        sleepAmount.text = asleepString
-                    } else {
-                        SleepDataView.isVisible = false
-                        SleepDataViewHidden.isVisible = true
-                        SleepDataViewHiddenTitle.text = getString(R.string.sleep_data_title)
-                        SleepDataViewHiddenContent.text = getString(R.string.home_sleep_data_not_found_content)
+                    withContext(Dispatchers.Main) {
+                        if (data.dataAvailable) {
+                            Log.d("HomeFragment", "Sleep data found")
+                            wakeUpTime.text = data.endTime
+                            bedTime.text = data.startTime
+                            val t: Int = data.totalMinutesAsleep
+                            val hours = t / 60
+                            val minutes = t % 60
+                            val asleepString = "$hours h $minutes m"
+                            sleepAmount.text = asleepString
+                        } else {
+                            Log.d("HomeFragment", "No sleep data available")
+                            SleepDataView.isVisible = false
+                            SleepDataViewHidden.isVisible = true
+                            SleepDataViewHiddenTitle.text = getString(R.string.sleep_data_title)
+                            SleepDataViewHiddenContent.text = getString(R.string.home_sleep_data_not_found_content)
+
+                        }
 
                     }
+                }
                 }
             }
 
@@ -255,26 +237,83 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
 
     private fun updateKeyboardData() {
-        lifecycleScope.launchWhenStarted {
-            getFromFirebase(dateViewModel.selectedDate.value.toString())
+        dateViewModel.checkDate()
+        val isToday = dateViewModel.isToday.value!!
+        val selectedDate = dateViewModel.selectedDate.value.toString()
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                println("Entering getfromfirebase")
+
+                firebaseViewModel.getFromFirebase(selectedDate, isToday)
+            } catch (e: Exception) {
+                Log.d("Error", "$e")
+            }
         }
-        if (keyboardList.isNotEmpty()) {
+    }
+
+    private fun setKeyboardDataObserver() {
+        Log.d("FirebaseDebug", "Observer set")
+        firebaseViewModel.keyboardData.observe(viewLifecycleOwner) {
+            Log.d("FirebaseDebug1", "KeyboardData: ${firebaseViewModel.keyboardData.value}")
+            if (firebaseViewModel.keyboardData.value!!.isNotEmpty()) {
+                val totalErr = mutableListOf<Double>()
+                val totalSpeed = mutableListOf<Double>()
+                val totalErrRate = mutableListOf<Double>()
+                for (i in firebaseViewModel.keyboardData.value!!) {
+                    if (i.date == dateViewModel.selectedDate.value) {
+                        totalErr.add(i.errors)
+                        totalSpeed.add(i.speed)
+                        totalErrRate.add(i.errorRate)
+                    }
+                }
+                binding.keyboardChart.keyboardDataNotFound.isVisible = false
+                binding.keyboardChart.dataAvailable.isVisible = true
+                val roundoff = (totalSpeed.average() * 10000.0).roundToInt() / 10000.0
+                binding.keyboardChart.speedData.text = roundoff.toString()
+                binding.keyboardChart.ProgressTextView.text =
+                    showPercentage(totalErrRate.average(),
+                        binding.keyboardChart.progressCircular).toString()
+            } else {/**
+                binding.keyboardChart.speedData.text = "No data"
+                binding.keyboardChart.textViewStats.isVisible = false
+                binding.keyboardChart.ProgressTextView.text = "--"
+                binding.keyboardChart.progressCircular.isVisible = false**/
+                binding.keyboardChart.keyboardDataNotFound.isVisible = true
+                binding.keyboardChart.dataAvailable.isVisible = false
+                Log.d("UpdateUI", "No data on keyboardList")
+            }
+        }
+    }
+
+    private fun setFirebaseDataToUI() {
+        Log.d("FirebaseDebug2", "KeyboardData: ${firebaseViewModel.keyboardData.value}")
+        if (firebaseViewModel.keyboardData.value!!.isNotEmpty()) {
             val totalErr = mutableListOf<Double>()
             val totalSpeed = mutableListOf<Double>()
-            for (i in keyboardList) {
+            val totalErrRate = mutableListOf<Double>()
+            for (i in firebaseViewModel.keyboardData.value!!) {
                 if (i.date == dateViewModel.selectedDate.value) {
                     totalErr.add(i.errors)
                     totalSpeed.add(i.speed)
+                    totalErrRate.add(i.errorRate)
                 }
             }
-            binding.keyboardChart.speedData.text = countAvgSpeed(totalSpeed).toString()
-            binding.keyboardChart.ProgressTextView.text = showPercentage(countAvgSpeed(totalErr),
-            binding.keyboardChart.progressCircular).toString()
-        }
-        else {
-            binding.keyboardChart.speedData.text = "No data"
-            binding.keyboardChart.ProgressTextView.text == "--"
-            binding.keyboardChart.progressCircular.isVisible = false
+            Log.d("HomeFragment", "Total speed: ${totalSpeed.average()}l")
+            Log.d("HomeFragment", "Total speed: ${totalErr.average()}l")
+            Log.d("HomeFragment", "Total speed: ${totalErrRate.average()}l")
+            binding.keyboardChart.keyboardDataNotFound.isVisible = false
+            binding.keyboardChart.dataAvailable.isVisible = true
+            binding.keyboardChart.speedData.text = totalSpeed.average().toString()
+            binding.keyboardChart.ProgressTextView.text =
+                showPercentage(0.2,
+                    binding.keyboardChart.progressCircular).toString()
+        } else {/**
+        binding.keyboardChart.speedData.text = "No data"
+        binding.keyboardChart.textViewStats.isVisible = false
+        binding.keyboardChart.ProgressTextView.text = "--"
+        binding.keyboardChart.progressCircular.isVisible = false**/
+            binding.keyboardChart.keyboardDataNotFound.isVisible = true
+            binding.keyboardChart.dataAvailable.isVisible = false
             Log.d("UpdateUI", "No data on keyboardList")
         }
     }
@@ -306,7 +345,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         chart!!.xAxis.axisMaximum = MAX_X_VALUE.toFloat()
     }
 
-    fun showPercentage(errorRate: Double, progressBar: ProgressBar, ): Double {
+    fun showPercentage(errorRate: Double, progressBar: ProgressBar): Double {
         var successRate = (1.0 - errorRate) * 100
         progressBar.progress = successRate.toInt()
         return successRate

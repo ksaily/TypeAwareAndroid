@@ -6,11 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.menu.HomeFragment"
     android:id="@+id/homeFragment"
-    android:background="@color/dark_purple"
-    android:shadowColor="@color/cardview_shadow_end_color"
-    android:shadowDx="0"
-    android:shadowDy="30"
-    android:shadowRadius="50">
+    android:background="@color/white">
 
     <LinearLayout
         android:layout_width="match_parent"

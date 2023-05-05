@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission  android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".AlertnessApp"
@@ -17,33 +17,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Testing"
         tools:targetApi="31">
-        <activity
-            android:name=".ui.onboarding.OnboardingActivity"
-            android:exported="false"
-            android:launchMode="singleInstance">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_settings">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
-            android:name=".ui.onboarding.ConsentActivity"
-            android:exported="true"
-            android:label="@string/title_activity_consent"
-            android:launchMode="singleInstance"
-            android:theme="@style/Theme.Testing.NoActionBar">
 
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
+
         <activity
             android:name=".fitbit.AuthenticationActivity"
             android:autoVerify="true"
@@ -56,9 +31,9 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
+                    android:scheme="https"
                     android:host="alertness-level-monitor.com"
-                    android:pathPrefix="/callback"
-                    android:scheme="https" />
+                    android:pathPrefix="/callback" />
             </intent-filter>
         </activity>
         <activity

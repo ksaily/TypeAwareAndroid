@@ -8,16 +8,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import com.example.testing.Graph
 import com.example.testing.MainActivity
 import com.example.testing.R
 import com.example.testing.databinding.FragmentDateBinding
 import com.example.testing.ui.viewmodel.DateViewModel
+import com.example.testing.ui.viewmodel.FirebaseViewModel
 import com.example.testing.utils.Utils.Companion.currentDate
 import com.example.testing.utils.Utils.Companion.formatDateString
 import com.example.testing.utils.Utils.Companion.formatter
-import com.example.testing.utils.Utils.Companion.getFromFirebase
 import java.util.*
 
 private const val ARG_PARAM1 = "param1"
@@ -28,7 +30,7 @@ class DateFragment : Fragment(R.layout.fragment_date) {
     private var _binding: FragmentDateBinding? = null
     private val binding get() = _binding!!
     //Initialize the viewmodel
-    private val viewModel: DateViewModel by viewModels()
+    private val viewModel: DateViewModel by activityViewModels()
     private var date: String? = null
 
     companion object {
@@ -89,7 +91,7 @@ class DateFragment : Fragment(R.layout.fragment_date) {
             val datePickerDialog = DatePickerDialog(
                 // on below line we are passing context.
                 this.activity!!.window!!.context,
-                DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
+                { view, year, monthOfYear, dayOfMonth ->
                     // on below line we are setting
                     // date to our text view.
                     val dateString = (dayOfMonth.toString() + "-" + (monthOfYear + 1) + "-" + year)

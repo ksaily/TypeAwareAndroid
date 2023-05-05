@@ -104,5 +104,8 @@
     <string name="home_sleep_data_hidden_content">If you wish to see your sleep data, go to settings and enable \'Show sleep data\'.</string>
     <string name="home_sleep_data_not_found_title">Sleep data could not be found</string>
     <string name="home_sleep_data_not_found_content">Sleep data could not be found for this date, please try another date.</string>
+    <string name="home_keyboard_data_not_found_title">Data could not be found for this date</string>
+    <string name="home_keyboard_data_not_found_content">Please try another date and make sure that accessibility settings are turned on. You can go to settings by pressing the button below.</string>
+    <string name="home_keyboard_data_not_found_btn">Settings</string>
 
 </resources>

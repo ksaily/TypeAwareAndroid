@@ -69,9 +69,11 @@ class Utils {
 
         fun formatForFitbit(inputDate: String): String {
             val cal = Calendar.getInstance()
+            val form = SimpleDateFormat("yyyy-MM-dd")
             val date = formatter.parse(inputDate) as Date
             cal.time = date
-            return formatter.format(cal.time)
+            Log.d("DateFormat", "Date formatted from: $date to ${form.format(cal.time)}")
+            return form.format(cal.time)
         }
 
         fun getCurrentDateString(): String {
@@ -83,7 +85,7 @@ class Utils {
             val cal = Calendar.getInstance()
             var date = formatter.parse(inputDate) as Date
             var thisDate = formatter.format(date)
-            Log.d("Dates", "Date formatted from $inputDate to: $thisDate")
+            Log.d("DateFormat", "Date formatted from $inputDate to: $thisDate")
             return thisDate
         }
 
@@ -114,60 +116,6 @@ class Utils {
             Log.d("Dates", "Previous date: $date")
             return nextDate
 
-        }
-
-        fun getFromFirebase(date: String) {
-            val rootRef = FirebaseDatabase.getInstance().reference
-            val ref = rootRef.child(date)
-            val valueEventListener = object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.exists()) {
-                        val children = snapshot.children
-                        children.forEach { dataSnapshot ->
-                            var child = dataSnapshot.children
-                            child.forEach {
-                                var speeds = it.child("typingSpeed").value
-                                if (speeds != null) {
-                                    var avgForOne = countAvgSpeed(speeds as MutableList<Double>)
-                                    errorsList.add(it.child("errorAmount").value as Long)
-                                    //Add the average for one instance to a new list
-                                    speedsList.add(avgForOne)
-                                }
-                            }
-                            totalErrList = (totalErrList + errorsList).toMutableList()
-                            Log.d("Firebase", child.toString())
-                            totalSpeedsList.add(speedsList.toMutableList())
-                            timeWindow = dataSnapshot.key?.toInt()!!
-                        //avgSpeed = countAvgSpeed(totalAvgSpeed)
-                        //var data = KeyboardStats(date, dataSnapshot.key, avgErrors, avgSpeed)
-                        //println(data)
-                            totalErr = countAvgErrors(totalErrList)
-                            var total: MutableList<Double> = mutableListOf()
-                            for (i in totalSpeedsList) {
-                                total.add(countAvgSpeed(i))
-                            }
-                            totalSpeed = countAvgSpeed(total)
-                            var data = KeyboardStats(
-                                date,
-                                timeWindow,
-                                totalErr,
-                                totalSpeed)
-                            keyboardList.add(data)
-                        }
-                        Log.d("Firebase", "Data fetched from firebase")
-                        println(keyboardList)
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    Log.d("Firebase", error.message)
-                }
-            }
-            if (date != currentDate) {
-                ref.addListenerForSingleValueEvent(valueEventListener)
-            } else {
-                ref.addValueEventListener(valueEventListener)
-            }
         }
 
         fun View.showSnackbar(
@@ -216,13 +164,15 @@ class Utils {
             }
         }
 
-        fun readSharedSettingBoolean(ctx: Context, settingName: String?, defaultValue: Boolean): Boolean {
+        fun readSharedSettingBoolean(ctx: Context = Graph.appContext,
+                                     settingName: String?, defaultValue: Boolean): Boolean {
             val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
             val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
             return s.getBoolean(settingName, defaultValue)
         }
 
-        fun readSharedSettingString(ctx: Context, settingName: String?, defaultValue: String): String? {
+        fun readSharedSettingString(ctx: Context = Graph.appContext,
+                                    settingName: String?, defaultValue: String): String? {
             val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
             val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
             return s.getString(settingName, defaultValue)
@@ -232,7 +182,8 @@ class Utils {
             return PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
         }
 
-        fun saveSharedSetting(ctx: Context, settingName: String?, settingValue: String?) {
+        fun saveSharedSetting(ctx: Context = Graph.appContext,
+                              settingName: String?, settingValue: String?) {
             val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
             val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
             val editor = s.edit()
@@ -240,7 +191,8 @@ class Utils {
             editor.apply()
         }
 
-        fun saveSharedSettingBoolean(ctx: Context, settingName: String?, settingValue: Boolean) {
+        fun saveSharedSettingBoolean(ctx: Context = Graph.appContext,
+                                     settingName: String?, settingValue: Boolean) {
             val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
             //val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
             val editor = s.edit()
@@ -248,7 +200,7 @@ class Utils {
             editor.apply()
         }
 
-        fun checkPermissions(context: Context): Boolean {
+        fun checkPermissions(context: Context = Graph.appContext): Boolean {
             isIgnoringBatteryOptimizations(context)
             val batteryOptOff = readSharedSettingBoolean(context, "battery_opt_off", false)
             val consent = readSharedSettingBoolean(context, "consent_given", true)
@@ -263,7 +215,8 @@ class Utils {
             return false
         }
 
-        fun checkAccessibilityPermission(context: Context, openSettings: Boolean): Boolean {
+        fun checkAccessibilityPermission(context: Context = Graph.appContext,
+                                         openSettings: Boolean): Boolean {
             var accessEnabled = 0
             try {
                 accessEnabled =

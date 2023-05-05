@@ -74,20 +74,23 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
             if (onboardingViewModel.onboardingFinished.value == false) {
                 binding.vp2Pager.currentItem = binding.vp2Pager.currentItem + 1
             } else {
-                Utils.saveSharedSettingBoolean(
-                    Graph.appContext, "onboarding_complete", true)
-                parentFragmentManager.beginTransaction().remove(this).commit()
+                onboardingFinished()
             }
         }
 
         binding.skip.setOnClickListener {
             view.showSnackbar(view, getString(R.string.skip_prompt), Snackbar.LENGTH_INDEFINITE,
                 getString(R.string.skip)) {
-                Utils.saveSharedSettingBoolean(
-                    Graph.appContext, "onboarding_complete",true)
-                parentFragmentManager.beginTransaction().remove(this).commit()
+                onboardingFinished()
             }
         }
+    }
+
+    private fun onboardingFinished() {
+        Utils.saveSharedSettingBoolean(
+            Graph.appContext, "onboarding_complete",true)
+        Utils.saveSharedSettingBoolean(Graph.appContext, "first_login_done", true)
+        parentFragmentManager.beginTransaction().remove(this).commit()
     }
 
     override fun onDestroyView() {

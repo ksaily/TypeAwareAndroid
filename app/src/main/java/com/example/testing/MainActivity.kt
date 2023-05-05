@@ -25,6 +25,8 @@ import com.example.testing.ui.menu.SettingsFragment
 import com.example.testing.ui.menu.ChartFragment
 import com.example.testing.ui.menu.DateFragment
 import com.example.testing.ui.onboarding.*
+import com.example.testing.ui.viewmodel.DateViewModel
+import com.example.testing.ui.viewmodel.FirebaseViewModel
 import com.example.testing.ui.viewmodel.PrefsViewModel
 import com.example.testing.utils.FragmentUtils
 import com.example.testing.utils.FragmentUtils.Companion.loadFragment
@@ -33,6 +35,7 @@ import com.example.testing.utils.Utils
 import com.example.testing.utils.Utils.Companion.checkBattery
 import com.example.testing.utils.Utils.Companion.getSharedPrefs
 import com.example.testing.utils.Utils.Companion.readSharedSettingBoolean
+import com.example.testing.utils.Utils.Companion.saveSharedSettingBoolean
 import com.example.testing.utils.Utils.Companion.showSnackbar
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.data.BarData
@@ -74,6 +77,8 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     protected val statsTitles = arrayOf(
         "Orders", "Inventory"
     )
+    val dateViewModel: DateViewModel by viewModels()
+    val firebaseViewModel: FirebaseViewModel by viewModels()
     private val calendar: Calendar = Calendar.getInstance()
     private val year = calendar.get(Calendar.YEAR)
     private val homeFragment = HomeFragment()
@@ -120,7 +125,12 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             true
         }
         sharedPrefs.registerOnSharedPreferenceChangeListener(this)
-        onFirstLogin()
+        if (!readSharedSettingBoolean(applicationContext,
+                "first_login_done", false)
+        ) {
+            onFirstLogin()
+        }
+        //onFirstLogin()
 
         Utils.checkPermissions(applicationContext)
     }
@@ -141,18 +151,21 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     }
 
     override fun onSharedPreferenceChanged(sharedPref: SharedPreferences?, key: String?) {
-        onFirstLogin()
-        if (key == "accessibility_permission") {
+        if (key == "accessibility_permission" && !readSharedSettingBoolean(Graph.appContext,
+                "accessibility_permission", false)
+        ) {
             Log.d("CheckPref", "Accessibility")
             Utils.checkAccessibilityPermission(applicationContext, true)
         }
-        if (key == "battery_opt_off") {
+        if (key == "battery_opt_off" && !readSharedSettingBoolean(Graph.appContext,
+                "accessibility_permission", false)
+        ) {
             Log.d("CheckPref", "Battery")
             checkBattery(applicationContext)
         }
     }
 
-    fun onFirstLogin() {
+    private fun onFirstLogin() {
         if (!readSharedSettingBoolean(applicationContext,
                 "consent_given",
                 false)
@@ -184,7 +197,8 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             bottomNav.isVisible = false
         }
         else {
-            val consentFragment = supportFragmentManager.findFragmentByTag("consentFragment")
+            saveSharedSettingBoolean(Graph.appContext, "first_login_done", true)
+            //val consentFragment = supportFragmentManager.findFragmentByTag("consentFragment")
             bottomNav.isVisible = true
         }
     }
