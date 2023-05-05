@@ -46,26 +46,67 @@ class ChartViewModel: ViewModel() {
                     val errList = mutableListOf<BarEntry>()
                     val dataList = mutableListOf<BarEntry>()
                     dataFound = true
+                    var sessionCount = 0
+                    val errorsAvgList = mutableListOf<Long>()
+                    val iterErrList = mutableListOf<BarEntry>()
+                    for (i in 0..144) {
+                        dataList.add(BarEntry(i.toFloat(), 0f))
+                        iterErrList.add(BarEntry(i.toFloat(), 0f))
+                    }
                     val children = snapshot.children
                     children.forEach { dataSnapshot ->
-                        sessionCount = dataSnapshot.childrenCount
-                        dataList.add(
-                            BarEntry(
-                                dataSnapshot.key!!.toFloat(),
-                                sessionCount.toFloat()
-                            )
-                        )
                         val child = dataSnapshot.children
                         child.forEach {
                             var y = it.child("errorAmount").value as Long
-                            errList.add(
-                                BarEntry(
-                                    dataSnapshot.key!!.toFloat(),
-                                    y.toFloat()
-                                )
+                            errorsAvgList.add(y)
+                            sessionCount += 1
+                            Log.d("ChartViewModel", "ErrorAmount: $y")
+                            /**
+                            val timeWindow = it.child("dailyTimeWindow").value as Long
+                            for (i in 1..144) {
+                            if (timeWindow.toInt() == i) {
+                            dataList.add(
+                            BarEntry(
+                            i.toFloat(),
+                            sessionCount.toFloat()
                             )
+                            )
+                            errList.add(
+                            BarEntry(
+                            i.toFloat(),
+                            y.toFloat()
+                            )
+                            )
+                            } else {
+                            dataList.add(
+                            BarEntry(
+                            i.toFloat(), 0f)
+                            )
+                            errList.add(
+                            BarEntry(
+                            i.toFloat(), 0f)
+                            )
+                            }
+                            }
+                            }**/
                         }
+
+                        for (i in iterErrList) {
+                            val timewindow = dataSnapshot.key?.toInt()
+                            Log.d("ChartViewModel", "Timewindow: $timewindow")
+                            iterErrList[timewindow!!] = BarEntry(
+                                timewindow.toFloat(),
+                                errorsAvgList.average().toFloat()
+                            )
+                            dataList[timewindow!!] = BarEntry(
+                                timewindow.toFloat(),
+                                sessionCount.toFloat()
+                            )
+
+                        }
+
                     }
+
                     /**
                     //Take into account missing values
                     for (i in 50..243) {
@@ -84,9 +125,9 @@ class ChartViewModel: ViewModel() {
                             }
                         }
                     }**/
-                    _chartErrorValues.postValue(errList)
+                    _chartErrorValues.postValue(iterErrList)
                     _chartSessions.postValue(dataList)
-                    Log.d("Firebase", "ChartErrorValues: $chartErrorValues")
+                    Log.d("Firebase", "ChartErrorValues: $")
                     Log.d("Firebase", "ChartSessions: $chartSessions")
                     //_keyboardStats.postValue(dataList)
                 } else {

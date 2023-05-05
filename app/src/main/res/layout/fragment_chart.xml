@@ -38,18 +38,20 @@
                 android:orientation="vertical"
                 android:backgroundTint="@color/white">
 
-                <Button
+
+
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="10dp"
-                    android:text="Switch to writing speed"
-                    android:textColor="@color/white"
+                    android:text="Writing speed"
+                    android:textColor="@color/light_purple"
                     android:backgroundTint="@color/light_purple"
                     android:layout_marginHorizontal="5dp"
                     android:layout_gravity="right"
                     android:textSize="10sp">
 
-                </Button>
+                </TextView>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

@@ -36,6 +36,7 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
+import kotlin.math.round
 import kotlin.math.roundToInt
 
 
@@ -137,6 +138,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         if (!readSharedSettingBoolean(Graph.appContext, "loggedInFitbit", false)) {
             showFitbitLogin()
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        //Remove observers?
     }
 
     override fun onDestroyView() {
@@ -251,40 +257,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
     }
 
-    private fun setKeyboardDataObserver() {
-        Log.d("FirebaseDebug", "Observer set")
-        firebaseViewModel.keyboardData.observe(viewLifecycleOwner) {
-            Log.d("FirebaseDebug1", "KeyboardData: ${firebaseViewModel.keyboardData.value}")
-            if (firebaseViewModel.keyboardData.value!!.isNotEmpty()) {
-                val totalErr = mutableListOf<Double>()
-                val totalSpeed = mutableListOf<Double>()
-                val totalErrRate = mutableListOf<Double>()
-                for (i in firebaseViewModel.keyboardData.value!!) {
-                    if (i.date == dateViewModel.selectedDate.value) {
-                        totalErr.add(i.errors)
-                        totalSpeed.add(i.speed)
-                        totalErrRate.add(i.errorRate)
-                    }
-                }
-                binding.keyboardChart.keyboardDataNotFound.isVisible = false
-                binding.keyboardChart.dataAvailable.isVisible = true
-                val roundoff = (totalSpeed.average() * 10000.0).roundToInt() / 10000.0
-                binding.keyboardChart.speedData.text = roundoff.toString()
-                binding.keyboardChart.ProgressTextView.text =
-                    showPercentage(totalErrRate.average(),
-                        binding.keyboardChart.progressCircular).toString()
-            } else {/**
-                binding.keyboardChart.speedData.text = "No data"
-                binding.keyboardChart.textViewStats.isVisible = false
-                binding.keyboardChart.ProgressTextView.text = "--"
-                binding.keyboardChart.progressCircular.isVisible = false**/
-                binding.keyboardChart.keyboardDataNotFound.isVisible = true
-                binding.keyboardChart.dataAvailable.isVisible = false
-                Log.d("UpdateUI", "No data on keyboardList")
-            }
-        }
-    }
-
     private fun setFirebaseDataToUI() {
         Log.d("FirebaseDebug2", "KeyboardData: ${firebaseViewModel.keyboardData.value}")
         if (firebaseViewModel.keyboardData.value!!.isNotEmpty()) {
@@ -303,7 +275,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             Log.d("HomeFragment", "Total speed: ${totalErrRate.average()}l")
             binding.keyboardChart.keyboardDataNotFound.isVisible = false
             binding.keyboardChart.dataAvailable.isVisible = true
-            binding.keyboardChart.speedData.text = totalSpeed.average().toString()
+            val roundoff = round(totalSpeed.average())
+            binding.keyboardChart.speedData.text = roundoff.toString()
             binding.keyboardChart.ProgressTextView.text =
                 showPercentage(0.2,
                     binding.keyboardChart.progressCircular).toString()

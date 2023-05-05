@@ -143,6 +143,11 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         super.onResume()
         //Register on shared preference change listener in onCreate and check for permissions?
         Utils.checkPermissions(applicationContext)
+        /**if (!readSharedSettingBoolean(applicationContext,
+                "first_login_done", false)
+        ) {
+            onFirstLogin()
+        }**/
     }
 
     override fun onDestroy() {
@@ -163,6 +168,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             Log.d("CheckPref", "Battery")
             checkBattery(applicationContext)
         }
+
     }
 
     private fun onFirstLogin() {
@@ -198,6 +204,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         }
         else {
             saveSharedSettingBoolean(Graph.appContext, "first_login_done", true)
+            loadFragment(this, homeFragment, null, "homeFragment", true)
             //val consentFragment = supportFragmentManager.findFragmentByTag("consentFragment")
             bottomNav.isVisible = true
         }

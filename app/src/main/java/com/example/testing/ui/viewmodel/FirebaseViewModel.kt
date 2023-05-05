@@ -88,7 +88,7 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
                                 speedsList.add(avgForOne)
                             }
                             errorsList.add(it.child("errorAmount").value as Long)
-                            errorRateList.add(it.child("errorRate").value as Double)
+                            errorRateList.add((it.child("errorRate").value as Number).toDouble())
                             //Add the average for one instance to a new list
                             Log.d("FirebaseDebug", "SpeedsList: $speedsList")
                             Log.d("FirebaseDebug", "ErrorsList: $errorsList")

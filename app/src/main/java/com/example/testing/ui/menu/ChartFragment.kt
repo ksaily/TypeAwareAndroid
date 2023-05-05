@@ -58,12 +58,12 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
     private var tvY: TextView? = null
 
     // Chart variables:
-    private val MAX_X_VALUE = 244
+    private val MAX_X_VALUE = 144
     private val GROUPS = 2
     private val GROUP_1_LABEL = "Errors"
     private val GROUP_2_LABEL = "Words"
     private val BAR_SPACE = 0.1f
-    private val BAR_WIDTH = 0.4f
+    private val BAR_WIDTH = 0.6f
     private val GROUP_SPACE = 0.1f
     protected var tfRegular: Typeface? = null
     protected var tfLight: Typeface? = null
@@ -133,7 +133,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
 
         v1.setDrawValues(false)
         v1.color = R.color.light_purple
-        v1.valueTextColor = R.color.white
+        v1.valueTextColor = R.color.dark_purple
 
         v3.setDrawValues(false)
         v3.color = R.color.white
@@ -154,17 +154,16 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             val dats = mutableListOf<BarEntry>()
             if (stats != null) {
                 for (i in stats) {
-                    label1.add(i.toString())
+                    label1.add(i.x.toInt().toString())
             }} else {
-                configureBarChart(barChart1!!, "Errors", label1)
+                configureBarChart(barChart1!!, "Errors", labels1)
                 prepareChartData(barChart1!!, data1)
             }
-            val v1: BarDataSet = BarDataSet(stats, "TestDataset1")
-            v1.color = R.color.light_purple
-            v1.valueTextColor = R.color.black
+            val v1: BarDataSet = BarDataSet(stats, "Errors made")
+            v1.setDrawValues(false)
             val data = BarData()
             data.addDataSet(v1)
-            Log.d("Dataset1", data1.toString())
+            Log.d("Dataset1", data.toString())
             configureBarChart(barChart1!!, "Errors", label1)
             prepareChartData(barChart1!!, data)
         }
@@ -179,6 +178,8 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                     Log.d("Error", "$e")
                 }
             }
+            barChart1!!.notifyDataSetChanged()
+            barChart2!!.notifyDataSetChanged()
         }
 
         //configureBarChart(barChart1!!, "Errors per timewindow", labels1)
@@ -431,7 +432,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
     private fun prepareChartData(chart: BarChart, data: BarData) {
         if (chart == barChart1) {
             barChart1!!.data = data
-            barChart1!!.data.setValueFormatter(IndexAxisValueFormatter(labels1))
+            //barChart1!!.data.setValueFormatter(IndexAxisValueFormatter(labels))
             barChart1!!.barData.barWidth = BAR_WIDTH
             val groupSpace = 1f - (BAR_SPACE + BAR_WIDTH)
             //barChart1!!.groupBars(0f, groupSpace, BAR_SPACE)
@@ -445,6 +446,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             //barChart2!!.data.setValueTextColor(R.color.white)
             barChart2!!.invalidate()
         }
+        chart.setVisibleXRangeMaximum(16f)
 
     }
 
@@ -453,33 +455,45 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         //chart!!.setDrawBarShadow(false)
         chart!!.setDrawGridBackground(false)
 
-        chart!!.description.isEnabled = true
-        chart!!.description.text = description
-        chart!!.description.textColor = R.color.white
+        chart!!.description.isEnabled = false
+        //chart!!.description.text = description
+        //chart!!.description.textColor = R.color.dark_purple
+
+
+
         val xAxis = chart!!.xAxis
+        //xAxis.labelCount = 12
+        xAxis.setDrawLabels(true)
+
         xAxis.granularity = 1f
         xAxis.position = XAxis.XAxisPosition.BOTTOM
-        xAxis.setAxisMinimum(0 + 0.5f); //to center the bars inside the vertical grid lines we need + 0.5 step
-        xAxis.setAxisMaximum(244f + 0.5f); //to center the bars inside the vertical grid lines we need + 0.5 step
-        //xAxis.setLabelCount(6, false); //show only 5 labels (5 vertical grid lines)
-        xAxis.setXOffset(0f); //labels x offset in dps
-        xAxis.setYOffset(0f); //labels y offset in dps
+
+
+        xAxis.axisMinimum = 0 + 0.5f; //to center the bars inside the vertical grid lines we need + 0.5 step
+        xAxis.axisMaximum = 144f + 0.5f; //to center the bars inside the vertical grid lines we need + 0.5 step
+        //xAxis.setLabelCount(12, false); //show only 5 labels (5 vertical grid lines)
+        xAxis.xOffset = 0f; //labels x offset in dps
+        xAxis.yOffset = 0f; //labels y offset in dps
         xAxis.setDrawGridLines(false)
-        xAxis.valueFormatter = IndexAxisValueFormatter(xAxisValues)
+        //xAxis.valueFormatter = IndexAxisValueFormatter(xAxisValues)
         chart!!.xAxis.isEnabled = true
         Log.d("Chart labels", labels1.toString())
         val leftAxis = chart!!.axisLeft
-        leftAxis.setDrawGridLines(true)
-        leftAxis.spaceTop = 35f
+        leftAxis.setDrawGridLines(false)
+        //leftAxis.spaceTop = 35f
         leftAxis.axisMinimum = 0f
         chart!!.axisRight.isEnabled = false
-        chart!!.xAxis.axisMinimum = 1f
-        chart!!.xAxis.axisMaximum = MAX_X_VALUE.toFloat()
+        // Limit the number of visible X-axis labels to 20
+
+// Enable horizontal scrolling and scaling
+        chart.isDragEnabled = true
+        chart.isScaleXEnabled = true
+        //chart!!.xAxis.axisMinimum = 1f
+        //chart!!.xAxis.axisMaximum = MAX_X_VALUE.toFloat()
         //xAxis.setCenterAxisLabels(true)
         val j = 0
         //To remove right side y axis from chart:
         chart!!.axisRight?.isEnabled = false
-        chart!!.xAxis.axisMaximum = 5f+0.1f
 
         //To enable zooming the chart
         chart!!.setTouchEnabled(true)

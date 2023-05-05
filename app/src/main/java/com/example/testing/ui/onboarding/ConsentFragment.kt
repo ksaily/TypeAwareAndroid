@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.replace
 import androidx.fragment.app.setFragmentResult
 import com.example.testing.Graph
 import com.example.testing.MainActivity
@@ -53,7 +54,7 @@ class ConsentFragment : Fragment(R.layout.fragment_consent) {
             //setFragmentResult("consentGiven", bundleOf("consent" to result))
             Utils.saveSharedSettingBoolean(Graph.appContext,
                 "consent_given", true)
-            //loadFragment(MainActivity, UserInfoFragment(),
+
               //  null, "userInfoFragment", false)
             //removeFragmentByTag(MainActivity, "consentFragment")
             parentFragmentManager.beginTransaction().remove(this).commit()

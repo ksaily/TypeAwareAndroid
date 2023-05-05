@@ -85,10 +85,11 @@
             android:padding="3dp">
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
                 android:text="@string/speed_avg"
-                android:textAlignment="center"
+                android:textAlignment="textStart"
                 android:textColor="@color/light_grey"
                 android:textSize="18sp" />
 

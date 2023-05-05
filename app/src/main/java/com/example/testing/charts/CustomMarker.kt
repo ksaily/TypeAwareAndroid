@@ -13,11 +13,10 @@ class CustomMarker(context: Context, layoutResource: Int = R.layout.marker_view)
         val binding: MarkerViewBinding? = null
         val value = entry?.y?.toDouble() ?: 0.0
         var resText = ""
-        if(value.toString().length > 8){
-            resText = "Val: " + value.toString().substring(0,7)
-        }
-        else{
-            resText = "Val: " + value.toString()
+        resText = if(value.toString().length > 8){
+            "Val: " + value.toString().substring(0,7)
+        } else{
+            "Val: $value"
         }
         binding?.tvPrice?.text = resText
         super.refreshContent(entry, highlight)
