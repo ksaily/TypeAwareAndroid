@@ -11,6 +11,8 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.example.testing.Graph
 import com.example.testing.R
@@ -95,6 +97,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         val values2: ArrayList<BarEntry> = ArrayList()
 
         statValues.clear()
+        viewModel.chartSelected = 0 //Initiate selected charts to error
         //
         for (i in 1 .. MAX_X_VALUE) {
             values1.add(
@@ -145,234 +148,260 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         //data2.addDataSet(v4)
         Log.d("Dataset1", data1.toString())
         dateViewModel.checkDate()
-        //viewModel.getFromFirebaseToChart(dateViewModel.selectedDate.value.toString())
-
-        viewModel.chartErrorValues.observe(viewLifecycleOwner) {
-            Log.d("ChartView", "Errors found")
-            val label1 = ArrayList<String>()
-            val stats = viewModel.chartErrorValues.value
-            val dats = mutableListOf<BarEntry>()
-            if (stats != null) {
-                for (i in stats) {
-                    label1.add(i.x.toInt().toString())
-            }} else {
-                configureBarChart(barChart1!!, "Errors", labels1)
-                prepareChartData(barChart1!!, data1)
-            }
-            val v1: BarDataSet = BarDataSet(stats, "Errors made")
-            v1.setDrawValues(false)
-            val data = BarData()
-            data.addDataSet(v1)
-            Log.d("Dataset1", data.toString())
-            configureBarChart(barChart1!!, "Errors", label1)
-            prepareChartData(barChart1!!, data)
+        lifecycleScope.launch {
+            viewModel.getFromFirebaseToChart(dateViewModel.selectedDate.value.toString())
         }
 
-        dateViewModel.selectedDate.observe(viewLifecycleOwner) {
-            Log.d("Dateviewmodel", "Date changed to: " +
-                    dateViewModel.selectedDate.value)
-            lifecycleScope.launch(Dispatchers.IO){
-                try {
-                    viewModel.getFromFirebaseToChart(dateViewModel.selectedDate.value.toString())
-                } catch (e: Exception) {
-                    Log.d("Error", "$e")
+            binding.switchToWritingSpeedBtn.setOnClickListener {
+                if (binding.switchToWritingSpeedBtn.background == resources.getDrawable(R.drawable.border_unselected)) {
+                    binding.switchToWritingSpeedBtn.setBackgroundResource(R.drawable.border_selected)
+                    binding.switchToErrorsBtn.setBackgroundResource(R.drawable.border_unselected)
+                    viewModel.chartSelected = 1
+                    updateChart(viewModel.chartSessions.value!!, "Writing speed per character",
+                        "Writing speed")
                 }
             }
-            barChart1!!.notifyDataSetChanged()
-            barChart2!!.notifyDataSetChanged()
+
+            binding.switchToErrorsBtn.setOnClickListener {
+                if (binding.switchToErrorsBtn.background == resources.getDrawable(R.drawable.border_unselected)) {
+                    binding.switchToErrorsBtn.setBackgroundResource(R.drawable.border_selected)
+                    binding.switchToWritingSpeedBtn.setBackgroundResource(R.drawable.border_unselected)
+                    updateChart(viewModel.chartErrorValues.value!!, "Errors made",
+                        "Errors")
+                }
+            }
+
+
+
+            viewModel.chartErrorValues.observe(viewLifecycleOwner) {
+                Log.d("ChartView", "Errors found")
+                if (viewModel.chartSelected == 0) {
+                    val stats = viewModel.chartErrorValues.value
+                    if (stats != null) {
+                        updateChart(stats, "Errors made", "Errors")
+                    }
+                }
+            }
+
+            dateViewModel.selectedDate.observe(viewLifecycleOwner) {
+                Log.d("Dateviewmodel", "Date changed to: " +
+                        dateViewModel.selectedDate.value)
+                lifecycleScope.launch(Dispatchers.IO){
+                    try {
+                        viewModel.getFromFirebaseToChart(dateViewModel.selectedDate.value.toString())
+                    } catch (e: Exception) {
+                        Log.d("Error", "$e")
+                    }
+                }
+                barChart1!!.notifyDataSetChanged()
+                barChart2!!.notifyDataSetChanged()
+            }
+
+            //configureBarChart(barChart1!!, "Errors per timewindow", labels1)
+            configureBarChart(barChart2!!, "Sessions per timewindow", labels2)
+            //prepareChartData(barChart1!!, data1)
+            prepareChartData(barChart2!!, data2)
+
+
+
+            //v2.addDataSet(dataSet2)
+            //Set draw values to false (to avoid mess)
+
+            //val entries = ArrayList<ILineDataSet>()
+            //entries.add(v1)
+            //entries.add(v2)
+
+            //Make first dataset dashed
+            //entries.get(0).formLineDashEffect
+            /**
+            //Assign our list to LineDataSet and label it
+            //val v1 = LineDataSet(entries, "My type")
+
+            //Set label rotation angle to x axis
+            lineChart!!.xAxis.labelRotationAngle = 0f
+
+            //Assign dataset to line chart
+            lineChart!!.data = LineData(entries)
+            //lineChart!!.data = LineData(v2)
+
+            val j = 0
+            //To remove right side y axis from chart:
+            lineChart!!.axisRight?.isEnabled = false
+            lineChart!!.xAxis.axisMaximum = 5f+0.1f
+
+            //To enable zooming the chart
+            lineChart!!.setTouchEnabled(true)
+            lineChart!!.setPinchZoom(true)
+
+            //When dataset fails write this on the screen
+            lineChart!!.description.text = "Days"
+            lineChart!!.setNoDataText("No forex yet!")
+            lineChart!!.setNoDataTextColor(R.color.white)
+            lineChart!!.xAxis.textColor = R.color.white
+            lineChart!!.data.setValueTextColor(R.color.white)
+
+            //Add animation to show while the dataset is loading
+            lineChart!!.animateX(1800, Easing.EaseInExpo)
+
+            //If you want to show values on the linechart, create custom market for that
+            // Remember to create a layout for this
+            val markerView = CustomMarker(Graph.appContext, R.layout.marker_view)
+            lineChart!!.marker = markerView
+            lineChart!!.invalidate()
+
+            //Stacked Bar Chart
+            barChart2 = binding.barChart2
+            var xAxisValues = ArrayList<String>()
+
+            xAxisValues.add("Jan")
+            xAxisValues.add("Feb")
+            xAxisValues.add("Mar")
+            xAxisValues.add("Apr")
+            xAxisValues.add("May")
+            xAxisValues.add("June")
+            xAxisValues.add("Jul")
+            xAxisValues.add("Aug")
+            xAxisValues.add("Sep")
+            xAxisValues.add("Oct")
+            xAxisValues.add("Nov")
+            xAxisValues.add("Dec")
+
+            var yValueGroup1 = ArrayList<BarEntry>()
+            var yValueGroup2 = ArrayList<BarEntry>()
+
+
+            yValueGroup1.add(BarEntry(1f, floatArrayOf(9.toFloat(), 3.toFloat())))
+            yValueGroup2.add(BarEntry(1f, floatArrayOf(2.toFloat(), 7.toFloat())))
+            yValueGroup1.add(BarEntry(2f, floatArrayOf(3.toFloat(), 3.toFloat())))
+            yValueGroup2.add(BarEntry(2f, floatArrayOf(4.toFloat(), 15.toFloat())))
+
+            yValueGroup1.add(BarEntry(3f, floatArrayOf(3.toFloat(), 3.toFloat())))
+            yValueGroup2.add(BarEntry(3f, floatArrayOf(4.toFloat(), 15.toFloat())))
+
+            yValueGroup1.add(BarEntry(4f, floatArrayOf(3.toFloat(), 3.toFloat())))
+            yValueGroup2.add(BarEntry(4f, floatArrayOf(4.toFloat(), 15.toFloat())))
+
+
+            yValueGroup1.add(BarEntry(5f, floatArrayOf(9.toFloat(), 3.toFloat())))
+            yValueGroup2.add(BarEntry(5f, floatArrayOf(10.toFloat(), 6.toFloat())))
+
+            yValueGroup1.add(BarEntry(6f, floatArrayOf(11.toFloat(), 1.toFloat())))
+            yValueGroup2.add(BarEntry(6f, floatArrayOf(12.toFloat(), 2.toFloat())))
+
+
+            yValueGroup1.add(BarEntry(7f, floatArrayOf(11.toFloat(), 7.toFloat())))
+            yValueGroup2.add(BarEntry(7f, floatArrayOf(12.toFloat(), 12.toFloat())))
+
+
+            yValueGroup1.add(BarEntry(8f, floatArrayOf(11.toFloat(), 9.toFloat())))
+            yValueGroup2.add(BarEntry(8f, floatArrayOf(12.toFloat(), 8.toFloat())))
+
+
+            yValueGroup1.add(BarEntry(9f, floatArrayOf(11.toFloat(), 13.toFloat())))
+            yValueGroup2.add(BarEntry(9f, floatArrayOf(12.toFloat(), 12.toFloat())))
+
+            yValueGroup1.add(BarEntry(10f, floatArrayOf(11.toFloat(), 2.toFloat())))
+            yValueGroup2.add(BarEntry(10f, floatArrayOf(12.toFloat(), 7.toFloat())))
+
+            yValueGroup1.add(BarEntry(11f, floatArrayOf(11.toFloat(), 6.toFloat())))
+
+            yValueGroup2.add(BarEntry(11f, floatArrayOf(12.toFloat(), 5.toFloat())))
+
+            yValueGroup1.add(BarEntry(12f, floatArrayOf(11.toFloat(), 2.toFloat())))
+            yValueGroup2.add(BarEntry(12f, floatArrayOf(12.toFloat(), 3.toFloat())))
+
+            var barDataSet1: BarDataSet
+            var barDataSet2: BarDataSet
+
+
+            barDataSet1 = BarDataSet(yValueGroup1, "")
+            barDataSet1.setColors(Color.BLUE, Color.RED)
+
+            barDataSet1.setDrawIcons(false)
+            barDataSet1.setDrawValues(false)
+
+            barDataSet2 = BarDataSet(yValueGroup2, "")
+            barDataSet2.setColors(Color.YELLOW, Color.RED)
+            barDataSet2.setDrawIcons(false)
+            barDataSet2.setDrawValues(false)
+
+
+            // Pass Both Bar Data Set's in Bar Data.
+            var barData = BarData(barDataSet1, barDataSet2)
+
+            chart!!.description.isEnabled = false
+            chart!!.description.textSize = 0f
+            barData.setValueFormatter(LargeValueFormatter())
+            chart!!.data = barData
+            chart!!.barData.barWidth = BAR_WIDTH
+            chart!!.xAxis.axisMinimum = 0f
+            chart!!.xAxis.axisMaximum = 12f
+            chart!!.groupBars(0f, GROUP_SPACE, BAR_SPACE)
+            //   barChartView.setFitBars(true)
+            chart!!.data.isHighlightEnabled = false
+            chart!!.invalidate()
+
+            // set bar label
+            var legend = chart!!.legend
+            legend.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
+            legend.horizontalAlignment = Legend.LegendHorizontalAlignment.RIGHT
+            legend.setOrientation(Legend.LegendOrientation.HORIZONTAL)
+            legend.setDrawInside(false)
+
+            var legenedEntries = arrayListOf<LegendEntry>()
+
+            legenedEntries.add(LegendEntry("2016", Legend.LegendForm.SQUARE, 8f, 8f, null, Color.RED))
+            legenedEntries.add(LegendEntry("2017", Legend.LegendForm.SQUARE, 8f, 8f, null, Color.YELLOW))
+
+            legend.setCustom(legenedEntries)
+
+            legend.setYOffset(2f)
+            legend.setXOffset(2f)
+            legend.setYEntrySpace(0f)
+            legend.setTextSize(5f)
+
+
+            //Populate x-axis
+            val xAxis = chart!!.getXAxis()
+            xAxis.granularity = 1f
+            xAxis.isGranularityEnabled = true
+            xAxis.setCenterAxisLabels(true)
+            xAxis.setDrawGridLines(false)
+            xAxis.textSize = 9f
+
+            xAxis.position = XAxis.XAxisPosition.BOTTOM
+            xAxis.valueFormatter = IndexAxisValueFormatter(xAxisValues)
+
+            xAxis.labelCount = 12
+            xAxis.mAxisMaximum = 12f
+            xAxis.setCenterAxisLabels(true)
+            xAxis.setAvoidFirstLastClipping(true)
+            xAxis.spaceMin = 4f
+            xAxis.spaceMax = 4f
+
+            //Y-axis
+            val leftAxis = chart!!.axisLeft
+            leftAxis.valueFormatter = LargeValueFormatter()
+            leftAxis.setDrawGridLines(false)
+            leftAxis.spaceTop = 1f
+            leftAxis.axisMinimum = 0f
+
+            chart!!.data = barData
+            chart!!.setVisibleXRange(1f, 12f)**/
         }
 
-        //configureBarChart(barChart1!!, "Errors per timewindow", labels1)
-        configureBarChart(barChart2!!, "Sessions per timewindow", labels2)
-        //prepareChartData(barChart1!!, data1)
-        prepareChartData(barChart2!!, data2)
-
-
-
-        //v2.addDataSet(dataSet2)
-        //Set draw values to false (to avoid mess)
-
-        //val entries = ArrayList<ILineDataSet>()
-        //entries.add(v1)
-        //entries.add(v2)
-
-        //Make first dataset dashed
-        //entries.get(0).formLineDashEffect
-/**
-        //Assign our list to LineDataSet and label it
-        //val v1 = LineDataSet(entries, "My type")
-
-        //Set label rotation angle to x axis
-        lineChart!!.xAxis.labelRotationAngle = 0f
-
-        //Assign dataset to line chart
-        lineChart!!.data = LineData(entries)
-        //lineChart!!.data = LineData(v2)
-
-        val j = 0
-        //To remove right side y axis from chart:
-        lineChart!!.axisRight?.isEnabled = false
-        lineChart!!.xAxis.axisMaximum = 5f+0.1f
-
-        //To enable zooming the chart
-        lineChart!!.setTouchEnabled(true)
-        lineChart!!.setPinchZoom(true)
-
-        //When dataset fails write this on the screen
-        lineChart!!.description.text = "Days"
-        lineChart!!.setNoDataText("No forex yet!")
-        lineChart!!.setNoDataTextColor(R.color.white)
-        lineChart!!.xAxis.textColor = R.color.white
-        lineChart!!.data.setValueTextColor(R.color.white)
-
-        //Add animation to show while the dataset is loading
-        lineChart!!.animateX(1800, Easing.EaseInExpo)
-
-        //If you want to show values on the linechart, create custom market for that
-        // Remember to create a layout for this
-        val markerView = CustomMarker(Graph.appContext, R.layout.marker_view)
-        lineChart!!.marker = markerView
-        lineChart!!.invalidate()
-
-        //Stacked Bar Chart
-        barChart2 = binding.barChart2
-        var xAxisValues = ArrayList<String>()
-
-        xAxisValues.add("Jan")
-        xAxisValues.add("Feb")
-        xAxisValues.add("Mar")
-        xAxisValues.add("Apr")
-        xAxisValues.add("May")
-        xAxisValues.add("June")
-        xAxisValues.add("Jul")
-        xAxisValues.add("Aug")
-        xAxisValues.add("Sep")
-        xAxisValues.add("Oct")
-        xAxisValues.add("Nov")
-        xAxisValues.add("Dec")
-
-        var yValueGroup1 = ArrayList<BarEntry>()
-        var yValueGroup2 = ArrayList<BarEntry>()
-
-
-        yValueGroup1.add(BarEntry(1f, floatArrayOf(9.toFloat(), 3.toFloat())))
-        yValueGroup2.add(BarEntry(1f, floatArrayOf(2.toFloat(), 7.toFloat())))
-        yValueGroup1.add(BarEntry(2f, floatArrayOf(3.toFloat(), 3.toFloat())))
-        yValueGroup2.add(BarEntry(2f, floatArrayOf(4.toFloat(), 15.toFloat())))
-
-        yValueGroup1.add(BarEntry(3f, floatArrayOf(3.toFloat(), 3.toFloat())))
-        yValueGroup2.add(BarEntry(3f, floatArrayOf(4.toFloat(), 15.toFloat())))
-
-        yValueGroup1.add(BarEntry(4f, floatArrayOf(3.toFloat(), 3.toFloat())))
-        yValueGroup2.add(BarEntry(4f, floatArrayOf(4.toFloat(), 15.toFloat())))
-
-
-        yValueGroup1.add(BarEntry(5f, floatArrayOf(9.toFloat(), 3.toFloat())))
-        yValueGroup2.add(BarEntry(5f, floatArrayOf(10.toFloat(), 6.toFloat())))
-
-        yValueGroup1.add(BarEntry(6f, floatArrayOf(11.toFloat(), 1.toFloat())))
-        yValueGroup2.add(BarEntry(6f, floatArrayOf(12.toFloat(), 2.toFloat())))
-
-
-        yValueGroup1.add(BarEntry(7f, floatArrayOf(11.toFloat(), 7.toFloat())))
-        yValueGroup2.add(BarEntry(7f, floatArrayOf(12.toFloat(), 12.toFloat())))
-
-
-        yValueGroup1.add(BarEntry(8f, floatArrayOf(11.toFloat(), 9.toFloat())))
-        yValueGroup2.add(BarEntry(8f, floatArrayOf(12.toFloat(), 8.toFloat())))
-
-
-        yValueGroup1.add(BarEntry(9f, floatArrayOf(11.toFloat(), 13.toFloat())))
-        yValueGroup2.add(BarEntry(9f, floatArrayOf(12.toFloat(), 12.toFloat())))
-
-        yValueGroup1.add(BarEntry(10f, floatArrayOf(11.toFloat(), 2.toFloat())))
-        yValueGroup2.add(BarEntry(10f, floatArrayOf(12.toFloat(), 7.toFloat())))
-
-        yValueGroup1.add(BarEntry(11f, floatArrayOf(11.toFloat(), 6.toFloat())))
-
-        yValueGroup2.add(BarEntry(11f, floatArrayOf(12.toFloat(), 5.toFloat())))
-
-        yValueGroup1.add(BarEntry(12f, floatArrayOf(11.toFloat(), 2.toFloat())))
-        yValueGroup2.add(BarEntry(12f, floatArrayOf(12.toFloat(), 3.toFloat())))
-
-        var barDataSet1: BarDataSet
-        var barDataSet2: BarDataSet
-
-
-        barDataSet1 = BarDataSet(yValueGroup1, "")
-        barDataSet1.setColors(Color.BLUE, Color.RED)
-
-        barDataSet1.setDrawIcons(false)
-        barDataSet1.setDrawValues(false)
-
-        barDataSet2 = BarDataSet(yValueGroup2, "")
-        barDataSet2.setColors(Color.YELLOW, Color.RED)
-        barDataSet2.setDrawIcons(false)
-        barDataSet2.setDrawValues(false)
-
-
-        // Pass Both Bar Data Set's in Bar Data.
-        var barData = BarData(barDataSet1, barDataSet2)
-
-        chart!!.description.isEnabled = false
-        chart!!.description.textSize = 0f
-        barData.setValueFormatter(LargeValueFormatter())
-        chart!!.data = barData
-        chart!!.barData.barWidth = BAR_WIDTH
-        chart!!.xAxis.axisMinimum = 0f
-        chart!!.xAxis.axisMaximum = 12f
-        chart!!.groupBars(0f, GROUP_SPACE, BAR_SPACE)
-//   barChartView.setFitBars(true)
-        chart!!.data.isHighlightEnabled = false
-        chart!!.invalidate()
-
-        // set bar label
-        var legend = chart!!.legend
-        legend.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
-        legend.horizontalAlignment = Legend.LegendHorizontalAlignment.RIGHT
-        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL)
-        legend.setDrawInside(false)
-
-        var legenedEntries = arrayListOf<LegendEntry>()
-
-        legenedEntries.add(LegendEntry("2016", Legend.LegendForm.SQUARE, 8f, 8f, null, Color.RED))
-        legenedEntries.add(LegendEntry("2017", Legend.LegendForm.SQUARE, 8f, 8f, null, Color.YELLOW))
-
-        legend.setCustom(legenedEntries)
-
-        legend.setYOffset(2f)
-        legend.setXOffset(2f)
-        legend.setYEntrySpace(0f)
-        legend.setTextSize(5f)
-
-
-        //Populate x-axis
-        val xAxis = chart!!.getXAxis()
-        xAxis.granularity = 1f
-        xAxis.isGranularityEnabled = true
-        xAxis.setCenterAxisLabels(true)
-        xAxis.setDrawGridLines(false)
-        xAxis.textSize = 9f
-
-        xAxis.position = XAxis.XAxisPosition.BOTTOM
-        xAxis.valueFormatter = IndexAxisValueFormatter(xAxisValues)
-
-        xAxis.labelCount = 12
-        xAxis.mAxisMaximum = 12f
-        xAxis.setCenterAxisLabels(true)
-        xAxis.setAvoidFirstLastClipping(true)
-        xAxis.spaceMin = 4f
-        xAxis.spaceMax = 4f
-
-        //Y-axis
-        val leftAxis = chart!!.axisLeft
-        leftAxis.valueFormatter = LargeValueFormatter()
-        leftAxis.setDrawGridLines(false)
-        leftAxis.spaceTop = 1f
-        leftAxis.axisMinimum = 0f
-
-        chart!!.data = barData
-        chart!!.setVisibleXRange(1f, 12f)**/
+    private fun updateChart(stats: List<BarEntry>, label: String, description: String) {
+        val label1 = ArrayList<String>()
+        for (i in stats) {
+            label1.add(i.x.toInt().toString())
+        }
+        val v1: BarDataSet = BarDataSet(stats, label)
+        v1.setDrawValues(false)
+        val data = BarData()
+        data.addDataSet(v1)
+        Log.d("Dataset1", data.toString())
+        configureBarChart(barChart1!!, description, label1)
+        prepareChartData(barChart1!!, data)
     }
 
     override fun onResume() {

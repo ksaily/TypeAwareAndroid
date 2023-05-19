@@ -29,6 +29,7 @@ class ChartViewModel: ViewModel() {
         get() = _chartSessions
 
     var dataFound: Boolean = false
+    var chartSelected: Int = 0 // 0 if errors, 1 if speed
 
 
     fun getFromFirebaseToChart(date: String) {

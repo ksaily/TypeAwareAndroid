@@ -38,27 +38,55 @@
                 android:orientation="vertical"
                 android:backgroundTint="@color/white">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingVertical="12dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="5dp"
+                        android:text="Errors"
+                        android:id="@+id/switchToErrorsBtn"
+                        android:background="@drawable/border_selected"
+                        android:textColor="@color/dark_purple"
+                        android:layout_marginHorizontal="5dp"
+                        android:gravity="center"
+                        android:textAlignment="center"
+                        android:textSize="16sp"
+                        android:fontFamily="@font/roboto_black">
+
+                    </TextView>
+
 
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="10dp"
+                    android:paddingHorizontal="5dp"
+                    android:textAlignment="center"
+                    android:fontFamily="@font/roboto_bold"
                     android:text="Writing speed"
-                    android:textColor="@color/light_purple"
-                    android:backgroundTint="@color/light_purple"
+                    android:id="@+id/switchToWritingSpeedBtn"
+                    android:background="@drawable/border_unselected"
+                    android:textColor="@color/muted_light_purple"
                     android:layout_marginHorizontal="5dp"
-                    android:layout_gravity="right"
-                    android:textSize="10sp">
+                    android:layout_gravity="center"
+                    android:textSize="16sp">
 
                 </TextView>
+                </LinearLayout>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Errors made during a timewindow"
                     android:textSize="15sp"
                     android:layout_gravity="left"
-                    android:padding="10dp"
+                    android:paddingVertical="15dp"
+                    android:paddingHorizontal="10dp"
                     android:fontFamily="@font/roboto_black"
                     android:textColor="@color/dark_purple" />
 
@@ -76,12 +104,13 @@
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="300dp">
+                android:layout_height="250dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
+                    android:paddingVertical="10dp"
                     android:backgroundTint="@color/white">
 
             <TextView
@@ -96,7 +125,7 @@
 
             <com.github.mikephil.charting.charts.BarChart
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:padding="2dp"
                 android:id="@+id/barChart2"/>
 

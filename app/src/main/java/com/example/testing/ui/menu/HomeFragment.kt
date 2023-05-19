@@ -7,7 +7,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ProgressBar
+import androidx.core.text.trimmedLength
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -88,6 +90,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val transaction = childFragmentManager.beginTransaction()
         transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
             .addToBackStack("dateFragment").commit()
+        val crashButton = Button(Graph.appContext)
+        crashButton.text = "Test Crash"
+        crashButton.setOnClickListener {
+            throw RuntimeException("Test Crash") // Force a crash
+        }
+
+
         val code = Utils.readSharedSettingString(
             Graph.appContext,
             "authorization_code", ""
@@ -275,8 +284,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             Log.d("HomeFragment", "Total speed: ${totalErrRate.average()}l")
             binding.keyboardChart.keyboardDataNotFound.isVisible = false
             binding.keyboardChart.dataAvailable.isVisible = true
-            val roundoff = round(totalSpeed.average())
-            binding.keyboardChart.speedData.text = roundoff.toString()
+            val s = totalSpeed.average().toString()
+            val clippedString = s.substring(0, s.length.coerceAtMost(4))
+            binding.keyboardChart.speedData.text = clippedString
             binding.keyboardChart.ProgressTextView.text =
                 showPercentage(0.2,
                     binding.keyboardChart.progressCircular).toString()
@@ -318,10 +328,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         chart!!.xAxis.axisMaximum = MAX_X_VALUE.toFloat()
     }
 
-    fun showPercentage(errorRate: Double, progressBar: ProgressBar): Double {
+    fun showPercentage(errorRate: Double, progressBar: ProgressBar): Int {
         var successRate = (1.0 - errorRate) * 100
         progressBar.progress = successRate.toInt()
-        return successRate
+        return successRate.toInt()
     }
 
     companion object {
