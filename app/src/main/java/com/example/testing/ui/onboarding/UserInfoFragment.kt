@@ -62,7 +62,8 @@ class UserInfoFragment : Fragment(R.layout.fragment_user_info) {
                 .putBoolean("user_info_saved", true)
                 .commit()
             Log.d("UserInfoFragment", "Start onboarding")
-            parentFragmentManager.beginTransaction().remove(this).commit()
+            parentFragmentManager.beginTransaction().replace(R.id.container, OnboardingFragment())
+            parentFragmentManager.popBackStack()
             //startActivity(Intent(Graph.appContext, OnboardingActivity::class.java))
             //removeFragmentByTag(MainActivity, "userInfoFragment")
         }

@@ -1,6 +1,8 @@
 package com.example.testing.ui.menu
 
 import android.content.Intent
+import android.content.SharedPreferences
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
@@ -28,9 +30,12 @@ import com.example.testing.utils.Utils
 import com.example.testing.utils.Utils.Companion.checkAccessibilityPermission
 import com.example.testing.utils.Utils.Companion.countAvgSpeed
 import com.example.testing.utils.Utils.Companion.readSharedSettingBoolean
+import com.example.testing.utils.Utils.Companion.readSharedSettingString
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.*
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -51,7 +56,7 @@ private const val ARG_PARAM2 = "param2"
  * Use the [HomeFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class HomeFragment : Fragment(R.layout.fragment_home) {
+class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeListener {
     // Chart variables:
     private val MAX_X_VALUE = 13
     private val GROUPS = 2
@@ -76,6 +81,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val firebaseViewModel: FirebaseViewModel by activityViewModels()
     var data = SleepData(false, 0, "", "")
 
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+            if (key == "access_token") {
+                checkFitbitLogin()
+            }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
@@ -90,12 +101,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val transaction = childFragmentManager.beginTransaction()
         transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
             .addToBackStack("dateFragment").commit()
-        val crashButton = Button(Graph.appContext)
-        crashButton.text = "Test Crash"
-        crashButton.setOnClickListener {
-            throw RuntimeException("Test Crash") // Force a crash
-        }
-
+        val sharedPrefs = Utils.getSharedPrefs()
 
         val code = Utils.readSharedSettingString(
             Graph.appContext,
@@ -104,18 +110,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val state = Utils.readSharedSettingString(
             Graph.appContext, "state", ""
         )
-        if (code != null && state != null) {
+        if (code!!.isNotEmpty() && state!!.isNotEmpty()) {
             FitbitApiService.authorizeRequestToken(code, state)
         } else {
             showFitbitLogin()
         }
 
-        if (!readSharedSettingBoolean(Graph.appContext, "loggedInFitbit", false)) {
-            showFitbitLogin()
-            //Replace with shared setting listener
-        } else {
-            updateSleepData()
-        }
 
         binding.keyboardChart.openAccessibilitySettingsBtn.setOnClickListener {
             checkAccessibilityPermission(Graph.appContext, true)
@@ -136,15 +136,32 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             dateViewModel.selectedDate.value)
             //firebaseViewModel.clearListOfFirebaseData()
             updateKeyboardData()
-            updateSleepData()
+            checkFitbitLogin()
             currentDate = dateViewModel.selectedDate.value.toString()
         }
 
+        firebaseViewModel.sleepData.observe(viewLifecycleOwner) {
+            Log.d("FirebaseViewModel","Sleep data updated")
+            hideFitbitLogin(firebaseViewModel.sleepData.value!!)
+        }
+
+        //sharedPrefs.registerOnSharedPreferenceChangeListener(this)
+
+    }
+
+    private fun checkFitbitLogin() {
+        if (!isLoggedInFitbit()) {
+            showFitbitLogin()
+            Log.d("Fitbit", "Not logged into fitbit")
+        } else {
+            Log.d("Fitbit", "Logged into fitbit")
+            updateSleepData()
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        if (!readSharedSettingBoolean(Graph.appContext, "loggedInFitbit", false)) {
+        if (!isLoggedInFitbit()) {
             showFitbitLogin()
         }
     }
@@ -159,73 +176,78 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         _binding = null
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        Utils.getSharedPrefs().unregisterOnSharedPreferenceChangeListener(this)
+    }
+
     private fun showFitbitLogin() {
-        binding.sleepDataContainer.FitbitBtn.isVisible = true
-        binding.sleepDataContainer.FitbitLoginPrompt.isVisible = true
-        binding.sleepDataContainer.hideThis.isVisible = false
+        binding.sleepDataContainer.FitbitLoginVisible.isVisible = true
         binding.sleepDataContainer.sleepData.isVisible = false
     }
 
-    private fun hideFitbitLogin() {
-        binding.sleepDataContainer.apply {
-            FitbitBtn.isVisible = false
-            FitbitLoginPrompt.isVisible = false
-            sleepData.isVisible = true
-            if (checkSleepDataSetting()) {
-                Log.d("GetSleepData", "Sleep data requested")
-                val formattedDate = Utils.formatForFitbit(
-                    dateViewModel.selectedDate.value.toString()
-                )
-                lifecycleScope.launch(Dispatchers.IO) {
-                    data = FitbitApiService.getSleepData(formattedDate)
-                    withContext(Dispatchers.Main) {
-                        if (data.dataAvailable) {
-                            Log.d("HomeFragment", "Sleep data found")
-                            wakeUpTime.text = data.endTime
-                            bedTime.text = data.startTime
-                            val t: Int = data.totalMinutesAsleep
-                            val hours = t / 60
-                            val minutes = t % 60
-                            val asleepString = "$hours h $minutes m"
-                            sleepAmount.text = asleepString
-                        } else {
-                            Log.d("HomeFragment", "No sleep data available")
-                            SleepDataView.isVisible = false
-                            SleepDataViewHidden.isVisible = true
-                            SleepDataViewHiddenTitle.text = getString(R.string.sleep_data_title)
-                            SleepDataViewHiddenContent.text = getString(R.string.home_sleep_data_not_found_content)
-
-                        }
-
-                    }
-                }
-                }
-            }
-
+    private fun updateViewWithSleepData() {
+        val formattedDate = Utils.formatForFitbit(
+            dateViewModel.selectedDate.value.toString()
+        )
+        Log.d("GetSleepData", "Sleep data requested")
+        firebaseViewModel.getSleepData(formattedDate)
     }
 
+    private fun hideFitbitLogin(data: SleepData) {
+        binding.sleepDataContainer.apply {
+            SleepDataViewHidden.isVisible = false
+            SleepDataView.isVisible = true
+            FitbitLoginVisible.isVisible = false
+            if (data.dataAvailable) {
+                sleepData.isVisible = true
+                sleepDataNotFound.isVisible = false
+                Log.d("HomeFragment", "Sleep data found")
+                println(data.endTime)
+                println(data.startTime)
+                wakeUpTime.text = data.endTime.toString()
+                bedTime.text = data.startTime.toString()
+                val t: Int = data.totalMinutesAsleep
+                val hours = t / 60
+                val minutes = t % 60
+                val asleepString = "$hours h $minutes m"
+                println(asleepString)
+                sleepAmount.text = asleepString
+                val participantId = readSharedSettingString(
+                    Graph.appContext,
+                    "p_id",
+                    "")
+                firebaseViewModel.saveSleepDataToFirebase(
+                    dateViewModel.selectedDate.value.toString(),
+                    data,
+                    participantId.toString()
+                )
+            } else {
+                Log.d("HomeFragment", "No sleep data available")
+                sleepData.isVisible = false
+                sleepDataNotFound.isVisible = true
+            }
+        }
+    }
+
+
     private fun updateSleepData() {
-        if (Utils.readSharedSettingBoolean(
-                Graph.appContext, "loggedInFitbit", false) &&
+        if (isLoggedInFitbit() &&
                 checkSleepDataSetting())
         {
-            hideFitbitLogin()
-        } else if (!Utils.readSharedSettingBoolean(
-                Graph.appContext, "loggedInFitbit", false) &&
+            updateViewWithSleepData()
+        } else if (!isLoggedInFitbit() &&
             checkSleepDataSetting())
         {
             binding.sleepDataContainer.apply {
-                FitbitBtn.isVisible = true
-                FitbitLoginPrompt.isVisible = true
+                FitbitLoginVisible.isVisible = true
                 sleepData.isVisible = false
             }
-        } else if (!checkSleepDataSetting())
-        {
-            binding.sleepDataContainer.apply {
-                SleepDataViewHiddenTitle.text = getString(R.string.home_sleep_data_hidden_title)
-                SleepDataViewHiddenContent.text = getString(R.string.home_sleep_data_hidden_content)
-            }
         }
+    }
+
+    private fun isLoggedInFitbit(): Boolean {
+        return readSharedSettingString(Graph.appContext, "access_token", "")!!.isNotEmpty()
     }
 
     /**
@@ -299,33 +321,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             binding.keyboardChart.dataAvailable.isVisible = false
             Log.d("UpdateUI", "No data on keyboardList")
         }
-    }
-
-    private fun prepareChartData(data: BarData) {
-        chart!!.data = data
-        //chart!!.barData.barWidth = BAR_WIDTH
-        val groupSpace = 1f - (BAR_SPACE + BAR_WIDTH)
-        //chart!!.groupBars(0f, groupSpace, BAR_SPACE)
-        chart!!.invalidate()
-    }
-
-    private fun configureBarChart() {
-        chart!!.setPinchZoom(false)
-        //chart!!.setDrawBarShadow(false)
-        chart!!.setDrawGridBackground(false)
-
-        chart!!.description.isEnabled = false
-        val xAxis = chart!!.xAxis
-        xAxis.granularity = 1f
-        xAxis.setCenterAxisLabels(true)
-        xAxis.setDrawGridLines(false)
-        val leftAxis = chart!!.axisLeft
-        leftAxis.setDrawGridLines(true)
-        leftAxis.spaceTop = 35f
-        leftAxis.axisMinimum = 0f
-        chart!!.axisRight.isEnabled = false
-        chart!!.xAxis.axisMinimum = 1f
-        chart!!.xAxis.axisMaximum = MAX_X_VALUE.toFloat()
     }
 
     fun showPercentage(errorRate: Double, progressBar: ProgressBar): Int {

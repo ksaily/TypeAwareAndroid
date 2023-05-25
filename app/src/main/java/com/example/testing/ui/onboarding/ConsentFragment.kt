@@ -57,7 +57,8 @@ class ConsentFragment : Fragment(R.layout.fragment_consent) {
 
               //  null, "userInfoFragment", false)
             //removeFragmentByTag(MainActivity, "consentFragment")
-            parentFragmentManager.beginTransaction().remove(this).commit()
+            parentFragmentManager.beginTransaction().replace(R.id.container, UserInfoFragment())
+            parentFragmentManager.popBackStack()
         }
 
         binding.conBtnQuit.setOnClickListener {

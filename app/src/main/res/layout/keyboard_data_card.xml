@@ -76,7 +76,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:id="@+id/dataAvailable">
+        android:id="@+id/dataAvailable"
+        android:visibility="visible">
 
         <TableRow
             android:layout_width="match_parent"

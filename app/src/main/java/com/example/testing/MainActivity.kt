@@ -9,8 +9,6 @@ import android.os.Handler
 import android.provider.Settings
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ProgressBar
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -27,8 +25,6 @@ import com.example.testing.ui.menu.SettingsFragment
 import com.example.testing.ui.menu.ChartFragment
 import com.example.testing.ui.menu.DateFragment
 import com.example.testing.ui.onboarding.*
-import com.example.testing.ui.viewmodel.DateViewModel
-import com.example.testing.ui.viewmodel.FirebaseViewModel
 import com.example.testing.ui.viewmodel.PrefsViewModel
 import com.example.testing.utils.FragmentUtils
 import com.example.testing.utils.FragmentUtils.Companion.loadFragment
@@ -79,8 +75,6 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     protected val statsTitles = arrayOf(
         "Orders", "Inventory"
     )
-    val dateViewModel: DateViewModel by viewModels()
-    val firebaseViewModel: FirebaseViewModel by viewModels()
     private val calendar: Calendar = Calendar.getInstance()
     private val year = calendar.get(Calendar.YEAR)
     private val homeFragment = HomeFragment()
@@ -88,7 +82,8 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     private val settingsFragment = SettingsFragment()
     val database = Firebase.database("https://health-app-9c151-default-rtdb.europe-west1.firebasedatabase.app")
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+
+        override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         view = binding.root
@@ -97,13 +92,13 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         val transaction = supportFragmentManager.beginTransaction()
 
         //Utils.checkBattery(applicationContext)
-
+        /**
         if (!readSharedSettingBoolean(applicationContext,
                 "consent_given",
                 false)) {
             loadFragment(this, ConsentFragment(), null,
                 "consentFragment", false)
-        }
+        }**/
 
         loadFragment(this, homeFragment, null, "homeFragment", true)
 
@@ -127,12 +122,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             true
         }
         sharedPrefs.registerOnSharedPreferenceChangeListener(this)
-        if (!readSharedSettingBoolean(applicationContext,
-                "first_login_done", false)
-        ) {
-            onFirstLogin()
-        }
-        //onFirstLogin()
+        checkFirstLogin()
 
         Utils.checkPermissions(applicationContext)
     }
@@ -143,13 +133,8 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
      **/
     override fun onResume() {
         super.onResume()
-        //Register on shared preference change listener in onCreate and check for permissions?
+        checkFirstLogin()
         Utils.checkPermissions(applicationContext)
-        /**if (!readSharedSettingBoolean(applicationContext,
-                "first_login_done", false)
-        ) {
-            onFirstLogin()
-        }**/
     }
 
     override fun onDestroy() {
@@ -162,15 +147,22 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
                 "accessibility_permission", false)
         ) {
             Log.d("CheckPref", "Accessibility")
-            Utils.checkAccessibilityPermission(applicationContext, true)
+            Utils.showAlertDialog(this@MainActivity, 0)
         }
         if (key == "battery_opt_off" && !readSharedSettingBoolean(Graph.appContext,
                 "accessibility_permission", false)
         ) {
             Log.d("CheckPref", "Battery")
-            checkBattery(applicationContext)
+            Utils.showAlertDialog(this@MainActivity, 1)
         }
+    }
 
+    private fun checkFirstLogin() {
+        if (!readSharedSettingBoolean(applicationContext,
+                "first_login_done", false)
+        ) {
+            onFirstLogin()
+        }
     }
 
     private fun onFirstLogin() {
@@ -181,7 +173,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             Log.d("MainActivity", "Start consent fragment")
             // The user hasn't seen the onboarding & consent screens yet, so show it
             loadFragment(this, ConsentFragment(), null,
-                "consentFragment", false)
+                "consentFragment", true)
             bottomNav.isVisible = false
         }
 
@@ -191,7 +183,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             Log.d("MainActivity", "Start userinfo fragment")
             // The user hasn't seen the onboarding & consent screens yet, so show it
             loadFragment(this, UserInfoFragment(), null,
-                "userInfoFragment", false)
+                "userInfoFragment", true)
             bottomNav.isVisible = false
         }
 
@@ -209,6 +201,13 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             loadFragment(this, homeFragment, null, "homeFragment", true)
             //val consentFragment = supportFragmentManager.findFragmentByTag("consentFragment")
             bottomNav.isVisible = true
+            if (!readSharedSettingBoolean(applicationContext, "accessibility_permission", false)) {
+                Utils.showAlertDialog(this@MainActivity, 0)
+                }
+            if (!readSharedSettingBoolean(applicationContext, "battery_opt_off", false)) {
+                Utils.showAlertDialog(this@MainActivity, 1)
+            }
+
         }
     }
 }

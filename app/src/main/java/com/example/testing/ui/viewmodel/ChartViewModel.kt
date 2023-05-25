@@ -40,7 +40,8 @@ class ChartViewModel: ViewModel() {
             Graph.appContext,
             "p_id",
             "").toString()
-        val ref = rootRef.child("KeyboardEvents").child(participantId).child(date)
+        val ref = rootRef.child("Data").child(participantId).child(date)
+            .child("keyboardEvents")
         val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
@@ -62,34 +63,6 @@ class ChartViewModel: ViewModel() {
                             errorsAvgList.add(y)
                             sessionCount += 1
                             Log.d("ChartViewModel", "ErrorAmount: $y")
-                            /**
-                            val timeWindow = it.child("dailyTimeWindow").value as Long
-                            for (i in 1..144) {
-                            if (timeWindow.toInt() == i) {
-                            dataList.add(
-                            BarEntry(
-                            i.toFloat(),
-                            sessionCount.toFloat()
-                            )
-                            )
-                            errList.add(
-                            BarEntry(
-                            i.toFloat(),
-                            y.toFloat()
-                            )
-                            )
-                            } else {
-                            dataList.add(
-                            BarEntry(
-                            i.toFloat(), 0f)
-                            )
-                            errList.add(
-                            BarEntry(
-                            i.toFloat(), 0f)
-                            )
-                            }
-                            }
-                            }**/
                         }
 
                         for (i in iterErrList) {
@@ -107,25 +80,6 @@ class ChartViewModel: ViewModel() {
                         }
 
                     }
-
-                    /**
-                    //Take into account missing values
-                    for (i in 50..243) {
-                        for (j in errList) {
-                            if (j.x.toInt() != i) {
-                                errList.add(BarEntry(
-                                    i.toFloat(), 0f
-                                ))
-                            }
-                        }
-                        for (k in dataList) {
-                            if (k.x.toInt() != i) {
-                                dataList.add(BarEntry(
-                                    i.toFloat(), 0f
-                                ))
-                            }
-                        }
-                    }**/
                     _chartErrorValues.postValue(iterErrList)
                     _chartSessions.postValue(dataList)
                     Log.d("Firebase", "ChartErrorValues: $")

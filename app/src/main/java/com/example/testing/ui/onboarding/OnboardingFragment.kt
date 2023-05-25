@@ -1,5 +1,6 @@
 package com.example.testing.ui.onboarding
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -83,6 +84,20 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
                 getString(R.string.skip)) {
                 onboardingFinished()
             }
+            val alertDialog: AlertDialog.Builder = AlertDialog.Builder(Graph.appContext)
+            alertDialog.setTitle(R.string.skip_title)
+            alertDialog.setMessage(R.string.skip_prompt)
+            alertDialog.setPositiveButton(
+                getString(R.string.skip)
+            ) { _, _ ->
+                onboardingFinished()
+            }
+            alertDialog.setNegativeButton(
+                "Cancel"
+            ) { _, _ -> }
+            val alert: AlertDialog = alertDialog.create()
+            alert.setCanceledOnTouchOutside(false)
+            alert.show()
         }
     }
 
@@ -90,7 +105,8 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
         Utils.saveSharedSettingBoolean(
             Graph.appContext, "onboarding_complete",true)
         Utils.saveSharedSettingBoolean(Graph.appContext, "first_login_done", true)
-        parentFragmentManager.beginTransaction().remove(this).commit()
+        //parentFragmentManager.beginTransaction().remove(this).commit()
+        parentFragmentManager.popBackStack()
     }
 
     override fun onDestroyView() {
@@ -109,27 +125,27 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
     private fun updateCircleMarker(binding: FragmentOnboardingBinding, position: Int) {
         when (position) {
             0 -> {
-                binding.ivFirstCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
-                binding.ivSecondCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
-                binding.ivThirdCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
+                binding.ivFirstCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
+                binding.ivSecondCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
+                binding.ivThirdCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
             }
             1 -> {
-                binding.ivSecondCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
-                binding.ivFirstCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
-                binding.ivThirdCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
+                binding.ivSecondCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
+                binding.ivFirstCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
+                binding.ivThirdCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
             }
             2 -> {
-                binding.ivThirdCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
-                binding.ivSecondCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
-                binding.ivFirstCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
+                binding.ivThirdCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
+                binding.ivSecondCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
+                binding.ivFirstCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
                 binding.next.text = "Finish"
                 binding.skip.visibility = View.INVISIBLE
                 onboardingViewModel.setOnboardingComplete(true)
             }
             3 -> {
-                binding.ivThirdCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
-                binding.ivSecondCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
                 binding.ivThirdCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
+                binding.ivSecondCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
+                binding.ivFirstCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
             }
         }
     }

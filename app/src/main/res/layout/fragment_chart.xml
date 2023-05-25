@@ -82,7 +82,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Errors made during a timewindow"
+                    android:text="Errors"
                     android:textSize="15sp"
                     android:layout_gravity="left"
                     android:paddingVertical="15dp"
@@ -116,7 +116,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Words typed during a timewindow"
+                android:text="Sessions"
                 android:textSize="15sp"
                 android:fontFamily="@font/roboto_black"
                 android:layout_gravity="left"
@@ -125,7 +125,7 @@
 
             <com.github.mikephil.charting.charts.BarChart
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:padding="2dp"
                 android:id="@+id/barChart2"/>
 

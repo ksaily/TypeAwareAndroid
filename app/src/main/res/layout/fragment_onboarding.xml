@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:theme="@style/Theme.Testing"
     tools:context="ui.onboarding.OnboardingFragment"
-    android:background="@color/dark_purple">
+    android:background="@color/white">
 
     <!-- For fragment container -->
     <FrameLayout

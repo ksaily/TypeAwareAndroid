@@ -38,8 +38,9 @@
     <string name="consent_prompt">In order to continue using the app, make sure that battery optimization is NOT enabled and that you have given consent to collect your data.</string>
 
     <!-- Onboarding -->
-    <string name="skip_prompt">Are you sure you want to skip the onboarding? If you click skip, you will move straight to Home screen without onboarding.</string>
+    <string name="skip_prompt">Are you sure you don\'t want to finish the onboarding? \n If you click skip, you will move straight to Home screen without onboarding.</string>
     <string name="skip">Skip</string>
+    <string name="skip_title">Skip onboarding</string>
     <string name="finish">Finish</string>
 
     <!-- Strings used for fragments for navigation -->
@@ -61,6 +62,8 @@
     <string name="show_sleep_data">Show sleep data</string>
     <string name="notifications_enabled">Allow this app to send notifications</string>
     <string name="battery_optimization_options">Battery optimization is DISABLED</string>
+    <string name="accessibility_perm_snackbar_title">Accessibility permission</string>
+    <string name="accessibility_perm_snackbar_msg">Click ok to enable accessibility in settings.</string>
     <string name="accessibility_perm_enabled">Accessibility permission is enabled</string>
     <string name="accessibility_perm_disabled">Accessibility permission is disabled</string>
     <string name="keyboard_data_to_show">Choose typing metrics to show on graph</string>
@@ -69,6 +72,8 @@
     <string name="mobile_data_usage_off_prompt">It is not recommended to limit mobile data usage</string>
     <string name="accessibility_permission_change">Accessibility permission should be enabled for the app to run as intended. Click here if you wish to make changes.</string>
     <string name="click_here_to_make_changes">Click here to make changes</string>
+    <string name="battery_opt_snackbar_title">Battery optimization</string>
+    <string name="battery_opt_snackbar_msg">Click ok to disable battery optimization in settings</string>
 
     <!-- Pref keys -->
     <string name="notifications_header_key">notifications_header</string>
@@ -105,7 +110,7 @@
     <string name="home_sleep_data_not_found_title">Sleep data could not be found</string>
     <string name="home_sleep_data_not_found_content">Sleep data could not be found for this date, please try another date.</string>
     <string name="home_keyboard_data_not_found_title">Data could not be found for this date</string>
-    <string name="home_keyboard_data_not_found_content">Please try another date and make sure that accessibility settings are turned on. You can go to settings by pressing the button below.</string>
+    <string name="home_keyboard_data_not_found_content">Please make sure that accessibility settings are turned on. You can go to settings by pressing the button below.</string>
     <string name="home_keyboard_data_not_found_btn">Settings</string>
 
 </resources>

@@ -2,11 +2,10 @@ package com.example.testing.ui.viewmodel
 
 import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.liveData
+import androidx.lifecycle.*
 import com.example.testing.Graph
+import com.example.testing.fitbit.FitbitApiService
+import com.example.testing.ui.data.SleepData
 import com.example.testing.utils.KeyboardEvents
 import com.example.testing.utils.KeyboardStats
 import com.example.testing.utils.Utils
@@ -15,6 +14,10 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel for returning Firebase data when updated
@@ -24,6 +27,10 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
     private val _keyboardData = MutableLiveData<List<KeyboardStats>>()
     val keyboardData: LiveData<List<KeyboardStats>>
         get() = _keyboardData
+
+    private val _sleepData = MutableLiveData<SleepData>()
+    val sleepData: LiveData<SleepData>
+        get() = _sleepData
 
     private val _keyboardEvents = MutableLiveData(ArrayList<KeyboardEvents>())
     val keyboardEvents: LiveData<ArrayList<KeyboardEvents>>
@@ -49,15 +56,21 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
     var sessionCount: Long = 0L
     var dataFound: Boolean = false
 
-/**
-    fun addToListOfFirebaseData(data: KeyboardStats) {
-        _keyboardData.value?.add(data)
+    fun getSleepData(date: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val data = FitbitApiService.getSleepData(date)
+            _sleepData.postValue(data)
+        }
     }
 
-    fun clearListOfFirebaseData() {
-        _keyboardData.value?.clear()
-
-    }**/
+    fun saveSleepDataToFirebase(date: String, data: SleepData, participantId: String) {
+        viewModelScope.launch {
+            val myRef = Firebase.database.getReference("KeyboardEvents")
+            // Save data under the current timeslot with an unique id for each
+            myRef.child(participantId.toString())
+                .child(date).child("sleep").setValue(data)
+        }
+    }
 
     fun getFromFirebase(date: String, isToday: Boolean) {
         val rootRef = FirebaseDatabase.getInstance().reference
@@ -65,7 +78,8 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
             Graph.appContext,
             "p_id",
             "").toString()
-        val ref = rootRef.child("KeyboardEvents").child(participantId).child(date)
+        val ref = rootRef.child("Data").child(participantId).child(date)
+            .child("keyboardEvents")
         Log.d("FirebaseDebug", ref.toString())
         errorsList.clear()
         speedsList.clear()
@@ -136,53 +150,5 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
         } else {
             ref.addValueEventListener(valueEventListener)
         }
-    }
-
-    fun getFromFirebaseToChart(date: String): Boolean {
-        //val dataFound: Boolean = false
-        val rootRef = FirebaseDatabase.getInstance().reference
-        val participantId = Utils.readSharedSettingString(
-            Graph.appContext,
-            "p_id",
-            "").toString()
-        val ref = rootRef.child(participantId).child(date)
-        val valueEventListener = object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    dataFound = true
-                    val children = snapshot.children
-                    children.forEach { dataSnapshot ->
-                        sessionCount = dataSnapshot.childrenCount
-                        chartSessions.value?.add(
-                            BarEntry(
-                                snapshot.key!!.toFloat(),
-                                sessionCount.toFloat()
-                            )
-                        )
-                        val child = dataSnapshot.children
-                        child.forEach {
-                            var y = it.child("errorAmount").value as Int
-                            chartErrorValues.value?.add(
-                                BarEntry(
-                                    snapshot.key!!.toFloat(),
-                                    y.toFloat()
-                                )
-                            )
-                        }
-
-                    }
-                    Log.d("Firebase", "ChartErrorValues: $chartErrorValues")
-                    Log.d("Firebase", "ChartSessions: $chartSessions")
-                } else {
-                    dataFound = false
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                dataFound = false
-            }
-        }
-        ref.addValueEventListener(valueEventListener)
-        return dataFound
     }
 }

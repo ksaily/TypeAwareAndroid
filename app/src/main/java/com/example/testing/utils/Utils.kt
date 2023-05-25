@@ -1,9 +1,12 @@
 package com.example.testing.utils
 
+import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
@@ -11,6 +14,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.preference.PreferenceManager
 import com.example.testing.Graph
@@ -253,6 +257,38 @@ class Utils {
                     true
                 }
             }
+        }
+
+        /**
+         * @param action 0 for accessibility settings, 1 for battery optimization settings
+         */
+        fun showAlertDialog(context: Context, action: Int) {
+            val alertDialog: AlertDialog.Builder = AlertDialog.Builder(context)
+            when (action) {
+                0 -> {
+                    alertDialog.setTitle(R.string.accessibility_perm_snackbar_title)
+                    alertDialog.setMessage(R.string.accessibility_perm_snackbar_msg)
+                }
+                1 -> {
+                    alertDialog.setTitle(R.string.battery_opt_snackbar_title)
+                    alertDialog.setMessage(R.string.battery_opt_snackbar_msg)
+                }
+            }
+
+            alertDialog.setPositiveButton(
+                "OK"
+            ) { _, _ ->
+                when (action) {
+                    0 -> checkAccessibilityPermission(Graph.appContext, true)
+                    1 -> checkBattery(Graph.appContext)
+                }
+            }
+            alertDialog.setNegativeButton(
+                "Cancel"
+            ) { _, _ -> }
+            val alert: AlertDialog = alertDialog.create()
+            alert.setCanceledOnTouchOutside(false)
+            alert.show()
         }
     }
 }
