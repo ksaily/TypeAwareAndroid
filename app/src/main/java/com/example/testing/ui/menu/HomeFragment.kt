@@ -111,10 +111,13 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
             Graph.appContext, "state", ""
         )
         if (code!!.isNotEmpty() && state!!.isNotEmpty()) {
-            FitbitApiService.authorizeRequestToken(code, state)
+            lifecycleScope.launch(Dispatchers.IO) {
+                FitbitApiService.authorizeRequestToken(code, state)
+            }
         } else {
             showFitbitLogin()
         }
+
 
 
         binding.keyboardChart.openAccessibilitySettingsBtn.setOnClickListener {

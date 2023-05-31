@@ -28,6 +28,10 @@ class ChartViewModel: ViewModel() {
     val chartSessions: LiveData<List<BarEntry>>
         get() = _chartSessions
 
+    private val _chartSpeedValues = MutableLiveData<List<BarEntry>>()
+    val chartSpeedValues: LiveData<List<BarEntry>>
+        get() = _chartSpeedValues
+
     var dataFound: Boolean = false
     var chartSelected: Int = 0 // 0 if errors, 1 if speed
 
@@ -45,46 +49,67 @@ class ChartViewModel: ViewModel() {
         val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    val errList = mutableListOf<BarEntry>()
-                    val dataList = mutableListOf<BarEntry>()
-                    dataFound = true
-                    var sessionCount = 0
-                    val errorsAvgList = mutableListOf<Long>()
-                    val iterErrList = mutableListOf<BarEntry>()
-                    for (i in 0..144) {
-                        dataList.add(BarEntry(i.toFloat(), 0f))
-                        iterErrList.add(BarEntry(i.toFloat(), 0f))
-                    }
-                    val children = snapshot.children
-                    children.forEach { dataSnapshot ->
-                        val child = dataSnapshot.children
-                        child.forEach {
-                            var y = it.child("errorAmount").value as Long
-                            errorsAvgList.add(y)
-                            sessionCount += 1
-                            Log.d("ChartViewModel", "ErrorAmount: $y")
+                    try {
+                        val errList = mutableListOf<BarEntry>()
+                        val dataList = mutableListOf<BarEntry>()
+                        val speedList = mutableListOf<BarEntry>()
+                        dataFound = true
+                        var sessionCount = 0
+                        val errorsAvgList = mutableListOf<Long>()
+                        val speedsAvgList = mutableListOf<Double>()
+                        val iterErrList = mutableListOf<BarEntry>()
+                        val iterSpeedList = mutableListOf<BarEntry>()
+                        for (i in 0..144) {
+                            dataList.add(BarEntry(i.toFloat(), 0f))
+                            iterErrList.add(BarEntry(i.toFloat(), 0f))
+                            iterSpeedList.add(BarEntry(i.toFloat(), 0f))
                         }
+                        val children = snapshot.children
+                        children.forEach { dataSnapshot ->
+                            val child = dataSnapshot.children
+                            child.forEach {
+                                var y = it.child("errorAmount").value as Long
+                                var speeds = it.child("typingSpeed").value as MutableList<Double>
+                                if (speeds != null) {
+                                    var avgForOne = speeds.average()
+                                    speedsAvgList.add(avgForOne)
+                                }
+                                errorsAvgList.add(y)
+                                sessionCount += 1
+                                Log.d("ChartViewModel", "ErrorAmount: $y")
+                            }
 
-                        for (i in iterErrList) {
-                            val timewindow = dataSnapshot.key?.toInt()
-                            Log.d("ChartViewModel", "Timewindow: $timewindow")
-                            iterErrList[timewindow!!] = BarEntry(
-                                timewindow.toFloat(),
-                                errorsAvgList.average().toFloat()
-                            )
-                            dataList[timewindow!!] = BarEntry(
-                                timewindow.toFloat(),
-                                sessionCount.toFloat()
-                            )
+                            for (i in iterErrList) {
+                                val timewindow = dataSnapshot.key?.toInt()
+                                if (timewindow!! < 144) {
+                                    Log.d("ChartViewModel", "Timewindow: $timewindow")
+                                    iterErrList[timewindow!!] = BarEntry(
+                                        timewindow.toFloat(),
+                                        errorsAvgList.average().toFloat()
+                                    )
+                                    dataList[timewindow!!] = BarEntry(
+                                        timewindow.toFloat(),
+                                        sessionCount.toFloat()
+                                    )
+                                    iterSpeedList[timewindow!!] = BarEntry(
+                                        timewindow.toFloat(),
+                                        errorsAvgList.average().toFloat()
+                                    )
+                                }
+
+
+                            }
 
                         }
-
+                        _chartErrorValues.postValue(iterErrList)
+                        _chartSessions.postValue(dataList)
+                        _chartSpeedValues.postValue(iterSpeedList)
+                        Log.d("Firebase", "ChartErrorValues: $")
+                        Log.d("Firebase", "ChartSessions: $chartSessions")
+                        //_keyboardStats.postValue(dataList)
+                } catch (e: Exception) {
+                    Log.d("Firebase", "Error: $e ")
                     }
-                    _chartErrorValues.postValue(iterErrList)
-                    _chartSessions.postValue(dataList)
-                    Log.d("Firebase", "ChartErrorValues: $")
-                    Log.d("Firebase", "ChartSessions: $chartSessions")
-                    //_keyboardStats.postValue(dataList)
                 } else {
                     dataFound = false
                     Log.d("FirebaseChart", "No data found")

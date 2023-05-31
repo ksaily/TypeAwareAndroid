@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:layout_margin="10dp"
     tools:context=".ui.onboarding.UserInfoFragment"
-    android:background="@color/dark_purple">
+    android:background="@color/white">
 
     <TextView
         android:id="@+id/textview_first"
@@ -18,7 +18,7 @@
         android:padding="30dp"
         android:textSize="24sp"
         android:fontFamily="@font/roboto_black"
-        android:textColor="@color/white"/>
+        android:textColor="@color/dark_purple"/>
 
     <TextView
         android:id="@+id/textview_second"
@@ -30,22 +30,8 @@
         android:layout_margin="5dp"
         android:padding="20dp"
         android:textSize="22sp"
-        android:textColor="@color/white"/>
+        android:textColor="@color/dark_purple"/>
 
-
-    <EditText
-        android:id="@+id/userFullName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="50dp"
-        android:layout_marginBottom="40dp"
-        android:background="@drawable/roundstyle"
-        android:backgroundTint="@color/white"
-        android:ems="10"
-        android:hint="Full name"
-        android:inputType="textPersonName"
-        android:minHeight="48dp"
-        android:padding="8dp" />
 
     <EditText
         android:id="@+id/userEmail"
@@ -53,21 +39,28 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="50dp"
         android:background="@drawable/roundstyle"
-        android:backgroundTint="@color/white"
         android:ems="10"
         android:hint="Email"
         android:inputType="textEmailAddress"
         android:minHeight="48dp"
         android:padding="8dp" />
 
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/email_prompt"
+        android:textColor="@color/muted_purple"
+        android:textSize="18sp"
+        android:padding="30dp"
+        android:textAlignment="center" />
+
     <EditText
         android:id="@+id/participantId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="50dp"
-        android:layout_marginTop="40dp"
         android:background="@drawable/roundstyle"
-        android:backgroundTint="@color/white"
         android:ems="10"
         android:hint="Your participant id"
         android:inputType="text"
@@ -79,7 +72,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/save_user_info_consent"
-        android:textColor="@color/white"
+        android:textColor="@color/light_purple"
         android:textSize="18sp"
         android:padding="20dp"
         android:textAlignment="center" />

@@ -34,7 +34,7 @@ import com.google.android.material.snackbar.Snackbar
  *
  *
  */
-private const val NUM_PAGES = 3
+private const val NUM_PAGES = 4
 
 class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
 
@@ -138,14 +138,14 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
                 binding.ivThirdCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
                 binding.ivSecondCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
                 binding.ivFirstCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
-                binding.next.text = "Finish"
-                binding.skip.visibility = View.INVISIBLE
-                onboardingViewModel.setOnboardingComplete(true)
             }
             3 -> {
                 binding.ivThirdCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
                 binding.ivSecondCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
                 binding.ivFirstCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
+                binding.next.text = "Finish"
+                binding.skip.visibility = View.INVISIBLE
+                onboardingViewModel.setOnboardingComplete(true)
             }
         }
     }

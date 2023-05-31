@@ -36,6 +36,7 @@
     <string name="save_user_info_consent">After saving your info you will be redirected to the onboarding pages. If you wish to change your info after pressing save, you will need to reinstall the app.</string>
     <string name="save_user_info">Save</string>
     <string name="consent_prompt">In order to continue using the app, make sure that battery optimization is NOT enabled and that you have given consent to collect your data.</string>
+    <string name="email_prompt">Your email will only be used to contact you if problems occur.</string>
 
     <!-- Onboarding -->
     <string name="skip_prompt">Are you sure you don\'t want to finish the onboarding? \n If you click skip, you will move straight to Home screen without onboarding.</string>
@@ -101,7 +102,7 @@
     <string name="to_view_your_sleep_data_you_need_to_log_in_to_your_fitbit_account">To view your sleep data, you need to log in to your Fitbit account</string>
     <string name="fitbit_login">Fitbit Login</string>
     <string name="sleep_data_title">Last night\'s sleep</string>
-    <string name="speed_avg">Speed (avg)</string>
+    <string name="speed_avg">Average speed</string>
     <string name="accuracy">Accuracy</string>
 
     <!-- Home Fragment -->

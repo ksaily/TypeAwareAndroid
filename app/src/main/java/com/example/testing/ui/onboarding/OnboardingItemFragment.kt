@@ -67,6 +67,13 @@ class OnboardingItemFragment: Fragment(R.layout.fragment_onboarding_item) {
                         )
                     )
                 }
+                3 -> {
+                    onboardingImage.setImageDrawable(
+                        ContextCompat.getDrawable(
+                            requireContext(),
+                            R.drawable.time_management //replace with picture of settings
+                    ))
+                }
             }
         }
     }

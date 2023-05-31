@@ -1,5 +1,8 @@
 package com.example.testing
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context.ALARM_SERVICE
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
@@ -41,6 +44,8 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.util.*
@@ -54,12 +59,20 @@ import kotlin.collections.ArrayList
  * Q2: How often did you have to correct your typing? (Scale 1-7)
  * Q3: At what time of day were you most active with typing? (some kind of selector)
  */
+private val alarmManager = Graph.appContext.getSystemService(ALARM_SERVICE) as AlarmManager
+private val alarmPendingIntent by lazy {
+    val intent = Intent(Graph.appContext, AlarmReceiver::class.java)
+    PendingIntent.getBroadcast(Graph.appContext, 0, intent, 0)
+}
+private const val HOUR_TO_SHOW_PUSH = 18
 class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
 
     private lateinit var view: View
     private lateinit var binding: ActivityMainBinding
     private lateinit var bottomNav: BottomNavigationView
     private lateinit var handler: Handler
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
+
 
     // Chart variables:
     private val MAX_X_VALUE = 13
@@ -83,25 +96,34 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     val database = Firebase.database("https://health-app-9c151-default-rtdb.europe-west1.firebasedatabase.app")
 
 
-        override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         view = binding.root
         setContentView(view)
+
+        // Obtain the FirebaseAnalytics instance.
+        firebaseAnalytics = Firebase.analytics
+        /**firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM) {
+            param(FirebaseAnalytics.Param.ITEM_ID, id)
+            param(FirebaseAnalytics.Param.ITEM_NAME, name)
+            param(FirebaseAnalytics.Param.CONTENT_TYPE, "image")
+        }**/
         val sharedPrefs = Utils.getSharedPrefs()
         val transaction = supportFragmentManager.beginTransaction()
+            //Utils.checkBattery(applicationContext)
+            /**
+            if (!readSharedSettingBoolean(applicationContext,
+                    "consent_given",
+                    false)) {
+                loadFragment(this, ConsentFragment(), null,
+                    "consentFragment", false)
+            }**/
 
-        //Utils.checkBattery(applicationContext)
-        /**
-        if (!readSharedSettingBoolean(applicationContext,
-                "consent_given",
-                false)) {
-            loadFragment(this, ConsentFragment(), null,
-                "consentFragment", false)
-        }**/
+
 
         loadFragment(this, homeFragment, null, "homeFragment", true)
-
         bottomNav = binding.bottomNav
         bottomNav.selectedItemId = R.id.homeFragment
         bottomNav.setOnItemSelectedListener {
@@ -123,7 +145,6 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         }
         sharedPrefs.registerOnSharedPreferenceChangeListener(this)
         checkFirstLogin()
-
         Utils.checkPermissions(applicationContext)
     }
 
@@ -209,5 +230,25 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             }
 
         }
+    }
+
+    fun schedulePushNotifications() {
+        val calendar = GregorianCalendar.getInstance().apply {
+            if (get(Calendar.HOUR_OF_DAY) >= HOUR_TO_SHOW_PUSH) {
+                add(Calendar.DAY_OF_MONTH, 1)
+            }
+
+            set(Calendar.HOUR_OF_DAY, HOUR_TO_SHOW_PUSH)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        alarmManager.setRepeating(
+            AlarmManager.RTC_WAKEUP,
+            calendar.timeInMillis,
+            AlarmManager.INTERVAL_DAY,
+            alarmPendingIntent
+        )
     }
 }

@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -95,6 +96,8 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
 
         val values1: ArrayList<BarEntry> = ArrayList()
         val values2: ArrayList<BarEntry> = ArrayList()
+        val typefaceBolded = ResourcesCompat.getFont(Graph.appContext, R.font.roboto_bold)
+        val typefaceNormal = ResourcesCompat.getFont(Graph.appContext, R.font.roboto_black)
 
         statValues.clear()
         viewModel.chartSelected = 0 //Initiate selected charts to error
@@ -152,60 +155,87 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             viewModel.getFromFirebaseToChart(dateViewModel.selectedDate.value.toString())
         }
 
-            binding.switchToWritingSpeedBtn.setOnClickListener {
-                if (binding.switchToWritingSpeedBtn.background == resources.getDrawable(R.drawable.border_unselected)) {
-                    binding.switchToWritingSpeedBtn.setBackgroundResource(R.drawable.border_selected)
-                    binding.switchToErrorsBtn.setBackgroundResource(R.drawable.border_unselected)
-                    viewModel.chartSelected = 1
-                    updateChart(viewModel.chartSessions.value!!, "Writing speed per character",
-                        "Writing speed")
+        binding.switchToWritingSpeedBtn.setOnClickListener {
+            if (viewModel.chartSelected == 0) {
+                Log.d("ChartFragment", "Switching chart to speed")
+                binding.switchToWritingSpeedBtn.setBackgroundResource(R.drawable.border_selected)
+                binding.switchToWritingSpeedBtn.typeface = typefaceBolded
+                binding.switchToErrorsBtn.setBackgroundResource(R.drawable.border_unselected)
+                binding.switchToErrorsBtn.typeface = typefaceNormal
+                viewModel.chartSelected = 1
+                val stats = viewModel.chartSpeedValues.value
+                if (stats != null) {
+                    updateChart(
+                        viewModel.chartSpeedValues.value!!, "Writing speed per character",
+                        "Writing speed"
+                    )
                 }
             }
+        }
 
-            binding.switchToErrorsBtn.setOnClickListener {
-                if (binding.switchToErrorsBtn.background == resources.getDrawable(R.drawable.border_unselected)) {
-                    binding.switchToErrorsBtn.setBackgroundResource(R.drawable.border_selected)
-                    binding.switchToWritingSpeedBtn.setBackgroundResource(R.drawable.border_unselected)
-                    updateChart(viewModel.chartErrorValues.value!!, "Errors made",
-                        "Errors")
+        binding.switchToErrorsBtn.setOnClickListener {
+            if (viewModel.chartSelected == 1) {
+                Log.d("ChartFragment", "Switching chart to error")
+                binding.switchToErrorsBtn.setBackgroundResource(R.drawable.border_selected)
+                binding.switchToErrorsBtn.typeface = typefaceBolded
+                binding.switchToWritingSpeedBtn.setBackgroundResource(R.drawable.border_unselected)
+                binding.switchToWritingSpeedBtn.typeface = typefaceNormal
+                viewModel.chartSelected = 0
+                val stats = viewModel.chartSpeedValues.value
+                if (stats != null) {
+                    updateChart(
+                        viewModel.chartSpeedValues.value!!, "Errors made",
+                        "Errors"
+                    )
                 }
             }
+        }
 
 
 
-            viewModel.chartErrorValues.observe(viewLifecycleOwner) {
-                Log.d("ChartView", "Errors found")
-                if (viewModel.chartSelected == 0) {
-                    val stats = viewModel.chartErrorValues.value
-                    if (stats != null) {
-                        updateChart(stats, "Errors made", "Errors")
-                    }
+        viewModel.chartErrorValues.observe(viewLifecycleOwner) {
+            Log.d("ChartView", "Errors found")
+            if (viewModel.chartSelected == 0) {
+                val stats = viewModel.chartErrorValues.value
+                if (stats != null) {
+                    updateChart(stats, "Errors made", "Errors")
                 }
             }
+        }
 
-            dateViewModel.selectedDate.observe(viewLifecycleOwner) {
-                Log.d("Dateviewmodel", "Date changed to: " +
-                        dateViewModel.selectedDate.value)
-                lifecycleScope.launch(Dispatchers.IO){
-                    try {
-                        viewModel.getFromFirebaseToChart(dateViewModel.selectedDate.value.toString())
-                    } catch (e: Exception) {
-                        Log.d("Error", "$e")
-                    }
+        viewModel.chartErrorValues.observe(viewLifecycleOwner) {
+            Log.d("ChartView", "Errors found")
+            if (viewModel.chartSelected == 0) {
+                val stats = viewModel.chartErrorValues.value
+                if (stats != null) {
+                    updateChart(stats, "Errors made", "Errors")
                 }
-                barChart1!!.notifyDataSetChanged()
-                barChart2!!.notifyDataSetChanged()
             }
+        }
 
-            //configureBarChart(barChart1!!, "Errors per timewindow", labels1)
-            configureBarChart(barChart2!!, "Sessions per timewindow", labels2)
-            //prepareChartData(barChart1!!, data1)
-            prepareChartData(barChart2!!, data2)
+        dateViewModel.selectedDate.observe(viewLifecycleOwner) {
+            Log.d("Dateviewmodel", "Date changed to: " +
+                    dateViewModel.selectedDate.value)
+            lifecycleScope.launch(Dispatchers.IO){
+                try {
+                    viewModel.getFromFirebaseToChart(dateViewModel.selectedDate.value.toString())
+                } catch (e: Exception) {
+                    Log.d("Error", "$e")
+                }
+            }
+            barChart1!!.notifyDataSetChanged()
+            barChart2!!.notifyDataSetChanged()
+        }
+
+        //configureBarChart(barChart1!!, "Errors per timewindow", labels1)
+        configureBarChart(barChart2!!, "Sessions per timewindow", labels2)
+        //prepareChartData(barChart1!!, data1)
+        prepareChartData(barChart2!!, data2)
 
 
 
-            //v2.addDataSet(dataSet2)
-            //Set draw values to false (to avoid mess)
+        //v2.addDataSet(dataSet2)
+        //Set draw values to false (to avoid mess)
 
             //val entries = ArrayList<ILineDataSet>()
             //entries.add(v1)
@@ -388,7 +418,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
 
             chart!!.data = barData
             chart!!.setVisibleXRange(1f, 12f)**/
-        }
+    }
 
     private fun updateChart(stats: List<BarEntry>, label: String, description: String) {
         val label1 = ArrayList<String>()

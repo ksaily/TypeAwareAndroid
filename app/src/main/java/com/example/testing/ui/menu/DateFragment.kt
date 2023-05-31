@@ -118,6 +118,12 @@ class DateFragment : Fragment(R.layout.fragment_date) {
             binding.arrowRight.isVisible = viewModel.isToday.value != true
             binding.arrowRightText.isVisible = viewModel.isToday.value != true
         }
+        viewModel.checkDate()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.checkDate()
     }
 
     override fun onDetach() {
