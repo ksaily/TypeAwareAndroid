@@ -62,10 +62,20 @@
         android:layout_marginHorizontal="50dp"
         android:background="@drawable/roundstyle"
         android:ems="10"
-        android:hint="Your participant id"
+        android:hint="Your Prolific ID"
         android:inputType="text"
         android:minHeight="48dp"
         android:padding="8dp" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Your prolific ID is used to verify your identity after the study is concluded."
+        android:textColor="@color/light_purple"
+        android:textSize="18sp"
+        android:padding="20dp"
+        android:textAlignment="center" />
 
     <TextView
         android:id="@+id/textView14"

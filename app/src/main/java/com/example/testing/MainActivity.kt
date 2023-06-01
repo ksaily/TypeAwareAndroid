@@ -54,10 +54,12 @@ import kotlin.collections.ArrayList
 /**
  * First week, show only survey for the user: How do you think you did this week
  * Second week, survey first and then reveal them the data
- * Q1: How much time did you spend typing during date x?
+ * Q1: How many words did you type during date x?
+ * Q2: Were you generally typing faster than normally
  * (Compare the participant's performance to others, how they feel about it)
  * Q2: How often did you have to correct your typing? (Scale 1-7)
  * Q3: At what time of day were you most active with typing? (some kind of selector)
+ *
  */
 private val alarmManager = Graph.appContext.getSystemService(ALARM_SERVICE) as AlarmManager
 private val alarmPendingIntent by lazy {
@@ -164,18 +166,31 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     }
 
     override fun onSharedPreferenceChanged(sharedPref: SharedPreferences?, key: String?) {
-        if (key == "accessibility_permission" && !readSharedSettingBoolean(Graph.appContext,
+        /**
+        if (!readSharedSettingBoolean(Graph.appContext,
                 "accessibility_permission", false)
         ) {
             Log.d("CheckPref", "Accessibility")
             Utils.showAlertDialog(this@MainActivity, 0)
         }
-        if (key == "battery_opt_off" && !readSharedSettingBoolean(Graph.appContext,
+        if (!readSharedSettingBoolean(Graph.appContext,
                 "accessibility_permission", false)
         ) {
             Log.d("CheckPref", "Battery")
             Utils.showAlertDialog(this@MainActivity, 1)
+        }**/
+
+        if (key == "first_login_done" && readSharedSettingBoolean(applicationContext,
+                "first_login_done", false)) {
+                loadFragment(this, homeFragment, null, "homeFragment", true)
+                //val consentFragment = supportFragmentManager.findFragmentByTag("consentFragment")
+                bottomNav.isVisible = true
+
         }
+        else {
+            onFirstLogin()
+        }
+
     }
 
     private fun checkFirstLogin() {
