@@ -88,8 +88,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:maxWidth="30dp"
+                android:paddingStart="35dp"
                 android:layout_height="match_parent"
-                android:text="@string/speed_avg"
+                android:text="Speed (avg)"
                 android:textColor="@color/light_grey"
                 android:textSize="18sp" />
 
@@ -106,7 +107,6 @@
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="3dp"
             android:orientation="horizontal">
 
             <TableRow
@@ -117,7 +117,8 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingTop="10dp">
+                android:paddingTop="10dp"
+                android:paddingHorizontal="10dp">
 
                 <ImageView
                     android:id="@+id/speedImage"
@@ -144,9 +145,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/speedImage"
-                    android:layout_marginTop="5dp"
+                    android:layout_marginTop="8dp"
                     android:fontFamily="@font/roboto"
-                    android:text="You were faster than the global average!"
+                    android:text="You were faster than the global \naverage!"
                     android:textAlignment="center"
                     android:gravity="center"
                     android:lines="2"
@@ -159,7 +160,8 @@
             <RelativeLayout
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
-                android:paddingVertical="10dp">
+                android:paddingVertical="8dp"
+                android:foregroundGravity="center">
             <ProgressBar
                 style="?android:attr/progressBarStyleHorizontal"
                 android:id="@+id/progress_circular"

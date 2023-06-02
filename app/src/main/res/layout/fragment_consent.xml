@@ -116,15 +116,14 @@
         <Button
             android:id="@+id/conBtnQuit"
             android:background="@drawable/roundstyle"
-            android:backgroundTint="@color/muted_light_purple"
-            android:textColor="@color/dark_grey"
+            android:backgroundTint="@color/light_grey"
+            android:textColor="@color/white"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_weight="1"
             android:elevation="10dp"
             android:layout_margin="10dp"
-            android:padding="5dp"
             android:text="@string/con_btn_not_now"
             android:textSize="12sp" />
 
@@ -137,9 +136,9 @@
             android:textColor="@color/white"
             android:padding="5dp"
             android:elevation="10dp"
-            android:layout_margin="10dp"
+            android:layout_margin="8dp"
             android:background="@drawable/roundstyle"
-            android:backgroundTint="@color/dark_purple"
+            android:backgroundTint="@color/light_purple"
             android:text="@string/con_btn_give_consent"
             android:textSize="12sp" />
 

@@ -138,14 +138,14 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
 
 
         v1.setDrawValues(false)
-        v1.color = R.color.light_purple
-        v1.valueTextColor = R.color.dark_purple
+        v1.color = R.color.dark_purple
+        v1.valueTextColor = R.color.light_purple
 
         v3.setDrawValues(false)
-        v3.color = R.color.white
-        v1.valueTextColor = R.color.white
+        v3.color = R.color.light_purple
+        v1.valueTextColor = R.color.dark_purple
 
-        //data1.addDataSet(v1)
+        data1.addDataSet(v1)
         //data1.addDataSet(v2)
         data2.addDataSet(v3)
         //data2.addDataSet(v4)
@@ -160,8 +160,10 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                 Log.d("ChartFragment", "Switching chart to speed")
                 binding.switchToWritingSpeedBtn.setBackgroundResource(R.drawable.border_selected)
                 binding.switchToWritingSpeedBtn.typeface = typefaceBolded
+                binding.switchToErrorsBtn.setTextColor(R.color.dark_purple)
                 binding.switchToErrorsBtn.setBackgroundResource(R.drawable.border_unselected)
                 binding.switchToErrorsBtn.typeface = typefaceNormal
+                binding.switchToErrorsBtn.setTextColor(R.color.light_purple)
                 viewModel.chartSelected = 1
                 val stats = viewModel.chartSpeedValues.value
                 if (stats != null) {
@@ -178,8 +180,10 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                 Log.d("ChartFragment", "Switching chart to error")
                 binding.switchToErrorsBtn.setBackgroundResource(R.drawable.border_selected)
                 binding.switchToErrorsBtn.typeface = typefaceBolded
+                binding.switchToErrorsBtn.setTextColor(R.color.dark_purple)
                 binding.switchToWritingSpeedBtn.setBackgroundResource(R.drawable.border_unselected)
                 binding.switchToWritingSpeedBtn.typeface = typefaceNormal
+                binding.switchToWritingSpeedBtn.setTextColor(R.color.light_purple)
                 viewModel.chartSelected = 0
                 val stats = viewModel.chartSpeedValues.value
                 if (stats != null) {
@@ -199,16 +203,18 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                 val stats = viewModel.chartErrorValues.value
                 if (stats != null) {
                     updateChart(stats, "Errors made", "Errors")
+                    barChart1!!.notifyDataSetChanged()
                 }
             }
         }
 
-        viewModel.chartErrorValues.observe(viewLifecycleOwner) {
+        viewModel.chartSpeedValues.observe(viewLifecycleOwner) {
             Log.d("ChartView", "Errors found")
-            if (viewModel.chartSelected == 0) {
-                val stats = viewModel.chartErrorValues.value
+            if (viewModel.chartSelected == 1) {
+                val stats = viewModel.chartSpeedValues.value
                 if (stats != null) {
                     updateChart(stats, "Errors made", "Errors")
+                    barChart1!!.notifyDataSetChanged()
                 }
             }
         }
@@ -223,8 +229,6 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                     Log.d("Error", "$e")
                 }
             }
-            barChart1!!.notifyDataSetChanged()
-            barChart2!!.notifyDataSetChanged()
         }
 
         //configureBarChart(barChart1!!, "Errors per timewindow", labels1)

@@ -110,7 +110,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
         val state = Utils.readSharedSettingString(
             Graph.appContext, "state", ""
         )
-        if (code!!.isNotEmpty() && state!!.isNotEmpty()) {
+        if (code != null && state != null) {
             lifecycleScope.launch(Dispatchers.IO) {
                 FitbitApiService.authorizeRequestToken(code, state)
             }
@@ -198,10 +198,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
     }
 
     private fun hideFitbitLogin(data: SleepData) {
+
         binding.sleepDataContainer.apply {
-            SleepDataViewHidden.isVisible = false
-            SleepDataView.isVisible = true
-            FitbitLoginVisible.isVisible = false
+            //FitbitLoginVisible.isVisible = false
             if (data.dataAvailable) {
                 sleepData.isVisible = true
                 sleepDataNotFound.isVisible = false
@@ -310,12 +309,13 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
             binding.keyboardChart.keyboardDataNotFound.isVisible = false
             binding.keyboardChart.dataAvailable.isVisible = true
             val s = totalSpeed.average().toString()
-            val clippedString = s.substring(0, s.length.coerceAtMost(4))
+            val clippedString = s.substring(0, s.length.coerceAtMost(4)) + "s"
             binding.keyboardChart.speedData.text = clippedString
             binding.keyboardChart.ProgressTextView.text =
-                showPercentage(0.2,
+                showPercentage(totalErrRate.average(),
                     binding.keyboardChart.progressCircular).toString()
-        } else {/**
+        } else {
+            /**
         binding.keyboardChart.speedData.text = "No data"
         binding.keyboardChart.textViewStats.isVisible = false
         binding.keyboardChart.ProgressTextView.text = "--"

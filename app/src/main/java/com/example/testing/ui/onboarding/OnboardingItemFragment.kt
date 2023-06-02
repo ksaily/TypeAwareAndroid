@@ -71,7 +71,7 @@ class OnboardingItemFragment: Fragment(R.layout.fragment_onboarding_item) {
                     onboardingImage.setImageDrawable(
                         ContextCompat.getDrawable(
                             requireContext(),
-                            R.drawable.time_management //replace with picture of settings
+                            R.drawable.screenshot_prefs__2_ //replace with picture of settings
                     ))
                 }
             }

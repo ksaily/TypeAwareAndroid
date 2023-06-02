@@ -68,7 +68,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:id="@+id/sleepDataNotFound"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -89,7 +89,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="3dp"
-        android:visibility="gone">
+        android:visibility="visible">
 
 
         <TableRow

@@ -128,19 +128,23 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
                 binding.ivFirstCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
                 binding.ivSecondCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
                 binding.ivThirdCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
+                binding.ivFourthCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
             }
             1 -> {
                 binding.ivSecondCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
                 binding.ivFirstCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
                 binding.ivThirdCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
+                binding.ivFourthCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
             }
             2 -> {
                 binding.ivThirdCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
                 binding.ivSecondCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
                 binding.ivFirstCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
+                binding.ivFourthCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
             }
             3 -> {
-                binding.ivThirdCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
+                binding.ivFourthCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_purple))
+                binding.ivThirdCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
                 binding.ivSecondCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
                 binding.ivFirstCircle.setImageDrawable(getDrawable(Graph.appContext, R.drawable.comp_view_circle_gray))
                 binding.next.text = "Finish"

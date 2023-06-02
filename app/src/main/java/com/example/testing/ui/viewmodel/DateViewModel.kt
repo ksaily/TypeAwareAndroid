@@ -32,7 +32,7 @@ class DateViewModel : ViewModel() {
         return if (Utils.getNextDateString(_selectedDate.value.toString()) == currentDate) {
             _isToday.value = false
             "Yesterday"
-        } else if (_selectedDate.value == currentDate) {
+        } else if (_selectedDate.value == Utils.getCurrentDateString()) {
             _isToday.value = true
             "Today"
         } else {

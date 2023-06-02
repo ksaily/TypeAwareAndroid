@@ -179,6 +179,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             Log.d("CheckPref", "Battery")
             Utils.showAlertDialog(this@MainActivity, 1)
         }**/
+        Log.d("SharedPref", "OnSharedPreferenceChanged")
 
         if (key == "first_login_done" && readSharedSettingBoolean(applicationContext,
                 "first_login_done", false)) {
