@@ -198,9 +198,10 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
     }
 
     private fun hideFitbitLogin(data: SleepData) {
-
         binding.sleepDataContainer.apply {
-            //FitbitLoginVisible.isVisible = false
+            SleepDataViewHidden.isVisible = false
+            SleepDataView.isVisible = true
+            FitbitLoginVisible.isVisible = false
             if (data.dataAvailable) {
                 sleepData.isVisible = true
                 sleepDataNotFound.isVisible = false

@@ -114,4 +114,13 @@
     <string name="home_keyboard_data_not_found_content">Please make sure that accessibility settings are turned on. You can go to settings by pressing the button below.</string>
     <string name="home_keyboard_data_not_found_btn">Settings</string>
 
+    <!-- Likert scale options -->
+    <string name="likert_1">1 (strongly disagree)</string>
+    <string name="likert_2">2 (disagree)</string>
+    <string name="likert_3">3 (somewhat disagree)</string>
+    <string name="likert_4">4 (neither agree or disagree)</string>
+    <string name="likert_5">5 (somewhat agree)</string>
+    <string name="likert_6">6 (agree)</string>
+    <string name="likert_7">7 (strongly agree)</string>
+
 </resources>
