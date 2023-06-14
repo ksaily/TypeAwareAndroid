@@ -11,14 +11,19 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.testing.databinding.ActivityMainBinding
 import com.example.testing.notifications.AlarmReceiver
+import com.example.testing.questionnaire.DailyQuestionnaireDialog
 import com.example.testing.ui.menu.HomeFragment
 import com.example.testing.ui.menu.SettingsFragment
 import com.example.testing.ui.menu.ChartFragment
 import com.example.testing.ui.onboarding.*
+import com.example.testing.ui.viewmodel.DailyQuestionnaireViewModel
 import com.example.testing.utils.FragmentUtils.Companion.loadFragment
 import com.example.testing.utils.Utils
 import com.example.testing.utils.Utils.Companion.getSharedPrefs
@@ -32,6 +37,7 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.concurrent.schedule
 
 /**
  * First week, show only survey for the user: How do you think you did this week
@@ -77,6 +83,8 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     private val homeFragment = HomeFragment()
     private val chartFragment = ChartFragment()
     private val settingsFragment = SettingsFragment()
+    //private val viewModel: DailyQuestionnaireViewModel by viewModels()
+    private val questionnaireDialog = DailyQuestionnaireDialog()
     val database = Firebase.database("https://health-app-9c151-default-rtdb.europe-west1.firebasedatabase.app")
 
 
@@ -129,7 +137,19 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         }
         sharedPrefs.registerOnSharedPreferenceChangeListener(this)
         checkFirstLogin()
-        Utils.checkPermissions(applicationContext)
+        questionnaireDialog.showQuestionnaire()
+        Timer("CheckPermissions", false).schedule(600000) {
+            //Set a timer to check permissions every 10 minutes
+            Utils.checkPermissions(applicationContext)
+        }
+        //Utils.checkPermissions(applicationContext)
+    }
+
+    private fun checkDailyQuestionnaire() {
+        if (!Utils.readSharedSettingBoolean(Graph.appContext,
+                "isQuestionnaireAnswered", false)) {
+            DailyQuestionnaireDialog().show(supportFragmentManager, "DailyQuestionnaireDialog")
+        }
     }
 
     /**
@@ -139,8 +159,10 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     override fun onResume() {
         super.onResume()
         checkFirstLogin()
-        Utils.checkPermissions(applicationContext)
+        //Utils.checkPermissions(applicationContext)
+        questionnaireDialog.showQuestionnaire()
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -163,12 +185,12 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         }**/
         Log.d("SharedPref", "OnSharedPreferenceChanged")
 
-        if (key == "first_login_done" && readSharedSettingBoolean(applicationContext,
+        if (readSharedSettingBoolean(applicationContext,
                 "first_login_done", false)) {
                 loadFragment(this, homeFragment, null, "homeFragment", true)
                 //val consentFragment = supportFragmentManager.findFragmentByTag("consentFragment")
                 bottomNav.isVisible = true
-
+            checkDailyQuestionnaire()
         }
         else {
             onFirstLogin()

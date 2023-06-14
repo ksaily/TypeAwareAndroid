@@ -5,135 +5,213 @@ import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
-import android.view.Window
+import android.util.Log
+import android.view.*
 import android.widget.Button
 import android.widget.RatingBar
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.testing.Graph
 import com.example.testing.R
+import com.example.testing.databinding.DialogDailyQuestionnaireBinding
+import com.example.testing.databinding.FragmentHomeBinding
+import com.example.testing.ui.viewmodel.DailyQuestionnaireViewModel
 import com.example.testing.utils.Utils
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 class DailyQuestionnaireDialog : DialogFragment() {
 
-    private lateinit var questionTextView: TextView
-    private lateinit var ratingBar: RatingBar
-    private lateinit var submitButton: Button
+    private var _binding: DialogDailyQuestionnaireBinding? = null
+    private val binding get() = _binding!!
 
-    private val database = FirebaseDatabase.getInstance()
-    private val answeredDatesRef = database.getReference("answered_dates")
-    private var currentDate: String = ""
+    private var currentDate: String = Utils.currentDate
+    private val myRef = Firebase.database.getReference("KeyboardEvents")
+    private val participantId = Utils.readSharedSettingString(Graph.appContext,
+        "p_id", "").toString()
+    private val questionnaireCompleteString = "QuestionnaireCompleted"
+    //private val viewModel: DailyQuestionnaireViewModel by activityViewModels()
+
 
     private val questions = listOf(
-        "Q1: How often do you experience X?",
-        "Q2: How often do you experience Y?",
-        "Q3: How often do you experience Z?",
-        "Q4: How often do you experience W?"
+        "Q1: How much did you have to correct your typing yesterday compared to an average day?",
+        "Q2: How was your typing speed yesterday compared to an average day?",
+        "Q3: How many words did you type during yesterday?",
+        "Q4: At what time of day were you typing the most yesterday?",
+        "Q5: Compared to an average day, how did you sleep yesterday?",
+        "Q6: How much fatigue did you experience yesterday compared to an average day?",
     )
     private var currentQuestionIndex = 0
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        _binding = DialogDailyQuestionnaireBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        if (activity != null) {
+            showQuestionnaire()
+            if (!Utils.readSharedSettingBoolean(Graph.appContext,
+                "isQuestionnaireAnswered", false)) {
+                setupView()
+                setupClickListener()
+            }
+        }
+    }
+
+    private fun setupView() {
+        binding.questionTextView.text = questions[currentQuestionIndex]
+    }
+
+    private fun setupClickListener() {
+        binding.submitButton.setOnClickListener {
+            val selectedRadioButtonId = binding.radioGroup1.checkedRadioButtonId
+            val selectedOptionIndex = getSelectedOptionIndex(selectedRadioButtonId)
+            saveAnswerToDatabase(currentQuestionIndex, selectedOptionIndex)
+            currentQuestionIndex++
+            showNextQuestion()
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.setLayout(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.WRAP_CONTENT
+        )
+    }
+
+/**
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        var selectedItem: Int = 0
-        return activity?.let {
-            // Use the Builder class for convenient dialog construction
-            val builder = AlertDialog.Builder(it)
-            builder.setMessage(questions[currentQuestionIndex])
-                .setSingleChoiceItems(R.array.questionnaire_likert_scale_options, 0,
-                    DialogInterface.OnClickListener { dialog, which ->
-                        // The 'which' argument contains the index position
-                        // of the selected item
-                        selectedItem = which
+         // Use the Builder class for convenient dialog construction
+        Log.d("AlertDialog", "onCreateDialog")
+            _binding = DialogDailyQuestionnaireBinding.inflate(layoutInflater).apply {
+                binding.questionTextView.text = questions[currentQuestionIndex]
+            }
+            val builder = AlertDialog.Builder(context)
 
-                    })
-                .setPositiveButton("Submit",
-                    DialogInterface.OnClickListener { dialog, id ->
-                        saveAnswerToDatabase(selectedItem)
+            return builder
+                .setView(binding.root)
+                .setPositiveButton("Submit") { dialog, _ ->
+                        val selectedRadioButtonId = binding.radioGroup.checkedRadioButtonId
+                        val selectedOptionIndex = getSelectedOptionIndex(selectedRadioButtonId)
+
+                        saveAnswerToDatabase(selectedOptionIndex)
                         currentQuestionIndex++
-                        if (currentQuestionIndex < questions.size) {
-                            showNextQuestion()
-                        } else {
-                            dialog.dismiss()
-                            showHomeScreen()
-                        }
+                        showNextQuestion()
 
-                    })
+                    }.create()
 
             // Create the AlertDialog object and return it
-            builder.create()
-        } ?: throw java.lang.IllegalStateException("Activity cannot be null")
+    }**/
+
+
+    private fun getSelectedOptionIndex(selectedRadioButtonId: Int): Int {
+        return when (selectedRadioButtonId) {
+            R.id.likertScale1 -> 0
+            R.id.likertScale2 -> 1
+            R.id.likertScale3 -> 2
+            R.id.likertScale4 -> 3
+            R.id.likertScale5 -> 4
+            R.id.likertScale6 -> 5
+            R.id.likertScale7 -> 6
+            else -> -1
+        }
     }
 
     fun showQuestionnaire() {
         val today = Utils.currentDate
+        var isQuestionnaireAnswered: Boolean
 
-        answeredDatesRef.child(today).get().addOnSuccessListener { snapshot ->
-            val isQuestionnaireAnswered = snapshot.exists()
+        lifecycleScope.launch(Dispatchers.IO) {
 
-            if (isQuestionnaireAnswered) {
-                // Questionnaire already answered for today, show home screen
-                showHomeScreen()
-            } else {
-                // Questionnaire not answered for today, show the dialog
-                showNextQuestion()
-            }
-        }.addOnFailureListener {
-            // Error occurred while checking if questionnaire is answered, show home screen
-            showHomeScreen()
-        }
+            myRef.child(participantId).child(today).child("questionnaire")
+                .child(questionnaireCompleteString).get().addOnSuccessListener { snapshot ->
+                    Log.d("Firebase", "Questionnaire listener")
+                    isQuestionnaireAnswered = (snapshot.exists() &&
+                            snapshot.value as Boolean) // both need to be true
+                    if (!isQuestionnaireAnswered) {
+                        Utils.saveSharedSettingBoolean(Graph.appContext,
+                        "isQuestionnaireAnswered", false)
+                    } else {
+                        Utils.saveSharedSettingBoolean(Graph.appContext,
+                            "isQuestionnaireAnswered", true)
+                    }
+                    }.addOnFailureListener {
+                        // Error occurred while checking if questionnaire is answered, show home screen
+                        showHomeScreen()
+                    }
+                }
     }
 
     private fun showNextQuestion() {
         if (currentQuestionIndex < questions.size) {
-            /**dialog = Dialog(context)
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-            dialog.setCancelable(false)
-            dialog.setContentView(R.layout.dialog_daily_questionnaire)
+            setupView()
+        }
+        else {
+            lifecycleScope.launch(Dispatchers.IO) {
+                val today = Utils.currentDate
+                val questionnaireRef = myRef.child(participantId).child(today).child("questionnaire")
 
-            questionTextView = dialog.findViewById(R.id.questionTextView)
-            ratingBar = dialog.findViewById(R.id.ratingBar)
-            submitButton = dialog.findViewById(R.id.submitButton)
-**/
-            questionTextView.text = questions[currentQuestionIndex]
+                questionnaireRef.child(questionnaireCompleteString).setValue(true).await()
+                Utils.saveSharedSettingBoolean(Graph.appContext,
+                    "isQuestionnaireAnswered", true)
 
-            submitButton.setOnClickListener {
-                val answer = ratingBar.rating.toInt()
-                saveAnswerToDatabase(answer)
-
-                currentQuestionIndex++
-                if (currentQuestionIndex < questions.size) {
-                    showNextQuestion()
-                } else {
-                    dialog!!.dismiss()
+                withContext(Dispatchers.Main) {
                     showHomeScreen()
                 }
             }
-
-            dialog!!.show()
-        } else {
-            // All questions answered, show home screen
-            showHomeScreen()
         }
     }
 
-    private fun saveAnswerToDatabase(answer: Int) {
-        CoroutineScope(Dispatchers.IO).launch {
+    private fun saveAnswerToDatabase(question: Int, answer: Int) {
+        lifecycleScope.launch(Dispatchers.IO) {
 
-                val userAnswersRef = database.getReference("answers").child("user_id").push()
-                userAnswersRef.setValue(answer)
+            val qstn = "Q$question"
+            val ans = "A$answer"
+            // Save data under the current timeslot with an unique id for each
+            myRef.child(participantId)
+                .child(currentDate).child("questionnaire").child(qstn)
+                .setValue(answer)
+
 
                 // Save the answered date to indicate the questionnaire has been answered for today
-                answeredDatesRef.child(currentDate).setValue(true)
+                //myRef.child(currentDate).setValue(true)
 
         }
     }
 
     private fun showHomeScreen() {
-        // Show the app's home screen
+        if (dialog != null) {
+            dismiss()
+        }
+        _binding = null
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    companion object {
+
+        const val TAG = "DailyQuestionnaireDialog"
+
     }
 }

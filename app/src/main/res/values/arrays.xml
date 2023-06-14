@@ -47,13 +47,45 @@
         <item>Apps</item>
     </string-array>
 
-    <string-array name="questionnaire_likert_scale_options">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
+    <string-array name="questionnaire_likert_scale_options1">
+        <item>1 (significantly less)</item>
+        <item>2 (less)</item>
+        <item>3 (slightly less)</item>
+        <item>4 (not more or less)</item>
+        <item>5 (slightly more)</item>
+        <item>6 (more)</item>
+        <item>7 (significantly more)</item>
+    </string-array>
+
+    <string-array name="questionnaire_likert_scale_options2">
+        <item>1 (significantly slower)</item>
+        <item>2 (slower)</item>
+        <item>3 (slightly slower)</item>
+        <item>4 (not faster or slower)</item>
+        <item>5 (slightly faster)</item>
+        <item>6 (faster)</item>
+        <item>7 (significantly faster)</item>
+    </string-array>
+
+    <string-array name="questionnaire_likert_scale_options3">
+        <item>1 (significantly worse)</item>
+        <item>2 (worse)</item>
+        <item>3 (slightly worse)</item>
+        <item>4 (not better or worse)</item>
+        <item>5 (slightly better)</item>
+        <item>6 (better)</item>
+        <item>7 (significantly better)</item>
+    </string-array>
+
+    <string-array name="questionnaire_time_of_day_options">
+        <item>0-1</item>
+        <item>1-2</item>
+        <item>2-3</item>
+        <item>3-4</item>
+        <item>4-5</item>
+        <item>5-6</item>
+        <item>6-7</item>
+        <item>7-8</item>
+        <item>8-9</item>
     </string-array>
 </resources>

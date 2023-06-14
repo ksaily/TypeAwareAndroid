@@ -90,9 +90,12 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val transaction = childFragmentManager.beginTransaction()
-        transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
-            .addToBackStack("dateFragment").commit()
+
+        if (!dateFragment.isAdded) {
+            val transaction = childFragmentManager.beginTransaction()
+            transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
+                .addToBackStack("dateFragment").commit()
+        }
 
         val values1: ArrayList<BarEntry> = ArrayList()
         val values2: ArrayList<BarEntry> = ArrayList()

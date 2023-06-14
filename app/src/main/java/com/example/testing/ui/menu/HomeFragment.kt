@@ -98,9 +98,12 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val transaction = childFragmentManager.beginTransaction()
-        transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
-            .addToBackStack("dateFragment").commit()
+        if (!dateFragment.isAdded) {
+            val transaction = childFragmentManager.beginTransaction()
+            transaction.replace(R.id.dateContainer, dateFragment, "dateFragment")
+                .addToBackStack("dateFragment").commit()
+        }
+
         val sharedPrefs = Utils.getSharedPrefs()
 
         val code = Utils.readSharedSettingString(
@@ -269,7 +272,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
         } else {
             binding.sleepDataContainer.apply {
                 SleepDataViewHidden.isVisible = false
-                sleepData.isVisible = true
+                SleepDataView.isVisible = true
             }
             true
         }
@@ -309,7 +312,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
             Log.d("HomeFragment", "Total speed: ${totalErrRate.average()}l")
             binding.keyboardChart.keyboardDataNotFound.isVisible = false
             binding.keyboardChart.dataAvailable.isVisible = true
-            val s = totalSpeed.average().toString()
+            val s = (60 / totalSpeed.average()).toString() //words per minute
             val clippedString = s.substring(0, s.length.coerceAtMost(4)) + "s"
             binding.keyboardChart.speedData.text = clippedString
             binding.keyboardChart.ProgressTextView.text =

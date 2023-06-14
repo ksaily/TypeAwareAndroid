@@ -41,6 +41,7 @@
         android:background="@drawable/roundstyle"
         android:ems="10"
         android:hint="Email"
+        android:layout_gravity="center"
         android:inputType="textEmailAddress"
         android:minHeight="48dp"
         android:padding="8dp" />
@@ -62,6 +63,7 @@
         android:layout_marginHorizontal="50dp"
         android:background="@drawable/roundstyle"
         android:ems="10"
+        android:layout_gravity="center"
         android:hint="Your Prolific ID"
         android:inputType="text"
         android:minHeight="48dp"

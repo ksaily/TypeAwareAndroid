@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_margin="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Daily questionnaire"
+            android:textSize="20sp"
+            android:fontFamily="@font/roboto_black"
+            android:textColor="@color/muted_purple"
+            android:padding="8dp"
+            android:textAlignment="center"/>
 
         <TextView
             android:id="@+id/questionTextView"
@@ -15,12 +25,65 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="18sp"
-            android:padding="8dp"/>
+            android:padding="8dp"
+            android:text="Q1: Yesterday I had to correct my typing more than normally."
+            />
 
         <RadioGroup
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/radioGroup1"
             android:paddingVertical="8dp">
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/likertScale1_1"
+                android:text="@string/likert_1"/>
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/likertScale1_2"
+                android:text="@string/likert_2"/>
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/likertScale1_3"
+                android:text="@string/likert_3"/>
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/likertScale1_4"
+                android:text="@string/likert_4"/>
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/likertScale1_5"
+                android:text="@string/likert_5"/>
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/likert_6"
+                android:id="@+id/likertScale1_6"/>
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/likertScale1_7"
+                android:text="@string/likert_7"/>
+        </RadioGroup>
+
+        <RadioGroup
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/radioGroup2"
+            android:paddingVertical="8dp"
+            android:visibility="gone">
 
             <RadioButton
                 android:layout_width="wrap_content"
@@ -65,11 +128,27 @@
                 android:text="@string/likert_7"/>
         </RadioGroup>
 
+        <EditText
+            android:id="@+id/amountOfWordsAnswer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="50dp"
+            android:background="@drawable/roundstyle"
+            android:ems="10"
+            android:visibility="gone"
+            android:layout_gravity="center_horizontal"
+            android:hint="Amount of words (number)"
+            android:inputType="number"
+            android:minHeight="48dp"
+            android:layout_marginVertical="10dp"
+            />
+
 
         <Button
             android:id="@+id/submitButton"
             style="@style/btn"
-            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:layout_gravity="center_horizontal"
             android:text="Submit" />
 
     </LinearLayout>

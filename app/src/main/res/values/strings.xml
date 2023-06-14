@@ -115,12 +115,22 @@
     <string name="home_keyboard_data_not_found_btn">Settings</string>
 
     <!-- Likert scale options -->
-    <string name="likert_1">1 (strongly disagree)</string>
-    <string name="likert_2">2 (disagree)</string>
-    <string name="likert_3">3 (somewhat disagree)</string>
-    <string name="likert_4">4 (neither agree or disagree)</string>
-    <string name="likert_5">5 (somewhat agree)</string>
-    <string name="likert_6">6 (agree)</string>
-    <string name="likert_7">7 (strongly agree)</string>
+    <string name="likert_1_1">1 (significantly less)</string>
+    <string name="likert_1_2">2 (less)</string>
+    <string name="likert_1_3">3 (slightly less)</string>
+    <string name="likert_1_4">4 (not more or less)</string>
+    <string name="likert_1_5">5 (slightly more)</string>
+    <string name="likert_1_6">6 (more)</string>
+    <string name="likert_1_7">7 (significantly more)</string>
+
+    <string name="likert_2_1">1 (strongly disagree)</string>
+    <string name="likert_2_2">2 (disagree)</string>
+    <string name="likert_2_3">3 (somewhat disagree)</string>
+    <string name="likert_2_4">4 (neither agree or disagree)</string>
+    <string name="likert_2_5">5 (somewhat agree)</string>
+    <string name="likert_2_6">6 (agree)</string>
+    <string name="likert_2_7">7 (strongly agree)</string>
+
+
 
 </resources>
