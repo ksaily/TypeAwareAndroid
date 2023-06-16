@@ -106,16 +106,17 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
 
         val sharedPrefs = Utils.getSharedPrefs()
 
-        val code = Utils.readSharedSettingString(
-            Graph.appContext,
-            "authorization_code", ""
-        )
-        val state = Utils.readSharedSettingString(
-            Graph.appContext, "state", ""
-        )
-        if (code != null && state != null) {
+
+        if (sharedPrefs.contains("state") && sharedPrefs.contains("authorization_code")) {
+            Log.d("HomeScreen", "Code and state not empty")
+            val code = readSharedSettingString(
+                Graph.appContext,
+                "authorization_code", "")
+            Log.d("sharedprefs", code.toString())
+            val state = readSharedSettingString(
+                Graph.appContext, "state", "")
             lifecycleScope.launch(Dispatchers.IO) {
-                FitbitApiService.authorizeRequestToken(code, state)
+                FitbitApiService.authorizeRequestToken(code!!, state!!)
             }
         } else {
             showFitbitLogin()
@@ -253,7 +254,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
     }
 
     private fun isLoggedInFitbit(): Boolean {
-        return readSharedSettingString(Graph.appContext, "access_token", "")!!.isNotEmpty()
+        return (Utils.getSharedPrefs().contains("authorization_code") &&
+                Utils.getSharedPrefs().contains("state") &&
+                Utils.getSharedPrefs().contains("access_token"))
     }
 
     /**

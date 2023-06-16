@@ -33,6 +33,7 @@ import com.github.mikephil.charting.charts.BarChart
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.util.*
@@ -95,14 +96,13 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         view = binding.root
         setContentView(view)
 
-        // Obtain the FirebaseAnalytics instance.
-        firebaseAnalytics = Firebase.analytics
-        /**firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM) {
-            param(FirebaseAnalytics.Param.ITEM_ID, id)
-            param(FirebaseAnalytics.Param.ITEM_NAME, name)
-            param(FirebaseAnalytics.Param.CONTENT_TYPE, "image")
-        }**/
-        val sharedPrefs = Utils.getSharedPrefs()
+        // Set user id for crash reports
+        Firebase.crashlytics.setUserId(
+            Utils.readSharedSettingString(Graph.appContext, "userId", "")
+                .toString()
+        )
+
+        val sharedPrefs = getSharedPrefs()
         val transaction = supportFragmentManager.beginTransaction()
             //Utils.checkBattery(applicationContext)
             /**
@@ -115,9 +115,8 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
 
 
 
-        loadFragment(this, homeFragment, null, "homeFragment", true)
+        //loadFragment(this, homeFragment, null, "homeFragment", true)
         bottomNav = binding.bottomNav
-        bottomNav.selectedItemId = R.id.homeFragment
         bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.homeFragment -> {
@@ -135,6 +134,8 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             }
             true
         }
+        bottomNav.selectedItemId = R.id.homeFragment
+
         sharedPrefs.registerOnSharedPreferenceChangeListener(this)
         checkFirstLogin()
         questionnaireDialog.showQuestionnaire()
@@ -147,8 +148,10 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
 
     private fun checkDailyQuestionnaire() {
         if (!Utils.readSharedSettingBoolean(Graph.appContext,
-                "isQuestionnaireAnswered", false)) {
-            DailyQuestionnaireDialog().show(supportFragmentManager, "DailyQuestionnaireDialog")
+                "isQuestionnaireAnswered", false) &&
+            !questionnaireDialog.isAdded) {
+            Log.d("DailyQuestionnaire", "Questionnaire not answered")
+            questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
         }
     }
 
@@ -161,6 +164,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         checkFirstLogin()
         //Utils.checkPermissions(applicationContext)
         questionnaireDialog.showQuestionnaire()
+        checkDailyQuestionnaire()
     }
 
 
@@ -185,11 +189,13 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         }**/
         Log.d("SharedPref", "OnSharedPreferenceChanged")
 
-        if (readSharedSettingBoolean(applicationContext,
+        if (key == "first_login_done" && readSharedSettingBoolean(applicationContext,
                 "first_login_done", false)) {
                 loadFragment(this, homeFragment, null, "homeFragment", true)
                 //val consentFragment = supportFragmentManager.findFragmentByTag("consentFragment")
                 bottomNav.isVisible = true
+        } else if (key == "isQuestionnaireAnswered") {
+            Log.d("DailyQuestionnaire", "key changed")
             checkDailyQuestionnaire()
         }
         else {

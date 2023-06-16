@@ -49,43 +49,61 @@
 
     <string-array name="questionnaire_likert_scale_options1">
         <item>1 (significantly less)</item>
-        <item>2 (less)</item>
+        <item>2 (somewhat less)</item>
         <item>3 (slightly less)</item>
-        <item>4 (not more or less)</item>
+        <item>4 (same amount)</item>
         <item>5 (slightly more)</item>
-        <item>6 (more)</item>
+        <item>6 (somewhat more)</item>
         <item>7 (significantly more)</item>
     </string-array>
 
     <string-array name="questionnaire_likert_scale_options2">
-        <item>1 (significantly slower)</item>
-        <item>2 (slower)</item>
-        <item>3 (slightly slower)</item>
-        <item>4 (not faster or slower)</item>
-        <item>5 (slightly faster)</item>
-        <item>6 (faster)</item>
-        <item>7 (significantly faster)</item>
-    </string-array>
-
-    <string-array name="questionnaire_likert_scale_options3">
         <item>1 (significantly worse)</item>
-        <item>2 (worse)</item>
+        <item>2 (somewhat worse)</item>
         <item>3 (slightly worse)</item>
-        <item>4 (not better or worse)</item>
+        <item>4 (the same)</item>
         <item>5 (slightly better)</item>
-        <item>6 (better)</item>
+        <item>6 (somewhat better)</item>
         <item>7 (significantly better)</item>
     </string-array>
 
-    <string-array name="questionnaire_time_of_day_options">
-        <item>0-1</item>
-        <item>1-2</item>
-        <item>2-3</item>
-        <item>3-4</item>
-        <item>4-5</item>
-        <item>5-6</item>
-        <item>6-7</item>
-        <item>7-8</item>
-        <item>8-9</item>
+    <string-array name="questionnaire_likert_scale_options3">
+        <item>1 (significantly earlier)</item>
+        <item>2 (somewhat earlier)</item>
+        <item>3 (slightly earlier)</item>
+        <item>4 (at the same time)</item>
+        <item>5 (slightly later)</item>
+        <item>6 (somewhat later)</item>
+        <item>7 (significantly later)</item>
     </string-array>
+
+
+    <!-- Wheel picker options -->
+    <string-array name="questionnaire_time_of_day_options">
+        <item>00</item>
+        <item>01</item>
+        <item>02</item>
+        <item>03</item>
+        <item>04</item>
+        <item>05</item>
+        <item>06</item>
+        <item>07</item>
+        <item>08</item>
+        <item>09</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+        <item>19</item>
+        <item>20</item>
+        <item>21</item>
+        <item>22</item>
+        <item>23</item>
+    </string-array>
+
 </resources>

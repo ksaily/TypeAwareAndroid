@@ -131,6 +131,14 @@
     <string name="likert_2_6">6 (agree)</string>
     <string name="likert_2_7">7 (strongly agree)</string>
 
+    <string name="likert_1">1 (strongly disagree)</string>
+    <string name="likert_2">2 (disagree)</string>
+    <string name="likert_3">3 (somewhat disagree)</string>
+    <string name="likert_4">4 (neither agree or disagree)</string>
+    <string name="likert_5">5 (somewhat agree)</string>
+    <string name="likert_6">6 (agree)</string>
+    <string name="likert_7">7 (strongly agree)</string>
+
 
 
 </resources>
