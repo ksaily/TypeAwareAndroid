@@ -23,13 +23,12 @@
             android:layout_alignEnd="@id/arrowLeft"
             android:layout_alignBottom="@id/currentDate"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="80dp"
-            app:tint="@color/light_purple"
             android:backgroundTint="@color/white"
+            android:paddingHorizontal="10dp"
+            android:layout_marginHorizontal="30dp"
+            app:tint="@color/light_purple"
             android:minWidth="48dp"
             android:minHeight="48dp"
-            android:padding="5dp"
             android:src="@drawable/ic_baseline_calendar_month_24"
             android:textAllCaps="false" />
 

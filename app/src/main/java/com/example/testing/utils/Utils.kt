@@ -1,30 +1,22 @@
 package com.example.testing.utils
 
-import android.Manifest
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
+import android.provider.Settings.Global.getString
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.preference.PreferenceManager
 import com.example.testing.Graph
-import com.example.testing.MainActivity
 import com.example.testing.R
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -42,7 +34,9 @@ class Utils {
         var speedsList: MutableList<Double> = mutableListOf()
         val calendar = Calendar.getInstance()
         val formatter = SimpleDateFormat("dd-MM-yyyy")
+        val formatterChart = SimpleDateFormat("dd-MM")
         var currentDate: String = getCurrentDateString()
+        private val questionnaireCompleteString = "QuestionnaireCompleted"
 
 
         /**
@@ -72,25 +66,29 @@ class Utils {
         }
 
         fun formatForFitbit(inputDate: String): String {
-            val cal = Calendar.getInstance()
-            val form = SimpleDateFormat("yyyy-MM-dd")
-            val date = formatter.parse(inputDate) as Date
-            cal.time = date
-            Log.d("DateFormat", "Date formatted from: $date to ${form.format(cal.time)}")
-            return form.format(cal.time)
+            val inputFormatter = SimpleDateFormat("dd-MM-yyyy")
+            val outputFormatter = SimpleDateFormat("yyyy-MM-dd")
+            val date = inputFormatter.parse(inputDate) as Date
+            val returnDate = outputFormatter.format(date)
+            Log.d("DateFormat", "Date formatted from: $date to $returnDate")
+            return returnDate
         }
+
 
         fun getCurrentDateString(): String {
-            var time = Calendar.getInstance().time
-            return formatter.format(time)
+            val time = Calendar.getInstance().time
+            val currentDay = formatter.format(time)
+            Log.d("CurrentDate", "Current date is $currentDay")
+            return currentDay
         }
 
-        fun formatDateString(inputDate: String): String {
-            val cal = Calendar.getInstance()
-            var date = formatter.parse(inputDate) as Date
-            var thisDate = formatter.format(date)
-            Log.d("DateFormat", "Date formatted from $inputDate to: $thisDate")
-            return thisDate
+        fun formatDateStringFromFitbit(inputDate: String): String {
+            val inputFormatter = SimpleDateFormat("yyyy-MM-dd")
+            val outputFormatter = SimpleDateFormat("dd-MM-yyyy")
+            val date = inputFormatter.parse(inputDate) as Date
+            val returnDate = outputFormatter.format(date)
+            Log.d("DateFormat", "Date formatted from $inputDate to: $returnDate")
+            return returnDate
         }
 
         /**
@@ -107,6 +105,21 @@ class Utils {
             return previousDate
         }
 
+        fun getDateWeekFromNow(inputDate: String): String {
+            val cal = Calendar.getInstance()
+            val date = formatter.parse(inputDate) as Date
+            cal.time = date
+            cal.add(Calendar.DATE, +7)
+            return formatter.format(cal.time)
+        }
+
+        fun dateHasPassed(inputDate: String): Boolean {
+            val date = formatter.parse(inputDate) as Date
+            val thisDay = formatter.parse(currentDate) as Date
+            //Check whether date is today or has passed
+            return date.before(thisDay) || date == thisDay
+        }
+
         /**
          * Get the date after the currently SELECTED date
          */
@@ -121,6 +134,14 @@ class Utils {
             return nextDate
 
         }
+
+        fun formatDateForChart(inputDate: String): String {
+            val inputFormatter = SimpleDateFormat("dd-MM-yyyy")
+            val outputFormatter = SimpleDateFormat("dd-MM")
+            val date = inputFormatter.parse(inputDate) as Date
+            return outputFormatter.format(date)
+        }
+
 
         fun View.showSnackbar(
             view: View,
@@ -143,7 +164,8 @@ class Utils {
          * Return true if in App's Battery settings "Not optimized" and false if "Optimizing battery use"
          */
         fun isIgnoringBatteryOptimizations(context: Context): Boolean {
-            val pwrm = context.applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+            val pwrm =
+                context.applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
             val name = context.applicationContext.packageName
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 saveSharedSettingBoolean(Graph.appContext, "battery_opt_off",
@@ -168,15 +190,19 @@ class Utils {
             }
         }
 
-        fun readSharedSettingBoolean(ctx: Context = Graph.appContext,
-                                     settingName: String?, defaultValue: Boolean): Boolean {
+        fun readSharedSettingBoolean(
+            ctx: Context = Graph.appContext,
+            settingName: String?, defaultValue: Boolean
+        ): Boolean {
             val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
             val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
             return s.getBoolean(settingName, defaultValue)
         }
 
-        fun readSharedSettingString(ctx: Context = Graph.appContext,
-                                    settingName: String?, defaultValue: String): String? {
+        fun readSharedSettingString(
+            ctx: Context = Graph.appContext,
+            settingName: String?, defaultValue: String
+        ): String? {
             val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
             val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
             return s.getString(settingName, defaultValue)
@@ -186,8 +212,11 @@ class Utils {
             return PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
         }
 
-        fun saveSharedSetting(ctx: Context = Graph.appContext,
-                              settingName: String?, settingValue: String?) {
+
+        fun saveSharedSetting(
+            ctx: Context = Graph.appContext,
+            settingName: String?, settingValue: String?
+        ) {
             val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
             val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
             val editor = s.edit()
@@ -195,8 +224,10 @@ class Utils {
             editor.apply()
         }
 
-        fun saveSharedSettingBoolean(ctx: Context = Graph.appContext,
-                                     settingName: String?, settingValue: Boolean) {
+        fun saveSharedSettingBoolean(
+            ctx: Context = Graph.appContext,
+            settingName: String?, settingValue: Boolean
+        ) {
             val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
             //val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
             val editor = s.edit()
@@ -219,12 +250,15 @@ class Utils {
             return false
         }
 
-        fun checkAccessibilityPermission(context: Context = Graph.appContext,
-                                         openSettings: Boolean): Boolean {
+        fun checkAccessibilityPermission(
+            context: Context = Graph.appContext,
+            openSettings: Boolean
+        ): Boolean {
             var accessEnabled = 0
             try {
                 accessEnabled =
-                    Settings.Secure.getInt(context.contentResolver, Settings.Secure.ACCESSIBILITY_ENABLED)
+                    Settings.Secure.getInt(context.contentResolver,
+                        Settings.Secure.ACCESSIBILITY_ENABLED)
             } catch (e: Settings.SettingNotFoundException) {
                 e.printStackTrace()
             }
@@ -259,11 +293,44 @@ class Utils {
             }
         }
 
+        fun checkQuestionnaireWeek(startDay: String) {
+            var nextDay = readSharedSettingString(Graph.appContext, "questionnaire_first_day", "").toString()
+            //val nextDay = getNextDateString(startDay)
+            val participantId = readSharedSettingString(Graph.appContext, "userId", "").toString()
+            val myRef = Firebase.database.getReference("KeyboardEvents")
+            var isQuestionnaireAnswered = false
+            var amountOfAnswers = 0
+            val dayAfter = getNextDateString(currentDate)
+            while (nextDay != dayAfter) {
+                myRef.child(participantId).child(nextDay).child("questionnaire")
+                    .child(questionnaireCompleteString).get().addOnSuccessListener { snapshot ->
+                        Log.d("Firebase", "Questionnaire listener")
+                        isQuestionnaireAnswered = (snapshot.exists() &&
+                                snapshot.value as Boolean)
+                    }.addOnFailureListener {
+                        // Error occurred while checking if questionnaire is answered, show home screen
+                        Log.d("checkQuestionnaireWeek", "Failure on setting listener")
+                    }
+                if (isQuestionnaireAnswered) {
+                    amountOfAnswers ++
+                }
+                nextDay = getNextDateString(nextDay)
+            }
+            if (amountOfAnswers == 7) {
+                saveSharedSettingBoolean(Graph.appContext,
+                    "first_week_done", true)
+                saveSharedSetting(Graph.appContext, "second_week_start_date", currentDate)
+                saveSharedSetting(Graph.appContext, "second_week_end_date", getDateWeekFromNow(
+                    currentDate))
+            }
+        }
+
         /**
          * @param action 0 for accessibility settings, 1 for battery optimization settings
          */
         fun showAlertDialog(context: Context, action: Int) {
             val alertDialog: AlertDialog.Builder = AlertDialog.Builder(context)
+            val alert: AlertDialog = alertDialog.create()
             when (action) {
                 0 -> {
                     alertDialog.setTitle(R.string.accessibility_perm_snackbar_title)
@@ -279,16 +346,30 @@ class Utils {
                 "OK"
             ) { _, _ ->
                 when (action) {
-                    0 -> checkAccessibilityPermission(Graph.appContext, true)
-                    1 -> checkBattery(Graph.appContext)
+                    0 -> {
+                        checkAccessibilityPermission(Graph.appContext, true)
+                        if (alert.isShowing) {
+                            alert.dismiss()
+                        }
+                    }
+
+                    1 -> {
+                        checkBattery(Graph.appContext)
+                        if (alert.isShowing) {
+                            alert.dismiss()
+                        }
+                    }
                 }
+                alertDialog.setNegativeButton(
+                    "Cancel"
+                ) { _, _ ->
+                    if (alert.isShowing) {
+                        alert.dismiss()
+                    }
+                }
+                alert.setCanceledOnTouchOutside(false)
+                alert.show()
             }
-            alertDialog.setNegativeButton(
-                "Cancel"
-            ) { _, _ -> }
-            val alert: AlertDialog = alertDialog.create()
-            alert.setCanceledOnTouchOutside(false)
-            alert.show()
         }
     }
 }

@@ -18,7 +18,6 @@ import com.example.testing.databinding.FragmentDateBinding
 import com.example.testing.ui.viewmodel.DateViewModel
 import com.example.testing.ui.viewmodel.FirebaseViewModel
 import com.example.testing.utils.Utils.Companion.currentDate
-import com.example.testing.utils.Utils.Companion.formatDateString
 import com.example.testing.utils.Utils.Companion.formatter
 import java.util.*
 
@@ -57,6 +56,7 @@ class DateFragment : Fragment(R.layout.fragment_date) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("DateFragment", "created")
         //binding.currentDate.text = "Today"
         //chosenDate = currentDate
         binding.arrowLeft.setOnClickListener {

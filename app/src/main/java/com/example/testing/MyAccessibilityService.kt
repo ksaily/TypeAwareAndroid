@@ -28,13 +28,22 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.lang.System.nanoTime
 import java.util.*
+import kotlin.concurrent.schedule
 
 class MyAccessibilityService : AccessibilityService() {
     private var startTime: Long = 0
     private var endTime: Long = 0
 
     override fun onInterrupt() {
-        TODO("restart after 5 minutes")
+        Timer("AccessibilityService", false).schedule(600000) {
+            //Restart after 10 minutes
+            MyAccessibilityService()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        OneTimeWorkRequestBuilder<SaveKeyboardDataWorker>()
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -71,29 +80,33 @@ class MyAccessibilityService : AccessibilityService() {
         }
     }
 
-            /** Check if session remains the same.
-             * If yes, add written character to string and typing time to an arraylist. **/
-
-            fun checkSession(event: AccessibilityEvent) {
+    /** Check if session remains the same.
+     * If yes, add written character to string and typing time to an arraylist. **/
+    private fun checkSession(event: AccessibilityEvent) {
 
             if (sameSession(event.packageName.toString(), timeElapsed)) {
             //Same session as before
                 if (timeElapsed != 0.0) {
                 typingTimes.add(timeElapsed)
                 }
-                addToString(event.text.toString().removeSurrounding("[", "]"),
-                event.beforeText.toString(), true)
+                saveCharIfNotPassword(event)
             } else { // Session has changed
                 newPackage = event.packageName.toString()
                 //startTime = nanoTime()
-                addToString(event.text.toString().removeSurrounding("[", "]"),
-                event.beforeText.toString(),false)
+                saveCharIfNotPassword(event)
                 val saveKeyboardDataWork = OneTimeWorkRequestBuilder<SaveKeyboardDataWorker>()
                 onSessionChange()
             }
-            }
+    }
 
-            /** Session has changed, save the current info as KeyboardEvents data class
+    private fun saveCharIfNotPassword(event: AccessibilityEvent) {
+        if (!event.isPassword) {
+            addToString(event.text.toString().removeSurrounding("[", "]"),
+                event.beforeText.toString(), false)
+        }
+    }
+
+    /** Session has changed, save the current info as KeyboardEvents data class
              * and if the timeslot has changed, also set up a worker that saves info to Firebase.
              * After that, reset values. **/
             private fun onSessionChange() {

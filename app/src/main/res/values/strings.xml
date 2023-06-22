@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Testing</string>
+    <string name="app_name">TypeAware</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
@@ -18,10 +18,9 @@
     <!-- Consent form -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="con_title">Consent to Participate</string>
-    <string name="con_intro">Welcome to TypeAware! This app is part of a scientific study, which focuses on tracking users\' keyboard usage during the day. During the first week, the app will send you a notification every day to complete a brief questionnaire about how you have experienced your own keyboard usage. The second week you will also be shown an overview of the data that the app has collected and you will also be asked to answer the same daily questionnaire. If you do not receive a notification within 24hours after installation, please let us know.</string>
-    <string name="con_portrait">Portrait of the researchers that organise the study: Tilman Dingler and Tonja Maschulla</string>
+    <string name="con_intro">Welcome to TypeAware! This app is part of a scientific study, which focuses on tracking users\' smartphone typing behaviour during the day. During the first week, the app will send you a notification every day to complete a brief questionnaire about how you have experienced your own typing behaviour, after which you can take a look at the data collected by the app. On the second week of the study you will always be shown an overview of the data that the app has collected and you will also be asked to answer a daily questionnaire. If you do not receive a notification or a daily questionnaire within 24hours after installation, please let us know.</string>
     <string name="con_contact">"This study is conducted by Katri Säily and Aku Visuri at the University of Oulu. In case you have questions, please contact us at katri.saily@oulu.fi"</string>
-    <string name="con_data">By pressing accept, you allow TypeAware to anonymously collect app and keyboard usage data. All data will be securely stored on a server in compliance with European data protection laws (BGBl. I S. 2325). All the keyboard data will be encrypted before sending it to the server so nobody can see exactly what you have written. Logs will only be uploaded when you are connected to WiFi to prevent any upload cost. Your data will only be used in the context of our research and will never be shared with third parties. You can withdraw from the study at any moment by simply uninstalling the app. Thanks! And have fun with the tasks!</string>
+    <string name="con_data">By pressing accept, you allow TypeAware to anonymously collect app and keyboard usage data. All data will be securely stored on a server in compliance with European data protection laws (BGBl. I S. 2325). All the keyboard data will be encrypted before sending it to the server so nobody can see exactly what you have written. Logs will only be uploaded when you are connected to WiFi to prevent any upload cost. Your data will only be used in the context of our research and will never be shared with third parties. You can withdraw from the study at any moment by simply uninstalling the app. Thanks! And have fun with the learning more about your typing behaviour!</string>
     <string name="con_btn_give_consent">Accept</string>
     <string name="con_btn_not_now">Not Now</string>
     <string name="con_could_not_register">No connection to our servers - are you connected to the Internet?</string>
@@ -53,6 +52,27 @@
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="title_activity_settings">SettingsActivity</string>
+
+    <!-- Shared preferences keys -->
+    <string name="sharedpref_accessibility">accessibility_permission</string>
+    <string name="sharedpref_battery">battery_opt_off</string>
+    <string name="sharedpref_permissions">permissions_granted</string>
+    <string name="sharedpref_questionnaire_ans">isQuestionnaireAnswered</string>
+    <string name="sharedpref_questionnaire_day">questionnaire_first_day</string>
+    <string name="sharedpref_user_info">user_info_saved</string>
+    <string name="sharedpref_consent">consent_given</string>
+    <string name="sharedpref_onboarding">onboarding_done</string>
+    <string name="sharedpref_authorization">authorization_code</string>
+    <string name="sharedpref_state">state</string>
+    <string name="sharedpref_first_login">first_login_done</string>
+    <string name="sharedpref_access">access_token</string>
+    <string name="sharedpref_refresh">refresh_token</string>
+    <string name="sharedpref_userid">userId</string>
+    <string name="sharedpref_firstweek_done">first_week_done</string>
+    <string name="sharedpref_firstweek_end_date">first_week_end_date</string>
+    <string name="sharedpref_secondweek_start_date">second_week_start_date</string>
+    <string name="sharedpref_secondweek_end_date">second_week_end_date</string>
+    <string name="sharedpref_secondweek_done">second_week_done</string>
 
     <!-- Preference Titles and prompts-->
     <string name="notifications_header">Notifications</string>

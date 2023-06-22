@@ -86,6 +86,7 @@
             android:layout_marginHorizontal="50dp"
             android:background="@drawable/roundstyle"
             android:ems="10"
+            android:padding="10dp"
             android:visibility="gone"
             android:layout_gravity="center_horizontal"
             android:hint="Amount of words (number)"
@@ -101,6 +102,49 @@
             android:layout_margin="10dp"
             android:padding="10dp"
             android:visibility="gone"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:id="@+id/week2Q2">
+
+        <RadioGroup
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/radioGroup2"
+            android:paddingVertical="8dp">
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/yesBtn"
+            android:text="Yes"/>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/noBtn"
+            android:text="No"/>
+        </RadioGroup>
+
+        <EditText
+            android:id="@+id/explainAnswer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="50dp"
+            android:background="@drawable/roundstyle"
+            android:textSize="14dp"
+            android:padding="5dp"
+            android:visibility="visible"
+            android:layout_gravity="center_horizontal"
+            android:hint="If yes, explain what?"
+            android:layout_marginVertical="10dp"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLength="2000"
+            android:maxLines="4"
+            />
+        </LinearLayout>
 
 
         <Button

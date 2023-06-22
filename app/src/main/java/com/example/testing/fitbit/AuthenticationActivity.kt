@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.lifecycle.lifecycleScope
 import com.example.testing.Graph
 import com.example.testing.MainActivity
 import java.net.URI
@@ -21,6 +22,9 @@ import com.example.testing.fitbit.CodeChallenge.Companion.REDIRECT_URL
 import com.example.testing.fitbit.CodeChallenge.Companion.CODE_VERIFIER
 import com.example.testing.fitbit.FitbitApiService.Companion.runningThread
 import com.example.testing.utils.Utils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Base64
 
 /**
@@ -41,16 +45,18 @@ class AuthenticationActivity : AppCompatActivity() {
         val authorizationUrl = buildUrl(fitbitAuthUrl)
         val builder = CustomTabsIntent.Builder()
         val customTabsIntent = builder.build()
-        customTabsIntent.intent.flags = FLAG_ACTIVITY_NEW_TASK
+        intent.flags = FLAG_ACTIVITY_NEW_TASK
+        //intent.putExtra(Intent.EXTRA_REFERRER,
+        //    Uri.parse("android-app://" + Graph.appContext.packageName))
         Log.d("Authorization", "Activity started")
         try {
             Log.d("Authorization", "$authorizationUrl")
-
             customTabsIntent.launchUrl(this, Uri.parse(authorizationUrl))
         } catch (e: Exception) {
             Log.d("Error", "$e")
         }
     }
+
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -68,6 +74,14 @@ class AuthenticationActivity : AppCompatActivity() {
                 "state", state)
             AUTH_CODE = code
             uniqueState = state
+            lifecycleScope.launch(Dispatchers.IO) {
+                try {
+                    FitbitApiService.authorizeRequestToken(code, state)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+            }/**
             Thread(Runnable {
                 try {
                     if (!runningThread) {
@@ -79,12 +93,21 @@ class AuthenticationActivity : AppCompatActivity() {
                 } catch (e: InterruptedException) {
                     e.printStackTrace()
                 }
-            }).start()
+            }).start()**/
             val returnIntent = Intent(this, MainActivity::class.java)
             startActivity(returnIntent)
         } else {
+            //No authorization code received, return to MainActivity
             Log.d("Authorization", "Authorization code not received")
+            finish()
+            return
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        finish()
+        return
     }
 
     private fun buildUrl(url: String): String {

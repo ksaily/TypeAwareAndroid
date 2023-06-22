@@ -77,6 +77,16 @@
         <item>7 (significantly later)</item>
     </string-array>
 
+    <string-array name="questionnaire_likert_scale_options_week2">
+        <item>1 (strongly disagree)</item>
+        <item>2 (disagree)</item>
+        <item>3 (somewhat disagree)</item>
+        <item>4 (neither agree or disagree)</item>
+        <item>5 (somewhat agree)</item>
+        <item>6 (agree)</item>
+        <item>7 (strongly agree)</item>
+    </string-array>
+
 
     <!-- Wheel picker options -->
     <string-array name="questionnaire_time_of_day_options">

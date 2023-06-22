@@ -1,41 +1,27 @@
 package com.example.testing.questionnaire
 
-import android.app.AlertDialog
-import android.app.Dialog
-import android.content.Context
-import android.content.DialogInterface
+import android.content.SharedPreferences
 import android.os.Bundle
-import android.provider.MediaStore.Audio.Radio
 import android.util.Log
 import android.view.*
-import android.widget.Button
 import android.widget.RadioButton
-import android.widget.RatingBar
-import android.widget.TextView
-import androidx.core.view.children
+import android.widget.RadioGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.testing.Graph
 import com.example.testing.R
 import com.example.testing.databinding.DialogDailyQuestionnaireBinding
-import com.example.testing.databinding.FragmentHomeBinding
-import com.example.testing.ui.viewmodel.DailyQuestionnaireViewModel
 import com.example.testing.utils.Utils
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-class DailyQuestionnaireDialog : DialogFragment() {
+class DailyQuestionnaireDialog : DialogFragment(),
+    SharedPreferences.OnSharedPreferenceChangeListener {
 
     private var _binding: DialogDailyQuestionnaireBinding? = null
     private val binding get() = _binding!!
@@ -48,16 +34,17 @@ class DailyQuestionnaireDialog : DialogFragment() {
     //private val viewModel: DailyQuestionnaireViewModel by activityViewModels()
 
 
-    private val questions = listOf(
+    private var questions = listOf(
         "Q1: How much did you have to correct your typing yesterday compared to an average day?",
         "Q2: How fast was your typing speed yesterday compared to an average day?",
         "Q3: How many words did you type during yesterday?",
         "Q4: At what hour of the day were you typing the most yesterday? Choose the starting hour.",
         "Q5: Compared to an average day, how did you sleep yesterday?",
-        "Q6: How much fatigue did you experience yesterday compared to an average day?",
+        "Q6: Did you go to bed earlier or later yesterday compared to an average day?",
     )
     private var currentQuestionIndex = 0
-    private var currentAnswer = 0
+    private var currentAnswer = ""
+    private var isFirstWeek = true
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -74,10 +61,28 @@ class DailyQuestionnaireDialog : DialogFragment() {
             if (!Utils.readSharedSettingBoolean(Graph.appContext,
                 "isQuestionnaireAnswered", false)) {
                 setUpNumberPicker()
-                setupView()
+                showNextQuestion()
                 setupClickListener()
             }
+            Utils.getSharedPrefs().registerOnSharedPreferenceChangeListener(this)
         }
+    }
+
+    override fun onSharedPreferenceChanged(sharedPref: SharedPreferences?, key: String?) {
+        if (key == getString(R.string.sharedpref_firstweek_done) &&
+                Utils.readSharedSettingBoolean(Graph.appContext,
+                getString(R.string.sharedpref_firstweek_done), false)) {
+            changeToSecondWeek()
+        }
+    }
+
+    private fun changeToSecondWeek() {
+        questions = listOf(
+            "Q1: Yesterday reflected a normal day for me.",
+            "Q2: I found yesterday’s data meaningful.",
+            "Q3: Did you find anything surprising in yesterday’s data?",
+            "Q4: Based on yesterday’s data, I would be likely to change my digital or sleep-related behaviour."
+        )
     }
 
     private fun setUpNumberPicker() {
@@ -90,52 +95,45 @@ class DailyQuestionnaireDialog : DialogFragment() {
     private fun chooseViewsToShow(
         radioGroupVisible: Boolean,
         wordAnswerVisible: Boolean,
-        numberPickerVisible: Boolean) {
+        numberPickerVisible: Boolean,
+        secondWeekWordAnswerVisible: Boolean) {
         binding.apply {
             radioGroup1.isVisible = radioGroupVisible
             amountOfWordsAnswer.isVisible = wordAnswerVisible
             numberPicker.isVisible = numberPickerVisible
+            week2Q2.isVisible = secondWeekWordAnswerVisible
+
+        }
+    }
+
+    private fun loopForLikertScaleQuestions(arrayId: Int) {
+        val radioGroup = binding.radioGroup1
+        chooseViewsToShow(true, false, false, false)
+        for (rbPosition in 0 until radioGroup.childCount) {
+            val rb = radioGroup.getChildAt(rbPosition) as RadioButton
+            rb.text = resources.getStringArray(
+                arrayId)[rbPosition].toString()
         }
     }
 
     private fun setupView() {
         binding.questionTextView.text = questions[currentQuestionIndex]
-        val rgGroup = binding.radioGroup1
-        when (currentQuestionIndex) {
-            2 -> {
-                chooseViewsToShow(false, true, false)
+        val rgGroup1 = binding.radioGroup1
+        if (isFirstWeek) {
+            when (currentQuestionIndex) {
+                0 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options1)
+                1 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options2)
+                2 -> chooseViewsToShow(false, true, false, false)
+                3 -> chooseViewsToShow(false, false, true, false)
+                4 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options2)
+                5 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options3)
             }
-            3 -> {
-                rgGroup.isVisible = false
-                binding.amountOfWordsAnswer.isVisible = false
-                binding.numberPicker.isVisible = true
-                chooseViewsToShow(false, false, true)
-            }
-            else -> {
-                chooseViewsToShow(true, false, false)
-                for (rbPosition in 0 until rgGroup.childCount) {
-                    val rb = rgGroup.getChildAt(rbPosition) as RadioButton
-                    when (currentQuestionIndex) {
-
-                        0 -> {
-                            rb.text =
-                                resources.getStringArray(
-                                    R.array.questionnaire_likert_scale_options1)[rbPosition].toString()
-
-                        }
-                        (1 or 4) -> {
-                            rb.text =
-                                resources.getStringArray(
-                                    R.array.questionnaire_likert_scale_options2)[rbPosition].toString()
-                        }
-                        5 -> {
-                            rb.text =
-                                resources.getStringArray(
-                                    R.array.questionnaire_likert_scale_options3)[rbPosition].toString()
-                        }
-                    }
-
-                }
+        } else {
+            when (currentQuestionIndex) {
+                0 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options_week2)
+                1 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options_week2)
+                2 -> chooseViewsToShow(false, false, false, true)
+                3 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options_week2)
             }
         }
     }
@@ -144,18 +142,36 @@ class DailyQuestionnaireDialog : DialogFragment() {
 
     private fun setupClickListener() {
         binding.submitButton.setOnClickListener {
-            when (currentQuestionIndex) {
-                (0 or 1 or 4 or 5) -> {
-                    val selectedRadioButtonId = binding.radioGroup1.checkedRadioButtonId
-                    currentAnswer = getSelectedOptionIndex(selectedRadioButtonId)
-                }
-                2 -> currentAnswer = binding.amountOfWordsAnswer.text.toString().toInt()
+            if (isFirstWeek) {
+                when (currentQuestionIndex) {
+                    (0 or 1 or 4 or 5) -> {
+                        val selectedRadioButtonId = binding.radioGroup1.checkedRadioButtonId
+                        currentAnswer = getSelectedOptionIndex(selectedRadioButtonId).toString()
+                    }
+                    2 -> currentAnswer = binding.amountOfWordsAnswer.text.toString()
 
-                3 -> currentAnswer = binding.numberPicker.value
+                    3 -> currentAnswer = binding.numberPicker.value.toString()
+                }
+                saveAnswerToDatabase(currentQuestionIndex, currentAnswer)
+                currentQuestionIndex++
+                showNextQuestion()
+            } else {
+                when (currentQuestionIndex) {
+                    (0 or 1 or 3) -> {
+                        val selectedRadioButtonId = binding.radioGroup1.checkedRadioButtonId
+                        currentAnswer = getSelectedOptionIndex(selectedRadioButtonId).toString()
+                    }
+                    2 -> {
+                        val selectedRadioButtonId = binding.radioGroup2.checkedRadioButtonId
+                        val ans = getSelectedOptionIndex(selectedRadioButtonId)
+                        val textAns = binding.explainAnswer.text
+                        currentAnswer = "$ans, $textAns"
+                    }
+                }
+                saveAnswerToDatabase(currentQuestionIndex, currentAnswer)
+                currentQuestionIndex++
+                showNextQuestion()
             }
-            saveAnswerToDatabase(currentQuestionIndex, currentAnswer)
-            currentQuestionIndex++
-            showNextQuestion()
         }
     }
 
@@ -206,27 +222,31 @@ class DailyQuestionnaireDialog : DialogFragment() {
         }
     }
 
-    fun showQuestionnaire() {
+    fun showQuestionnaire(isFirstDay: Boolean) {
         val today = Utils.currentDate
         Log.d("Today:", today)
         var isQuestionnaireAnswered: Boolean
 
-        lifecycleScope.launch(Dispatchers.IO) {
+        if (!isFirstDay) {
 
-            myRef.child(participantId).child(today).child("questionnaire")
-                .child(questionnaireCompleteString).get().addOnSuccessListener { snapshot ->
-                    Log.d("Firebase", "Questionnaire listener")
-                    isQuestionnaireAnswered = (snapshot.exists() &&
-                            snapshot.value as Boolean)
-                    Log.d("isQuestionnaireAnswered", isQuestionnaireAnswered.toString())// both need to be true
+            lifecycleScope.launch(Dispatchers.IO) {
 
-                    Utils.saveSharedSettingBoolean(Graph.appContext,
-                        "isQuestionnaireAnswered", isQuestionnaireAnswered)
+                myRef.child(participantId).child(today).child("questionnaire")
+                    .child(questionnaireCompleteString).get().addOnSuccessListener { snapshot ->
+                        Log.d("Firebase", "Questionnaire listener")
+                        isQuestionnaireAnswered = (snapshot.exists() &&
+                                snapshot.value as Boolean)
+                        Log.d("isQuestionnaireAnswered",
+                            isQuestionnaireAnswered.toString())// both need to be true
+
+                        Utils.saveSharedSettingBoolean(Graph.appContext,
+                            "isQuestionnaireAnswered", isQuestionnaireAnswered)
                     }.addOnFailureListener {
                         // Error occurred while checking if questionnaire is answered, show home screen
                         showHomeScreen()
                     }
-                }
+            }
+        }
     }
 
     private fun showNextQuestion() {
@@ -241,15 +261,12 @@ class DailyQuestionnaireDialog : DialogFragment() {
                 questionnaireRef.child(questionnaireCompleteString).setValue(true).await()
                 Utils.saveSharedSettingBoolean(Graph.appContext,
                     "isQuestionnaireAnswered", true)
-
-                withContext(Dispatchers.Main) {
-                    showHomeScreen()
-                }
             }
+            showHomeScreen()
         }
     }
 
-    private fun saveAnswerToDatabase(question: Int, answer: Int) {
+    private fun saveAnswerToDatabase(question: Int, answer: String) {
         lifecycleScope.launch(Dispatchers.IO) {
 
             val qstn = "Q$question"

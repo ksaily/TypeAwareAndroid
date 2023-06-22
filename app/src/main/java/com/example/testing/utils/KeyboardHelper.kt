@@ -77,7 +77,12 @@ class KeyboardHelper {
                         deletedChars = 1
                     }
                 } else {
-                    val newChar = text.last()
+                    var newChar = text.last()
+                    if (newChar.isLetterOrDigit()) {
+                        //Check if character is something other than space or punctuation
+                        //Replace the character with 'a'
+                        newChar = 'a'
+                    }
                     if (sameSession) {
                         beforeString += newChar
                         Log.d("KeyboardEvents", "New char is: $newChar")

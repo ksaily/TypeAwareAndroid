@@ -58,7 +58,7 @@ class StackedBarChartFragment : Fragment(), SeekBar.OnSeekBarChangeListener,
 
         // if more than 60 entries are displayed in the chart, no values will be
         // drawn
-        chart!!.setMaxVisibleValueCount(40)
+        chart!!.setMaxVisibleValueCount(8)
 
         // scaling can now only be done on x- and y-axis separately
         chart!!.setPinchZoom(false)
@@ -146,17 +146,15 @@ class StackedBarChartFragment : Fragment(), SeekBar.OnSeekBarChangeListener,
          * Use this factory method to create a new instance of
          * this fragment using the provided parameters.
          *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
+         * @param date Currently selected date.
          * @return A new instance of fragment StackedBarChartFragment.
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance(param1: String) =
             StackedBarChartFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
                 }
             }
     }

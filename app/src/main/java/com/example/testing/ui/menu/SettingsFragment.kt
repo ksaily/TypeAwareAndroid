@@ -69,8 +69,8 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         super.onResume()
         Log.d("Prefs", "onResume")
         //preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
-        Utils.isIgnoringBatteryOptimizations(Graph.appContext)
-        Utils.checkAccessibilityPermission(Graph.appContext, false)
+        //Utils.isIgnoringBatteryOptimizations(Graph.appContext)
+        //Utils.checkAccessibilityPermission(Graph.appContext, false)
     }
 
     override fun onDetach()
@@ -112,7 +112,7 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         if (Utils.readSharedSettingBoolean(Graph.appContext,
                 "battery_opt_off", false)) {
             pref?.title = getString(R.string.battery_opt_off_prompt)
-            pref?.summary = getString(R.string.click_here_to_make_changes)
+            //pref?.summary = getString(R.string.click_here_to_make_changes)
             pref?.icon = Graph.appContext.getDrawable(
                 R.drawable.ic_baseline_check_circle_outline_24)
         } else {

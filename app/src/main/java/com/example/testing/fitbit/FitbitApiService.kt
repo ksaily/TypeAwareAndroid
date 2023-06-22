@@ -152,15 +152,11 @@ class FitbitApiService {
                     var startTime: String?
                     var minutesAsleep: Int?
                     if (response.isSuccessful) {
-                        println(response)
+                        //println(response)
                         //Utils.saveSharedSettingBoolean(Graph.appContext, "loggedInFitbit", true)
                         //Print the sleep data
                         val jsonObject = JSONTokener(sleepData).nextValue() as JSONObject
-                        println("jsonObject:")
-                        println(jsonObject)
                         val jsonArray = jsonObject.getJSONArray("sleep")
-                        println("jsonArray:")
-                        println(jsonArray)
                         val summary = jsonObject.getJSONObject("summary")
                         //val summary = jsonArray.getJSONObject(0).getJSONObject("summary")
                         val minutesAsleep = summary.getInt("totalMinutesAsleep")
@@ -224,7 +220,8 @@ class FitbitApiService {
                 Log.d("Authorization", "Refresh token needed")
                 fitbitTokenUrl.httpPost(listOf(
                     "grant_type" to "refresh_token",
-                    "refresh_token" to refreshToken
+                    "refresh_token" to refreshToken,
+                    "client_id" to CLIENT_ID
                 )).responseString()
             }
         }

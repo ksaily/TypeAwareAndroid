@@ -29,10 +29,11 @@ class DateViewModel : ViewModel() {
     }
 
     fun checkDate(): String {
-        return if (Utils.getNextDateString(_selectedDate.value.toString()) == currentDate) {
+        return if (Utils.getNextDateString(_selectedDate.value.toString()) == Utils.getCurrentDateString()) {
             _isToday.value = false
             "Yesterday"
         } else if (_selectedDate.value == Utils.getCurrentDateString()) {
+            Log.d("Today", "Current selected date is ${_selectedDate.value}")
             _isToday.value = true
             "Today"
         } else {

@@ -26,8 +26,13 @@ import com.example.testing.ui.onboarding.*
 import com.example.testing.ui.viewmodel.DailyQuestionnaireViewModel
 import com.example.testing.utils.FragmentUtils.Companion.loadFragment
 import com.example.testing.utils.Utils
+import com.example.testing.utils.Utils.Companion.checkPermissions
+import com.example.testing.utils.Utils.Companion.currentDate
+import com.example.testing.utils.Utils.Companion.dateHasPassed
 import com.example.testing.utils.Utils.Companion.getSharedPrefs
 import com.example.testing.utils.Utils.Companion.readSharedSettingBoolean
+import com.example.testing.utils.Utils.Companion.readSharedSettingString
+import com.example.testing.utils.Utils.Companion.saveSharedSetting
 import com.example.testing.utils.Utils.Companion.saveSharedSettingBoolean
 import com.github.mikephil.charting.charts.BarChart
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -96,12 +101,6 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         view = binding.root
         setContentView(view)
 
-        // Set user id for crash reports
-        Firebase.crashlytics.setUserId(
-            Utils.readSharedSettingString(Graph.appContext, "userId", "")
-                .toString()
-        )
-
         val sharedPrefs = getSharedPrefs()
         val transaction = supportFragmentManager.beginTransaction()
             //Utils.checkBattery(applicationContext)
@@ -134,23 +133,59 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             }
             true
         }
-        bottomNav.selectedItemId = R.id.homeFragment
+        checkFirstLogin()
+        //bottomNav.selectedItemId = R.id.homeFragment
 
         sharedPrefs.registerOnSharedPreferenceChangeListener(this)
-        checkFirstLogin()
-        questionnaireDialog.showQuestionnaire()
-        Timer("CheckPermissions", false).schedule(600000) {
-            //Set a timer to check permissions every 10 minutes
-            Utils.checkPermissions(applicationContext)
+        if (readSharedSettingBoolean(Graph.appContext,
+                "permissions_granted", false)) {
+            // Don't show questionnaire if it is the first day
+            questionnaireDialog.showQuestionnaire(currentDate == readSharedSettingString(
+                Graph.appContext, getString(R.string.sharedpref_questionnaire_day), ""
+            ))
         }
         //Utils.checkPermissions(applicationContext)
     }
 
     private fun checkDailyQuestionnaire() {
         if (!Utils.readSharedSettingBoolean(Graph.appContext,
-                "isQuestionnaireAnswered", false) &&
-            !questionnaireDialog.isAdded) {
+                getString(R.string.sharedpref_questionnaire_ans), false) &&
+            !questionnaireDialog.isAdded &&
+                readSharedSettingBoolean(Graph.appContext,
+                "first_login_done", false)
+        ) {
+            //Check that user info is given before showing questionnaire
             Log.d("DailyQuestionnaire", "Questionnaire not answered")
+            //questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
+        }
+    }
+
+    private fun checkDayOfQuestionnaire() {
+        if (!getSharedPrefs().contains(getString(R.string.sharedpref_questionnaire_day))) {
+            //Don't show questionnaire because it is the first day
+            Utils.saveSharedSetting(Graph.appContext,
+                getString(R.string.sharedpref_questionnaire_day), currentDate)
+            val weekFromNow = Utils.getDateWeekFromNow(currentDate)
+            saveSharedSetting(Graph.appContext,
+            getString(R.string.sharedpref_firstweek_end_date), weekFromNow)
+        }  else {
+            if (!readSharedSettingBoolean(Graph.appContext, getString(R.string.sharedpref_firstweek_done)
+                    , false) &&
+                dateHasPassed(readSharedSettingString(Graph.appContext,
+                    getString(R.string.sharedpref_firstweek_end_date), "").toString())) {
+                Log.d("Questionnaire", "First day")
+                //Check if date has passed to check how many questionnaires have been answered
+                Utils.checkQuestionnaireWeek(readSharedSettingString(Graph.appContext,
+                    "questionnaire_first_day", "").toString())
+            }
+            else if (readSharedSettingBoolean(Graph.appContext, getString(R.string.sharedpref_firstweek_done)
+                    , false) &&
+                dateHasPassed(readSharedSettingString(Graph.appContext,
+                    getString(R.string.sharedpref_firstweek_end_date), "").toString())) {
+                // Second week
+                Utils.checkQuestionnaireWeek(readSharedSettingString(Graph.appContext,
+                    getString(R.string.sharedpref_secondweek_start_date), "").toString())
+            }
             questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
         }
     }
@@ -163,8 +198,12 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         super.onResume()
         checkFirstLogin()
         //Utils.checkPermissions(applicationContext)
-        questionnaireDialog.showQuestionnaire()
-        checkDailyQuestionnaire()
+        /**
+        if (readSharedSettingBoolean(Graph.appContext,
+                "permissions_granted", false)) {
+            questionnaireDialog.showQuestionnaire()
+            checkDailyQuestionnaire()
+        }**/
     }
 
 
@@ -187,34 +226,42 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             Log.d("CheckPref", "Battery")
             Utils.showAlertDialog(this@MainActivity, 1)
         }**/
+        checkFirstLogin()
         Log.d("SharedPref", "OnSharedPreferenceChanged")
 
-        if (key == "first_login_done" && readSharedSettingBoolean(applicationContext,
-                "first_login_done", false)) {
-                loadFragment(this, homeFragment, null, "homeFragment", true)
-                //val consentFragment = supportFragmentManager.findFragmentByTag("consentFragment")
-                bottomNav.isVisible = true
-        } else if (key == "isQuestionnaireAnswered") {
+        if (key == getString(R.string.sharedpref_permissions) && readSharedSettingBoolean(
+                Graph.appContext, getString(R.string.sharedpref_permissions), false)
+        ) { questionnaireDialog.showQuestionnaire(currentDate == readSharedSettingString(
+            Graph.appContext, getString(R.string.sharedpref_questionnaire_day), ""
+        )) }
+
+        else if (key == getString(R.string.sharedpref_questionnaire_ans)) {
             Log.d("DailyQuestionnaire", "key changed")
             checkDailyQuestionnaire()
+        } else if (key == "accessibility_permission" && !readSharedSettingBoolean(
+                Graph.appContext, "accessibility_permission", false)
+            && readSharedSettingBoolean(Graph.appContext,
+                "first_login_done", false)
+        ) {
+            Log.d("Timer", "check permissions")
+            checkPermissions(applicationContext)
         }
-        else {
-            onFirstLogin()
-        }
-
     }
+
 
     private fun checkFirstLogin() {
         if (!readSharedSettingBoolean(applicationContext,
-                "first_login_done", false)
+                getString(R.string.sharedpref_first_login), false)
         ) {
             onFirstLogin()
+        } else {
+            afterFirstLoginDone()
         }
     }
 
     private fun onFirstLogin() {
         if (!readSharedSettingBoolean(applicationContext,
-                "consent_given",
+                getString(R.string.sharedpref_consent),
                 false)
         ) {
             Log.d("MainActivity", "Start consent fragment")
@@ -225,7 +272,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         }
 
         else if (!readSharedSettingBoolean(applicationContext,
-            "user_info_saved", false)
+                getString(R.string.sharedpref_user_info), false)
         ) {
             Log.d("MainActivity", "Start userinfo fragment")
             // The user hasn't seen the onboarding & consent screens yet, so show it
@@ -235,8 +282,15 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         }
 
         else if (!readSharedSettingBoolean(applicationContext,
-            "onboarding_complete", false)
+                getString(R.string.sharedpref_onboarding), false)
         ) {
+            // Set user id for crash reports
+            Firebase.crashlytics.setUserId(
+                Utils.readSharedSettingString(Graph.appContext,
+                    getString(R.string.sharedpref_userid),
+                    "")
+                    .toString()
+            )
             Log.d("MainActivity", "Start onboarding activity")
             // The user hasn't seen the onboarding & consent screens yet, so show it
             loadFragment(this, OnboardingFragment(), null,
@@ -244,18 +298,26 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             bottomNav.isVisible = false
         }
         else {
-            saveSharedSettingBoolean(Graph.appContext, "first_login_done", true)
-            loadFragment(this, homeFragment, null, "homeFragment", true)
-            //val consentFragment = supportFragmentManager.findFragmentByTag("consentFragment")
-            bottomNav.isVisible = true
-            if (!readSharedSettingBoolean(applicationContext, "accessibility_permission", false)) {
-                Utils.showAlertDialog(this@MainActivity, 0)
-                }
-            if (!readSharedSettingBoolean(applicationContext, "battery_opt_off", false)) {
-                Utils.showAlertDialog(this@MainActivity, 1)
-            }
-
+            saveSharedSettingBoolean(Graph.appContext, getString(R.string.sharedpref_first_login), true)
         }
+    }
+
+    private fun afterFirstLoginDone() {
+        if (!homeFragment.isAdded) {
+            loadFragment(this, homeFragment, null, "homeFragment", true)
+            bottomNav.isVisible = true
+        }
+        checkPermissions()
+        if (!readSharedSettingBoolean(applicationContext, getString(
+                R.string.sharedpref_accessibility), false)) {
+            Log.d("afterFirstLoginDone", "check accessibility")
+            Utils.showAlertDialog(this@MainActivity, 0)
+        } else if (!readSharedSettingBoolean(applicationContext,
+                getString(R.string.sharedpref_battery), false)) {
+            Log.d("afterFirstLoginDone", "check battery")
+            Utils.showAlertDialog(this@MainActivity, 1)
+        }
+        //checkPermissions()
     }
 
     fun schedulePushNotifications() {

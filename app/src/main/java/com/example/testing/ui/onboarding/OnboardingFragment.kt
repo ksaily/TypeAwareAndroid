@@ -80,11 +80,7 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
         }
 
         binding.skip.setOnClickListener {
-            view.showSnackbar(view, getString(R.string.skip_prompt), Snackbar.LENGTH_INDEFINITE,
-                getString(R.string.skip)) {
-                onboardingFinished()
-            }
-            val alertDialog: AlertDialog.Builder = AlertDialog.Builder(Graph.appContext)
+            val alertDialog: AlertDialog.Builder = AlertDialog.Builder(requireContext())
             alertDialog.setTitle(R.string.skip_title)
             alertDialog.setMessage(R.string.skip_prompt)
             alertDialog.setPositiveButton(
@@ -104,7 +100,7 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
     private fun onboardingFinished() {
         Utils.saveSharedSettingBoolean(
             Graph.appContext, "onboarding_complete",true)
-        Utils.saveSharedSettingBoolean(Graph.appContext, "first_login_done", true)
+        //Utils.saveSharedSettingBoolean(Graph.appContext, "first_login_done", true)
         //parentFragmentManager.beginTransaction().remove(this).commit()
         parentFragmentManager.popBackStack()
     }

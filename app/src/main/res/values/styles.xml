@@ -8,4 +8,27 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
     </style>
+
+    <!-- Chart switch styles -->
+    <style name="switchChartChosen" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/roboto_black</item>
+        <item name="android:textColor">@color/dark_purple</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/border_selected</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textSize">16dp</item>
+    </style>
+
+    <style name="switchChartNotChosen" parent="TextAppearance.AppCompat">
+        <item name="android:fontFamily">@font/roboto_bold</item>
+        <item name="android:textColor">@color/muted_light_purple</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/border_unselected</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:textSize">16dp</item>
+    </style>
 </resources>
