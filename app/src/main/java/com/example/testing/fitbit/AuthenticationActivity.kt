@@ -1,16 +1,19 @@
 package com.example.testing.fitbit
 
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.content.Intent.FLAG_ACTIVITY_NO_HISTORY
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabsIntent
+import androidx.browser.customtabs.*
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.lifecycleScope
 import com.example.testing.Graph
 import com.example.testing.MainActivity
@@ -38,31 +41,47 @@ class AuthenticationActivity : AppCompatActivity() {
     private val fitbitAuthUrl = "https://www.fitbit.com/oauth2/authorize"
     private var uniqueState: String? = null
     private var AUTH_CODE: String? = null
+    val CUSTOM_TAB_PACKAGE_NAME = "com.android.chrome"
+    val authorizationUrl = buildUrl(fitbitAuthUrl)
+    val builder = CustomTabsIntent.Builder()
+    val customTabsIntent = builder.build()
+
+
+    private var mCustomTabsServiceConnection: CustomTabsServiceConnection? = null
+    private var mClient: CustomTabsClient? = null
+    private var mCustomTabsSession: CustomTabsSession? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val authorizationUrl = buildUrl(fitbitAuthUrl)
-        val builder = CustomTabsIntent.Builder()
-        val customTabsIntent = builder.build()
-        intent.flags = FLAG_ACTIVITY_NEW_TASK
+
+        mCustomTabsServiceConnection = object : CustomTabsServiceConnection() {
+            override fun onCustomTabsServiceConnected(componentName: ComponentName, customTabsClient: CustomTabsClient) {
+                //Pre-warming
+                mClient = customTabsClient
+                mClient?.warmup(0L)
+                mCustomTabsSession = mClient?.newSession(null)
+            }
+
+            override fun onServiceDisconnected(name: ComponentName) {
+                mClient = null
+            }
+        }
+
+        CustomTabsClient.bindCustomTabsService(this, CUSTOM_TAB_PACKAGE_NAME,
+            mCustomTabsServiceConnection as CustomTabsServiceConnection)
+
         //intent.putExtra(Intent.EXTRA_REFERRER,
         //    Uri.parse("android-app://" + Graph.appContext.packageName))
-        Log.d("Authorization", "Activity started")
-        try {
-            Log.d("Authorization", "$authorizationUrl")
-            customTabsIntent.launchUrl(this, Uri.parse(authorizationUrl))
-        } catch (e: Exception) {
-            Log.d("Error", "$e")
-        }
+
     }
 
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         Log.d("Authorization", "On new intent")
-        val code = intent?.data?.getQueryParameter("code")
-        val state = intent?.data?.getQueryParameter("state")
+        val code = intent.data?.getQueryParameter("code")
+        val state = intent.data?.getQueryParameter("state")
         //val redirect = intent?.data?.getQueryParameter("redirect")
         if (code != null && state != null) {
             Log.d("Authorization", "Authorization code is: $code")
@@ -94,8 +113,8 @@ class AuthenticationActivity : AppCompatActivity() {
                     e.printStackTrace()
                 }
             }).start()**/
-            val returnIntent = Intent(this, MainActivity::class.java)
-            startActivity(returnIntent)
+            finish()
+            return
         } else {
             //No authorization code received, return to MainActivity
             Log.d("Authorization", "Authorization code not received")
@@ -106,6 +125,19 @@ class AuthenticationActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        Log.d("Authorization", "Activity started")
+        try {
+            Log.d("Authorization", "$authorizationUrl")
+            customTabsIntent.intent.addFlags(FLAG_ACTIVITY_NO_HISTORY)
+            customTabsIntent.intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+            customTabsIntent.launchUrl(this, Uri.parse(authorizationUrl))
+        } catch (e: Exception) {
+            Log.d("Error", "$e")
+        }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
         finish()
         return
     }

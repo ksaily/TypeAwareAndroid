@@ -316,11 +316,11 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
             binding.keyboardChart.keyboardDataNotFound.isVisible = false
             binding.keyboardChart.dataAvailable.isVisible = true
             val s = (60 / totalSpeed.average()).toString() //words per minute
-            val clippedString = s.substring(0, s.length.coerceAtMost(4)) + "s"
+            val clippedString = s.substring(0, s.length.coerceAtMost(4))
             binding.keyboardChart.speedData.text = clippedString
             binding.keyboardChart.ProgressTextView.text =
                 showPercentage(totalErrRate.average(),
-                    binding.keyboardChart.progressCircular).toString()
+                    binding.keyboardChart.progressCircular).toString() + "%"
         } else {
             /**
         binding.keyboardChart.speedData.text = "No data"

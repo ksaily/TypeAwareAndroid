@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.testing.Graph
 import com.example.testing.fitbit.FitbitApiService.Companion.authorizeRequestToken
+import com.example.testing.fitbit.FitbitApiService.Companion.getRefreshToken
 import com.example.testing.ui.data.KeyboardChart
 import com.example.testing.utils.KeyboardStats
 import com.example.testing.utils.Utils
@@ -65,24 +66,25 @@ class ChartViewModel: ViewModel() {
         val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    try {
-                        val errList = mutableListOf<BarEntry>()
-                        val dataList = mutableListOf<BarEntry>()
-                        val speedList = mutableListOf<BarEntry>()
-                        dataFound = true
-                        var sessionCount = 0
-                        val errorsAvgList = mutableListOf<Long>()
-                        val speedsAvgList = mutableListOf<Double>()
-                        val iterErrList = mutableListOf<BarEntry>()
-                        val iterSpeedList = mutableListOf<BarEntry>()
-                        for (i in 0..144) {
-                            dataList.add(BarEntry(i.toFloat(), 0f))
-                            iterErrList.add(BarEntry(i.toFloat(), 0f))
-                            iterSpeedList.add(BarEntry(i.toFloat(), 0f))
-                        }
-                        val children = snapshot.children
-                        children.forEach { dataSnapshot ->
-                            val child = dataSnapshot.children
+                    val errList = mutableListOf<BarEntry>()
+                    val dataList = mutableListOf<BarEntry>()
+                    val speedList = mutableListOf<BarEntry>()
+                    var wordCount = 0
+                    dataFound = true
+                    var sessionCount = 0
+                    val errorsAvgList = mutableListOf<Long>()
+                    val speedsAvgList = mutableListOf<Double>()
+                    val iterErrList = mutableListOf<BarEntry>()
+                    val iterSpeedList = mutableListOf<BarEntry>()
+                    for (i in 36..144) {
+                        dataList.add(BarEntry(i.toFloat(), 0f))
+                        iterErrList.add(BarEntry(i.toFloat(), 0f))
+                        iterSpeedList.add(BarEntry(i.toFloat(), 0f))
+                    }
+                    val children = snapshot.children
+                    children.forEach { dataSnapshot ->
+                        val child = dataSnapshot.children
+                        try {
                             child.forEach {
                                 var y = it.child("errorAmount").value as Long
                                 var speeds = it.child("typingSpeed").value as MutableList<Double>
@@ -92,29 +94,34 @@ class ChartViewModel: ViewModel() {
                                 }
                                 errorsAvgList.add(y)
                                 sessionCount += 1
+                                wordCount = (wordCount + it.child("wordCount").value as Long).toInt()
                                 Log.d("ChartViewModel", "ErrorAmount: $y")
                             }
+                        } catch (e: Exception) {
+                            Log.d("Firebase", "Error: $e ")
+                        }
+                        val averageSpeedInWordsPerSecond = wordCount.toDouble() / (speedsAvgList.average() * 60)
 
-                            for (i in iterErrList) {
-                                val timewindow = dataSnapshot.key?.toInt()
-                                if (timewindow!! < 144) {
-                                    Log.d("ChartViewModel", "Timewindow: $timewindow")
-                                    iterErrList[timewindow!!] = BarEntry(
-                                        timewindow.toFloat(),
-                                        errorsAvgList.average().toFloat()
-                                    )
-                                    dataList[timewindow!!] = BarEntry(
-                                        timewindow.toFloat(),
-                                        sessionCount.toFloat()
-                                    )
-                                    iterSpeedList[timewindow!!] = BarEntry(
-                                        timewindow.toFloat(),
-                                        (60 / speedsAvgList.average()).toFloat()
-                                    )
-                                }
-
-
+                        for (i in iterErrList) {
+                            val timewindow = dataSnapshot.key?.toInt()
+                            val wordsPerMinute = (averageSpeedInWordsPerSecond * 60).toInt()
+                            if (timewindow!! < 144) {
+                                Log.d("ChartViewModel", "Timewindow: $timewindow")
+                                iterErrList[timewindow!!] = BarEntry(
+                                    timewindow.toFloat(),
+                                    errorsAvgList.average().toFloat()
+                                )
+                                dataList[timewindow!!] = BarEntry(
+                                    timewindow.toFloat(),
+                                    sessionCount.toFloat()
+                                )
+                                iterSpeedList[timewindow!!] = BarEntry(
+                                    timewindow.toFloat(),
+                                    wordsPerMinute.toFloat()
+                                )
                             }
+
+                        }
 
                         }
                         _chartErrorValues.postValue(iterErrList)
@@ -123,9 +130,6 @@ class ChartViewModel: ViewModel() {
                         Log.d("Firebase", "ChartErrorValues: $")
                         Log.d("Firebase", "ChartSessions: $chartSessions")
                         //_keyboardStats.postValue(dataList)
-                } catch (e: Exception) {
-                    Log.d("Firebase", "Error: $e ")
-                    }
                 } else {
                     dataFound = false
                     Log.d("FirebaseChart", "No data found")
@@ -209,7 +213,7 @@ class ChartViewModel: ViewModel() {
                 )
                 return if (code!!.isNotEmpty() && state!!.isNotEmpty() && !authAttempted) {
                     Log.d("GetSleepDataFailure", "Re-authorizing")
-                    authorizeRequestToken(code!!, state!!)
+                    getRefreshToken(code, state)
                     authAttempted = true
                     getSleepDataFromThisWeek(date)
                 } else {

@@ -37,7 +37,7 @@ class DateFragment : Fragment(R.layout.fragment_date) {
 
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
-            HomeFragment().apply {
+            DateFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_PARAM1, param1)
                     putString(ARG_PARAM2, param2)
@@ -117,6 +117,10 @@ class DateFragment : Fragment(R.layout.fragment_date) {
         ) { // Check if date is today, if yes, remove right arrow
             binding.arrowRight.isVisible = viewModel.isToday.value != true
             binding.arrowRightText.isVisible = viewModel.isToday.value != true
+        }
+
+        viewModel.selectedDate.observe(viewLifecycleOwner) {
+            binding.currentDate.text = viewModel.checkDate()
         }
         viewModel.checkDate()
     }

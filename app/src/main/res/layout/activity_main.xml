@@ -16,6 +16,19 @@
         tools:layout="@layout/fragment_home">
     </androidx.fragment.app.FragmentContainerView>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/secondWeekQstnrBtn"
+        android:minHeight="15dp"
+        android:layout_above="@id/bottomNav"
+        android:paddingTop="8dp"
+        android:textColor="@color/white"
+        android:textAlignment="center"
+        android:text="You have not answered today's questionnaire. Click here to answer."
+        android:background="@color/teal_800"
+        android:visibility="gone"/>
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"

@@ -38,6 +38,8 @@ import com.github.mikephil.charting.charts.BarChart
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -102,7 +104,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         setContentView(view)
 
         val sharedPrefs = getSharedPrefs()
-        val transaction = supportFragmentManager.beginTransaction()
+        //val transaction = supportFragmentManager.beginTransaction()
             //Utils.checkBattery(applicationContext)
             /**
             if (!readSharedSettingBoolean(applicationContext,
@@ -120,15 +122,15 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             when (it.itemId) {
                 R.id.homeFragment -> {
                     Log.d("BottomNav", "homefragment selected")
-                    loadFragment(this, homeFragment, null, "homeFragment", true)
+                    loadFragment(this, homeFragment, null, "homeFragment", false)
                 }
                 R.id.settingsFragment -> {
                     Log.d("BottomNav", "settingfragment selected")
-                    loadFragment(this, settingsFragment, null, "settingsFragment", true)
+                    loadFragment(this, settingsFragment, null, "settingsFragment", false)
                 }
                 R.id.chartFragment -> {
                     Log.d("BottomNav", "chartfragment selected")
-                    loadFragment(this, chartFragment, null, "chartFragment", true)
+                    loadFragment(this, chartFragment, null, "chartFragment", false)
                 }
             }
             true
@@ -156,7 +158,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         ) {
             //Check that user info is given before showing questionnaire
             Log.d("DailyQuestionnaire", "Questionnaire not answered")
-            //questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
+            questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
         }
     }
 
@@ -176,7 +178,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
                 Log.d("Questionnaire", "First day")
                 //Check if date has passed to check how many questionnaires have been answered
                 Utils.checkQuestionnaireWeek(readSharedSettingString(Graph.appContext,
-                    "questionnaire_first_day", "").toString())
+                    "questionnaire_first_day", "").toString(), 1)
             }
             else if (readSharedSettingBoolean(Graph.appContext, getString(R.string.sharedpref_firstweek_done)
                     , false) &&
@@ -184,9 +186,12 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
                     getString(R.string.sharedpref_firstweek_end_date), "").toString())) {
                 // Second week
                 Utils.checkQuestionnaireWeek(readSharedSettingString(Graph.appContext,
-                    getString(R.string.sharedpref_secondweek_start_date), "").toString())
+                    getString(R.string.sharedpref_secondweek_start_date), "").toString(), 2)
+                binding.secondWeekQstnrBtn.isVisible = true
+                binding.secondWeekQstnrBtn.setOnClickListener {
+                    questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
+                }
             }
-            questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
         }
     }
 
@@ -285,7 +290,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
                 getString(R.string.sharedpref_onboarding), false)
         ) {
             // Set user id for crash reports
-            Firebase.crashlytics.setUserId(
+            FirebaseCrashlytics.getInstance().setUserId(
                 Utils.readSharedSettingString(Graph.appContext,
                     getString(R.string.sharedpref_userid),
                     "")
@@ -303,11 +308,20 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     }
 
     private fun afterFirstLoginDone() {
-        if (!homeFragment.isAdded) {
-            loadFragment(this, homeFragment, null, "homeFragment", true)
-            bottomNav.isVisible = true
+        //if (!homeFragment.isVisible) {
+            //loadFragment(this, homeFragment, null, "homeFragment", false)
+          //  bottomNav.isVisible = true
+        //}
+        bottomNav.isVisible = true
+        if (!supportFragmentManager.isStateSaved) {
+            //Check which fragment is visible
+            val currentFragment = supportFragmentManager.findFragmentById(R.id.container)
+            if (currentFragment == null) {
+                loadFragment(this, homeFragment, null, "homeFragment", true)
+            }
         }
         checkPermissions()
+        checkDayOfQuestionnaire()
         if (!readSharedSettingBoolean(applicationContext, getString(
                 R.string.sharedpref_accessibility), false)) {
             Log.d("afterFirstLoginDone", "check accessibility")

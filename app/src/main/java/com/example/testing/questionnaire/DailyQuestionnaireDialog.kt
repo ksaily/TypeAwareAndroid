@@ -27,7 +27,7 @@ class DailyQuestionnaireDialog : DialogFragment(),
     private val binding get() = _binding!!
 
     private var currentDate: String = Utils.currentDate
-    private val myRef = Firebase.database.getReference("KeyboardEvents")
+    private val myRef = Firebase.database.getReference("Data")
     private val participantId = Utils.readSharedSettingString(Graph.appContext,
         "p_id", "").toString()
     private val questionnaireCompleteString = "QuestionnaireCompleted"
@@ -255,7 +255,7 @@ class DailyQuestionnaireDialog : DialogFragment(),
         }
         else {
             lifecycleScope.launch(Dispatchers.IO) {
-                val today = Utils.currentDate
+                val today = Utils.getCurrentDateString()
                 val questionnaireRef = myRef.child(participantId).child(today).child("questionnaire")
 
                 questionnaireRef.child(questionnaireCompleteString).setValue(true).await()

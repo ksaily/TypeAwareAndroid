@@ -93,6 +93,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         return binding.root
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -171,6 +172,8 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                 Log.d("ChartFragment", "Switching chart to WPM")
                 binding.switchToWritingSpeedBtn.setTextAppearance(R.style.switchChartChosen)
                 binding.switchToErrorsBtn.setTextAppearance(R.style.switchChartNotChosen)
+                binding.switchToWritingSpeedBtn.setBackgroundResource(R.drawable.border_selected)
+                binding.switchToErrorsBtn.setBackgroundResource(R.drawable.border_unselected)
                 binding.switchChartTitle.text = "Words per minute"
                 viewModel.chartSelected = 1
                 val stats = viewModel.chartSpeedValues.value
@@ -272,6 +275,11 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         }
         val v1: BarDataSet = BarDataSet(stats, label)
         v1.setDrawValues(false)
+        if (chart == barChart2) {
+            v1.color = R.color.muted_purple
+        } else {
+            v1.color = R.color.light_purple
+        }
         val data = BarData()
         data.addDataSet(v1)
         configureBarChart(chart!!, description, label1)
@@ -290,8 +298,8 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         val v1: BarDataSet = BarDataSet(datasetList, label)
         v1.setDrawValues(false)
         v1.stackLabels = arrayOf("deep", "light", "rem", "wake")
-        v1.colors = listOf(R.color.dark_purple, R.color.light_purple,
-            R.color.muted_light_purple, R.color.teal_700)
+        v1.colors = listOf(R.color.light_purple, R.color.teal_200,
+            R.color.muted_purple, R.color.teal_700)
         val data = BarData()
         data.addDataSet(v1)
         configureBarChart(stackedBarChart!!, description, labels)
@@ -371,8 +379,14 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         chart!!.description.isEnabled = false
         //chart!!.description.text = description
         //chart!!.description.textColor = R.color.dark_purple
-
-
+        val leftAxis = chart.axisLeft
+        if (chart == barChart2) {
+            leftAxis.valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return value.toInt().toString() // Format the float value as an integer
+                }
+            }
+        }
 
         val xAxis = chart!!.xAxis
         //xAxis.labelCount = 12
@@ -390,7 +404,6 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         xAxis.valueFormatter = IndexAxisValueFormatter(xAxisValues)
         chart!!.xAxis.isEnabled = true
         Log.d("Chart labels", labels1.toString())
-        val leftAxis = chart!!.axisLeft
         leftAxis.setDrawGridLines(false)
         //leftAxis.spaceTop = 35f
         leftAxis.axisMinimum = 0f

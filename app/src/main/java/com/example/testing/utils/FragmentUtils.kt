@@ -38,8 +38,8 @@ class FragmentUtils {
                 var transaction = activity.supportFragmentManager.beginTransaction()
 
                 if (addToBackStack) { transaction.addToBackStack(tag) }
-                if (!fragment.isAdded) {
-                    Log.d("Fragment", "Fragment added)")
+                if (!fragment.isVisible) {
+                    Log.d("Fragment", "Fragment is not visible)")
                     transaction.replace(R.id.container, fragment, tag).commit()
                 }
             } catch (e: java.lang.IllegalStateException) {
@@ -55,7 +55,7 @@ class FragmentUtils {
                 if (fragment == null) { return }
                 if (bundle != null) { fragment.arguments = bundle }
 
-                var transaction = activity.supportFragmentManager.beginTransaction()
+                val transaction = activity.supportFragmentManager.beginTransaction()
 
                 if (addToBackStack) { transaction.addToBackStack(tag) }
                 if (!fragment.isAdded) {

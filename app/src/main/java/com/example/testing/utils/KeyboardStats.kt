@@ -5,5 +5,6 @@ data class KeyboardStats(
     val timeWindow: Int?,
     val errors: Double,
     val speed: Double,
-    val errorRate: Double
+    val errorRate: Double,
+    val wordCount: Int
 )

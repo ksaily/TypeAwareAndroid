@@ -293,11 +293,18 @@ class Utils {
             }
         }
 
-        fun checkQuestionnaireWeek(startDay: String) {
-            var nextDay = readSharedSettingString(Graph.appContext, "questionnaire_first_day", "").toString()
+        fun checkQuestionnaireWeek(startDay: String, weekNumber: Int) {
+            var nextDay: String = ""
+            if (weekNumber == 1) {
+                nextDay = readSharedSettingString(Graph.appContext, "questionnaire_first_day", "").toString()
+                //val nextDay = getNextDateString(startDay)
+            }
+            else if (weekNumber == 2) {
+                nextDay = readSharedSettingString(Graph.appContext, "second_week_start_date", "").toString()
+            }
             //val nextDay = getNextDateString(startDay)
             val participantId = readSharedSettingString(Graph.appContext, "userId", "").toString()
-            val myRef = Firebase.database.getReference("KeyboardEvents")
+            val myRef = Firebase.database.getReference("Data")
             var isQuestionnaireAnswered = false
             var amountOfAnswers = 0
             val dayAfter = getNextDateString(currentDate)
@@ -317,11 +324,16 @@ class Utils {
                 nextDay = getNextDateString(nextDay)
             }
             if (amountOfAnswers == 7) {
-                saveSharedSettingBoolean(Graph.appContext,
-                    "first_week_done", true)
-                saveSharedSetting(Graph.appContext, "second_week_start_date", currentDate)
-                saveSharedSetting(Graph.appContext, "second_week_end_date", getDateWeekFromNow(
-                    currentDate))
+                if (weekNumber == 1) {
+                    saveSharedSettingBoolean(Graph.appContext,
+                        "first_week_done", true)
+                    saveSharedSetting(Graph.appContext, "second_week_start_date", currentDate)
+                    saveSharedSetting(Graph.appContext, "second_week_end_date", getDateWeekFromNow(
+                        currentDate))
+                } else if (weekNumber == 2) {
+                    saveSharedSettingBoolean(Graph.appContext,
+                        "second_week_done", true)
+                }
             }
         }
 
@@ -348,16 +360,10 @@ class Utils {
                 when (action) {
                     0 -> {
                         checkAccessibilityPermission(Graph.appContext, true)
-                        if (alert.isShowing) {
-                            alert.dismiss()
-                        }
                     }
 
                     1 -> {
                         checkBattery(Graph.appContext)
-                        if (alert.isShowing) {
-                            alert.dismiss()
-                        }
                     }
                 }
                 alertDialog.setNegativeButton(
@@ -367,7 +373,7 @@ class Utils {
                         alert.dismiss()
                     }
                 }
-                alert.setCanceledOnTouchOutside(false)
+                alert.setCanceledOnTouchOutside(true)
                 alert.show()
             }
         }

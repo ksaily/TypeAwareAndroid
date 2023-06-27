@@ -6,19 +6,22 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.utils.MPPointF
 import com.example.testing.R.layout.marker_view
+import com.example.testing.databinding.FragmentHomeBinding
 import com.example.testing.databinding.MarkerViewBinding
 
 class CustomMarker(context: Context, layoutResource: Int = R.layout.marker_view):  MarkerView(context, layoutResource) {
+    private var _binding: MarkerViewBinding? = null
+    private val binding get() = _binding!!
+
     override fun refreshContent(entry: Entry?, highlight: Highlight?) {
-        val binding: MarkerViewBinding? = null
         val value = entry?.y?.toDouble() ?: 0.0
         var resText = ""
         resText = if(value.toString().length > 8){
-            "Val: " + value.toString().substring(0,7)
+            value.toString().substring(0,7)
         } else{
-            "Val: $value"
+            "$value"
         }
-        binding?.tvPrice?.text = resText
+        binding.tvPrice.text = resText
         super.refreshContent(entry, highlight)
     }
 
