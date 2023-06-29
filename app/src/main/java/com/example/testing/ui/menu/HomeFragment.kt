@@ -107,22 +107,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
         val sharedPrefs = Utils.getSharedPrefs()
 
 
-        if (sharedPrefs.contains("state") && sharedPrefs.contains("authorization_code")) {
-            Log.d("HomeScreen", "Code and state not empty")
-            val code = readSharedSettingString(
-                Graph.appContext,
-                "authorization_code", "")
-            Log.d("sharedprefs", code.toString())
-            val state = readSharedSettingString(
-                Graph.appContext, "state", "")
-            lifecycleScope.launch(Dispatchers.IO) {
-                FitbitApiService.authorizeRequestToken(code!!, state!!)
-            }
-        } else {
-            showFitbitLogin()
-        }
-
-
+        checkFitbitLogin()
+        setFirebaseDataToUI()
 
         binding.keyboardChart.openAccessibilitySettingsBtn.setOnClickListener {
             checkAccessibilityPermission(Graph.appContext, true)
@@ -220,10 +206,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
                 val asleepString = "$hours h $minutes m"
                 println(asleepString)
                 sleepAmount.text = asleepString
-                val participantId = readSharedSettingString(
-                    Graph.appContext,
-                    "p_id",
-                    "")
+                val participantId = readSharedSettingString("p_id", "")
                 firebaseViewModel.saveSleepDataToFirebase(
                     dateViewModel.selectedDate.value.toString(),
                     data,
@@ -264,8 +247,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
      * returns true if on and false sleep data will not be shown
      */
     private fun checkSleepDataSetting(): Boolean {
-        return if (!Utils.readSharedSettingBoolean(Graph.appContext,
-                getString(R.string.sleep_data_key), true)) {
+        return if (!Utils.readSharedSettingBoolean(getString(R.string.sleep_data_key), true)) {
             //Hide sleep data
             binding.sleepDataContainer.apply {
                 SleepDataView.isVisible = false
@@ -299,15 +281,19 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
 
     private fun setFirebaseDataToUI() {
         Log.d("FirebaseDebug2", "KeyboardData: ${firebaseViewModel.keyboardData.value}")
-        if (firebaseViewModel.keyboardData.value!!.isNotEmpty()) {
+        if (firebaseViewModel.keyboardData.value != null) {
             val totalErr = mutableListOf<Double>()
             val totalSpeed = mutableListOf<Double>()
             val totalErrRate = mutableListOf<Double>()
+            val wordsPerMinute = mutableListOf<Double>()
             for (i in firebaseViewModel.keyboardData.value!!) {
+                var totalWords: Int = 0
                 if (i.date == dateViewModel.selectedDate.value) {
                     totalErr.add(i.errors)
                     totalSpeed.add(i.speed)
                     totalErrRate.add(i.errorRate)
+                    val wordsPM = i.averageWPM
+                    wordsPerMinute.add(wordsPM)
                 }
             }
             Log.d("HomeFragment", "Total speed: ${totalSpeed.average()}l")
@@ -315,7 +301,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
             Log.d("HomeFragment", "Total speed: ${totalErrRate.average()}l")
             binding.keyboardChart.keyboardDataNotFound.isVisible = false
             binding.keyboardChart.dataAvailable.isVisible = true
-            val s = (60 / totalSpeed.average()).toString() //words per minute
+            val s = wordsPerMinute.average().toString() //words per minute
             val clippedString = s.substring(0, s.length.coerceAtMost(4))
             binding.keyboardChart.speedData.text = clippedString
             binding.keyboardChart.ProgressTextView.text =

@@ -20,7 +20,7 @@
 
     <string-array name="onboarding_texts">
         <item>To participate in this study, all you have to do is use your mobile phone like you normally would and complete the daily questionnaires.</item>
-        <item>Sleep data is also available so you can compare your keyboard usage with how well you have slept.</item>
+        <item>If you have a Fitbit device, sleep data is also available so you can compare your keyboard usage with how well you have slept.</item>
         <item>Access to all this information allows us to see whether your sleep quality affects your keyboard usage during the day.</item>
         <item>Before you begin, remember to check your TypeAware settings tab to see if the smartphone battery optimization and accessibility settings on your phone are optimized for the use of this app.</item>
     </string-array>

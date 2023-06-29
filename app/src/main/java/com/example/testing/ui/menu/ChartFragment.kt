@@ -1,5 +1,6 @@
 package com.example.testing.ui.menu
 
+import android.content.res.Resources.Theme
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
@@ -12,36 +13,25 @@ import android.widget.SeekBar
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.example.testing.Graph
 import com.example.testing.R
 import com.example.testing.charts.CustomMarker
-import com.example.testing.charts.StackedBarChartFragment
 import com.example.testing.databinding.FragmentChartBinding
 import com.example.testing.ui.viewmodel.ChartViewModel
 import com.example.testing.ui.viewmodel.DateViewModel
-import com.example.testing.ui.viewmodel.FirebaseViewModel
 import com.example.testing.ui.viewmodel.SleepDataForChart
 import com.example.testing.utils.Utils
 import com.github.mikephil.charting.animation.Easing
 import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.components.Legend
-import com.github.mikephil.charting.components.LegendEntry
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.github.mikephil.charting.formatter.LargeValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
-import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.*
 import kotlin.collections.ArrayList
 
 private const val ARG_PARAM1 = "param1"
@@ -80,6 +70,10 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
     )
     private val labels1= ArrayList<String>()
     private val labels2= ArrayList<String>()
+    private var lightPurple: Int = 0
+    private var darkPurple: Int = 0
+    private var teal: Int = 0
+    private var mutedPurple: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -107,10 +101,15 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         val values2: ArrayList<BarEntry> = ArrayList()
         val typefaceBolded = ResourcesCompat.getFont(Graph.appContext, R.font.roboto_black)
         val typefaceNormal = ResourcesCompat.getFont(Graph.appContext, R.font.roboto_bold)
+        lightPurple = resources.getColor(R.color.light_purple)
+        teal = resources.getColor(R.color.teal_200)
+        darkPurple = resources.getColor(R.color.dark_purple)
+        mutedPurple = resources.getColor(R.color.muted_light_purple)
 
         statValues.clear()
         viewModel.chartSelected = 0 //Initiate selected charts to error
         //
+        /**
         for (i in 1 .. MAX_X_VALUE) {
             values1.add(
                 BarEntry(
@@ -158,12 +157,13 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         //data1.addDataSet(v2)
         data2.addDataSet(v3)
         //data2.addDataSet(v4)
-        Log.d("Dataset1", data1.toString())
+        Log.d("Dataset1", data1.toString())**/
         dateViewModel.checkDate()
         lifecycleScope.launch {
             viewModel.getFromFirebaseToChart(dateViewModel.selectedDate.value.toString())
         }
-        if (Utils.getSharedPrefs().contains(getString(R.string.sharedpref_access))) {
+
+        if (isLoggedInFitbit()) {
             viewModel.getSleepDataFromThisWeek(dateViewModel.selectedDate.value.toString())
         }
 
@@ -192,6 +192,8 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                 binding.switchToErrorsBtn.setTextAppearance(R.style.switchChartChosen)
                 binding.switchToWritingSpeedBtn.setTextAppearance(R.style.switchChartNotChosen)
                 binding.switchChartTitle.text = "Errors"
+                binding.switchToWritingSpeedBtn.setBackgroundResource(R.drawable.border_unselected)
+                binding.switchToErrorsBtn.setBackgroundResource(R.drawable.border_selected)
                 viewModel.chartSelected = 0
                 val stats = viewModel.chartErrorValues.value
                 if (stats != null) {
@@ -267,6 +269,12 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         //prepareChartData(barChart2!!, data2)
     }
 
+    private fun isLoggedInFitbit(): Boolean {
+        return (Utils.getSharedPrefs().contains("authorization_code") &&
+                Utils.getSharedPrefs().contains("state") &&
+                Utils.getSharedPrefs().contains("access_token"))
+    }
+
     private fun updateChart(stats: List<BarEntry>, label: String,
                             description: String, chart: BarChart) {
         val label1 = ArrayList<String>()
@@ -276,9 +284,9 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         val v1: BarDataSet = BarDataSet(stats, label)
         v1.setDrawValues(false)
         if (chart == barChart2) {
-            v1.color = R.color.muted_purple
+            v1.color = mutedPurple
         } else {
-            v1.color = R.color.light_purple
+            v1.color = lightPurple
         }
         val data = BarData()
         data.addDataSet(v1)
@@ -297,9 +305,12 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         }
         val v1: BarDataSet = BarDataSet(datasetList, label)
         v1.setDrawValues(false)
+        val lightPurple = resources.getColor(R.color.light_purple)
+        val teal = resources.getColor(R.color.teal_200)
+        val darkPurple = resources.getColor(R.color.dark_purple)
+        val mutedPurple = resources.getColor(R.color.muted_light_purple)
         v1.stackLabels = arrayOf("deep", "light", "rem", "wake")
-        v1.colors = listOf(R.color.light_purple, R.color.teal_200,
-            R.color.muted_purple, R.color.teal_700)
+        v1.colors = listOf(darkPurple, lightPurple, teal, mutedPurple)
         val data = BarData()
         data.addDataSet(v1)
         configureBarChart(stackedBarChart!!, description, labels)

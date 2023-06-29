@@ -19,6 +19,7 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.concurrent.schedule
 
 class Utils {
 
@@ -78,7 +79,6 @@ class Utils {
         fun getCurrentDateString(): String {
             val time = Calendar.getInstance().time
             val currentDay = formatter.format(time)
-            Log.d("CurrentDate", "Current date is $currentDay")
             return currentDay
         }
 
@@ -100,8 +100,6 @@ class Utils {
             cal.time = date
             cal.add(Calendar.DATE, -1)
             var previousDate = formatter.format(cal.time)
-            Log.d("Dates", "Selected date: $previousDate")
-            Log.d("Dates", "Previous date: $date")
             return previousDate
         }
 
@@ -129,8 +127,6 @@ class Utils {
             cal.time = date
             cal.add(Calendar.DATE, +1)
             var nextDate = formatter.format(cal.time)
-            Log.d("Dates", "Current date: $nextDate")
-            Log.d("Dates", "Previous date: $date")
             return nextDate
 
         }
@@ -168,11 +164,11 @@ class Utils {
                 context.applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
             val name = context.applicationContext.packageName
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                saveSharedSettingBoolean(Graph.appContext, "battery_opt_off",
+                saveSharedSettingBoolean( "battery_opt_off",
                     pwrm.isIgnoringBatteryOptimizations(name))
                 return pwrm.isIgnoringBatteryOptimizations(name)
             }
-            saveSharedSettingBoolean(Graph.appContext, "battery_opt_off", false)
+            saveSharedSettingBoolean("battery_opt_off", false)
             return false
         }
 
@@ -191,21 +187,24 @@ class Utils {
         }
 
         fun readSharedSettingBoolean(
-            ctx: Context = Graph.appContext,
             settingName: String?, defaultValue: Boolean
         ): Boolean {
-            val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
-            val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
+            val s = getSharedPrefs()
             return s.getBoolean(settingName, defaultValue)
         }
 
         fun readSharedSettingString(
-            ctx: Context = Graph.appContext,
             settingName: String?, defaultValue: String
         ): String? {
-            val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
-            val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
+            val s = getSharedPrefs()
             return s.getString(settingName, defaultValue)
+        }
+
+        fun readSharedSettingInt(
+            settingName: String?, defaultValue: Int
+        ): Int? {
+            val s = getSharedPrefs()
+            return s.getInt(settingName, defaultValue)
         }
 
         fun getSharedPrefs(): SharedPreferences {
@@ -214,32 +213,37 @@ class Utils {
 
 
         fun saveSharedSetting(
-            ctx: Context = Graph.appContext,
             settingName: String?, settingValue: String?
         ) {
-            val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
-            val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
+            val s = getSharedPrefs()
             val editor = s.edit()
             editor.putString(settingName, settingValue)
             editor.apply()
         }
 
         fun saveSharedSettingBoolean(
-            ctx: Context = Graph.appContext,
             settingName: String?, settingValue: Boolean
         ) {
-            val s = PreferenceManager.getDefaultSharedPreferences(Graph.appContext)
-            //val sharedPref = ctx.getSharedPreferences("USER_INFO", Context.MODE_PRIVATE)
+            val s = getSharedPrefs()
             val editor = s.edit()
             editor.putBoolean(settingName, settingValue)
             editor.apply()
         }
 
+        fun saveSharedSettingInt(
+            settingName: String?, settingValue: Int
+        ) {
+            val s = getSharedPrefs()
+            val editor = s.edit()
+            editor.putInt(settingName, settingValue)
+            editor.apply()
+        }
+
         fun checkPermissions(context: Context = Graph.appContext): Boolean {
             isIgnoringBatteryOptimizations(context)
-            val batteryOptOff = readSharedSettingBoolean(context, "battery_opt_off", false)
-            val consent = readSharedSettingBoolean(context, "consent_given", true)
-            val userInfoSaved = readSharedSettingBoolean(context, "user_info_saved", true)
+            val batteryOptOff = readSharedSettingBoolean( "battery_opt_off", false)
+            val consent = readSharedSettingBoolean("consent_given", true)
+            val userInfoSaved = readSharedSettingBoolean("user_info_saved", true)
             val accessibilityPermission = checkAccessibilityPermission(context, false)
             if (consent && batteryOptOff && userInfoSaved && accessibilityPermission) {
                 val sharedPref = getSharedPrefs()
@@ -274,8 +278,7 @@ class Utils {
                     false
                 } else {
                     Log.d("AccessibilitySettings", "value false")
-                    saveSharedSettingBoolean(
-                        context, "accessibility_permission", false)
+                    saveSharedSettingBoolean("accessibility_permission", false)
                     false
                 }
                 else -> return if (openSettings) {
@@ -286,8 +289,7 @@ class Utils {
                 } else {
                     Log.d("AccessibilitySettings", "value true")
 
-                    saveSharedSettingBoolean(
-                        context, "accessibility_permission", true)
+                    saveSharedSettingBoolean("accessibility_permission", true)
                     true
                 }
             }
@@ -296,14 +298,15 @@ class Utils {
         fun checkQuestionnaireWeek(startDay: String, weekNumber: Int) {
             var nextDay: String = ""
             if (weekNumber == 1) {
-                nextDay = readSharedSettingString(Graph.appContext, "questionnaire_first_day", "").toString()
+                nextDay = readSharedSettingString("questionnaire_first_day",
+                    "").toString()
                 //val nextDay = getNextDateString(startDay)
-            }
-            else if (weekNumber == 2) {
-                nextDay = readSharedSettingString(Graph.appContext, "second_week_start_date", "").toString()
+            } else if (weekNumber == 2) {
+                nextDay = readSharedSettingString("second_week_start_date",
+                    "").toString()
             }
             //val nextDay = getNextDateString(startDay)
-            val participantId = readSharedSettingString(Graph.appContext, "userId", "").toString()
+            val participantId = readSharedSettingString( "userId", "").toString()
             val myRef = Firebase.database.getReference("Data")
             var isQuestionnaireAnswered = false
             var amountOfAnswers = 0
@@ -311,7 +314,7 @@ class Utils {
             while (nextDay != dayAfter) {
                 myRef.child(participantId).child(nextDay).child("questionnaire")
                     .child(questionnaireCompleteString).get().addOnSuccessListener { snapshot ->
-                        Log.d("Firebase", "Questionnaire listener")
+                        Log.d("Firebase", "Questionnaire listener2")
                         isQuestionnaireAnswered = (snapshot.exists() &&
                                 snapshot.value as Boolean)
                     }.addOnFailureListener {
@@ -319,63 +322,22 @@ class Utils {
                         Log.d("checkQuestionnaireWeek", "Failure on setting listener")
                     }
                 if (isQuestionnaireAnswered) {
-                    amountOfAnswers ++
+                    amountOfAnswers++
                 }
                 nextDay = getNextDateString(nextDay)
             }
             if (amountOfAnswers == 7) {
                 if (weekNumber == 1) {
-                    saveSharedSettingBoolean(Graph.appContext,
-                        "first_week_done", true)
-                    saveSharedSetting(Graph.appContext, "second_week_start_date", currentDate)
-                    saveSharedSetting(Graph.appContext, "second_week_end_date", getDateWeekFromNow(
+                    saveSharedSettingBoolean("first_week_done", true)
+                    saveSharedSetting("second_week_start_date", currentDate)
+                    saveSharedSetting("second_week_end_date", getDateWeekFromNow(
                         currentDate))
                 } else if (weekNumber == 2) {
-                    saveSharedSettingBoolean(Graph.appContext,
-                        "second_week_done", true)
+                    saveSharedSettingBoolean("second_week_done", true)
                 }
             }
         }
 
-        /**
-         * @param action 0 for accessibility settings, 1 for battery optimization settings
-         */
-        fun showAlertDialog(context: Context, action: Int) {
-            val alertDialog: AlertDialog.Builder = AlertDialog.Builder(context)
-            val alert: AlertDialog = alertDialog.create()
-            when (action) {
-                0 -> {
-                    alertDialog.setTitle(R.string.accessibility_perm_snackbar_title)
-                    alertDialog.setMessage(R.string.accessibility_perm_snackbar_msg)
-                }
-                1 -> {
-                    alertDialog.setTitle(R.string.battery_opt_snackbar_title)
-                    alertDialog.setMessage(R.string.battery_opt_snackbar_msg)
-                }
-            }
 
-            alertDialog.setPositiveButton(
-                "OK"
-            ) { _, _ ->
-                when (action) {
-                    0 -> {
-                        checkAccessibilityPermission(Graph.appContext, true)
-                    }
-
-                    1 -> {
-                        checkBattery(Graph.appContext)
-                    }
-                }
-                alertDialog.setNegativeButton(
-                    "Cancel"
-                ) { _, _ ->
-                    if (alert.isShowing) {
-                        alert.dismiss()
-                    }
-                }
-                alert.setCanceledOnTouchOutside(true)
-                alert.show()
-            }
-        }
     }
 }

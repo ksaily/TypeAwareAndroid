@@ -34,16 +34,17 @@ class MyAccessibilityService : AccessibilityService() {
     private var startTime: Long = 0
     private var endTime: Long = 0
 
-    override fun onInterrupt() {
-        Timer("AccessibilityService", false).schedule(600000) {
-            //Restart after 10 minutes
-            MyAccessibilityService()
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
-        OneTimeWorkRequestBuilder<SaveKeyboardDataWorker>()
+        val setUpWork = OneTimeWorkRequestBuilder<KeyboardWorker>()
+        .setInputData(workDataOf(
+            "TIMESLOT" to previousTimeSlot
+        )).build()
+        WorkManager.getInstance(applicationContext).enqueue(setUpWork)
+    }
+
+    override fun onInterrupt() {
+        Log.d("AccessibilityService","Service interrupted")
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -86,15 +87,14 @@ class MyAccessibilityService : AccessibilityService() {
 
             if (sameSession(event.packageName.toString(), timeElapsed)) {
             //Same session as before
-                if (timeElapsed != 0.0) {
-                typingTimes.add(timeElapsed)
-                }
                 saveCharIfNotPassword(event)
             } else { // Session has changed
                 newPackage = event.packageName.toString()
-                //startTime = nanoTime()
+                timeElapsed = ((KeyboardHelper.endTime - KeyboardHelper.startTime).toDouble() / 1_000_000_000)
+                if (startTime != 0L) {
+                    typingTimes.add(timeElapsed)
+                }
                 saveCharIfNotPassword(event)
-                val saveKeyboardDataWork = OneTimeWorkRequestBuilder<SaveKeyboardDataWorker>()
                 onSessionChange()
             }
     }
@@ -134,7 +134,6 @@ class MyAccessibilityService : AccessibilityService() {
                 previousTimeSlot = currentTimeSlot
                 typingTimes = arrayListOf()
                 thisPackage = newPackage
-                //beforeString = beforeString.substring(beforeString.length - 1)
                 beforeString = newString
                 newString = ""
             }

@@ -9,6 +9,7 @@ import com.example.testing.Graph
 import com.example.testing.fitbit.FitbitApiService.Companion.authorizeRequestToken
 import com.example.testing.fitbit.FitbitApiService.Companion.getRefreshToken
 import com.example.testing.ui.data.KeyboardChart
+import com.example.testing.ui.data.SleepData
 import com.example.testing.utils.KeyboardStats
 import com.example.testing.utils.Utils
 import com.github.kittinunf.fuel.core.FuelManager
@@ -50,18 +51,18 @@ class ChartViewModel: ViewModel() {
     var chartSelected: Int = 0 // 0 if errors, 1 if speed
     var authAttempted = false
     val dates = arrayListOf<String>()
-    private val sleepDataList = ArrayList<SleepDataForChart>(7)
+    private val sleepDataList = ArrayList<SleepDataForChart>()
 
 
     fun getFromFirebaseToChart(date: String) {
         //val dataFound: Boolean = false
         var sessionCount = 0L
         val rootRef = FirebaseDatabase.getInstance().reference
+        val authId = Utils.readSharedSettingString("firebase_auth_uid", "").toString()
         val participantId = Utils.readSharedSettingString(
-            Graph.appContext,
             "p_id",
             "").toString()
-        val ref = rootRef.child("Data").child(participantId).child(date)
+        val ref = rootRef.child("Data").child(participantId).child(authId).child(date)
             .child("keyboardEvents")
         val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -71,6 +72,8 @@ class ChartViewModel: ViewModel() {
                     val speedList = mutableListOf<BarEntry>()
                     var wordCount = 0
                     dataFound = true
+                    val averageWPMList = mutableListOf<Double>()
+                    val averageWPM = Double
                     var sessionCount = 0
                     val errorsAvgList = mutableListOf<Long>()
                     val speedsAvgList = mutableListOf<Double>()
@@ -100,13 +103,13 @@ class ChartViewModel: ViewModel() {
                         } catch (e: Exception) {
                             Log.d("Firebase", "Error: $e ")
                         }
-                        val averageSpeedInWordsPerSecond = wordCount.toDouble() / (speedsAvgList.average() * 60)
+
+                        val avgDurationInMinutes = wordCount * speedsAvgList.average() / 60
+                        val averageWPM = wordCount / avgDurationInMinutes
 
                         for (i in iterErrList) {
                             val timewindow = dataSnapshot.key?.toInt()
-                            val wordsPerMinute = (averageSpeedInWordsPerSecond * 60).toInt()
                             if (timewindow!! < 144) {
-                                Log.d("ChartViewModel", "Timewindow: $timewindow")
                                 iterErrList[timewindow!!] = BarEntry(
                                     timewindow.toFloat(),
                                     errorsAvgList.average().toFloat()
@@ -117,7 +120,7 @@ class ChartViewModel: ViewModel() {
                                 )
                                 iterSpeedList[timewindow!!] = BarEntry(
                                     timewindow.toFloat(),
-                                    wordsPerMinute.toFloat()
+                                    averageWPM.toFloat()
                                 )
                             }
 
@@ -127,8 +130,6 @@ class ChartViewModel: ViewModel() {
                         _chartErrorValues.postValue(iterErrList)
                         _chartSessions.postValue(dataList)
                         _chartSpeedValues.postValue(iterSpeedList)
-                        Log.d("Firebase", "ChartErrorValues: $")
-                        Log.d("Firebase", "ChartSessions: $chartSessions")
                         //_keyboardStats.postValue(dataList)
                 } else {
                     dataFound = false
@@ -145,30 +146,109 @@ class ChartViewModel: ViewModel() {
     }
 
     fun getSleepDataFromThisWeek(startDate: String) {
-        //val iterList = ArrayList<SleepDataForChart>(7)
-        //sleepDataList.clear()
+        sleepDataList.clear()
+        dates.clear()
         var previousDay = startDate
+        for (i in 0 .. 6) {
+            sleepDataList.add(SleepDataForChart("", BarEntry(0f, floatArrayOf(0f,0f,0f))))
+        }
+        val dates = ArrayList<String>()
+        val dateRange = ArrayList<String>()
+
+        for (i in 0..6) {
+            dates.add(previousDay)
+            previousDay = Utils.getPreviousDateString(previousDay)
+        }
+        dates.reverse()
+
         viewModelScope.launch(Dispatchers.IO) {
-            for (i in 6 downTo 0) {
-                getSleepDataToCharts(previousDay, i)
-                previousDay = Utils.getPreviousDateString(previousDay)
-            }
-            Log.d("SleepDataValuesList:", sleepDataList.toString())
-            _sleepDataValues.postValue(sleepDataList)
+
+            val accessToken = Utils.readSharedSettingString("access_token", "")
+            FuelManager.instance.basePath = "https://api.fitbit.com/1.2/user/-"
+
+            val startDateFitbit = Utils.formatForFitbit(dates.first())
+            val endDateFitbit = Utils.formatForFitbit(dates.last())
+            Log.d("Dates reversed", dates.toString())
+
+            val url = "/sleep/date/$startDateFitbit/$endDateFitbit.json"
+            try {
+                val (_, response, result) = url.httpGet().header(
+                    "Authorization" to "Bearer $accessToken"
+                ).responseString()
+                println(response)
+
+                val (sleepData, error) = result
+                if (response.isSuccessful) {
+                    val jsonObject = JSONTokener(sleepData).nextValue() as JSONObject
+                    val jsonArray = jsonObject.getJSONArray("sleep")
+                    println(jsonArray)
+                    if (!jsonArray.isNull(0)) {
+                        for (i in 0 until jsonArray.length()) {
+                            val obj = jsonArray.getJSONObject(i)
+                            val dateOfSleep = obj.getString("dateOfSleep")
+                            val sleepLogDay = Utils.formatDateStringFromFitbit(dateOfSleep)
+                            val summary = obj.getJSONObject("levels").getJSONObject("summary")
+                            val deepSleep = summary.getJSONObject("deep").getInt("minutes")
+                            val lightSleep = summary.getJSONObject("light").getInt("minutes")
+                            val remSleep = summary.getJSONObject("rem").getInt("minutes")
+                            val wakeSleep = summary.getJSONObject("wake").getInt("minutes")
+
+
+                            val index = dates.indexOf(sleepLogDay)
+                            Log.d("Index", "$index Day $sleepLogDay")
+                            if (index != -1) {
+                                sleepDataList[index] = SleepDataForChart(
+                                    Utils.formatDateForChart(sleepLogDay),
+                                    BarEntry(index.toFloat(), floatArrayOf(
+                                        deepSleep.toFloat(),
+                                        lightSleep.toFloat(),
+                                        remSleep.toFloat(),
+                                        wakeSleep.toFloat()
+                                    ))
+                                )
+                            }
+                        }
+
+                        Log.d("SleepDataValuesList:", sleepDataList.toString())
+                        Log.d("SleepDataValues", "Post")
+                        _sleepDataValues.postValue(sleepDataList)
+                    }
+                 else {
+                    _sleepDataValues.postValue(ArrayList<SleepDataForChart>())
+                    }
+                }
+                else if (response.statusCode == 401) {
+                    val code = Utils.readSharedSettingString("authorization_code", "")
+                    val state = Utils.readSharedSettingString("state", "")
+                    if (code!!.isNotEmpty() && state!!.isNotEmpty() && !authAttempted) {
+                        Log.d("GetSleepDataFailure", "Re-authorizing")
+                        getRefreshToken(code, state)
+                        authAttempted = true
+                        getSleepDataFromThisWeek(startDate)
+                    } else {
+                        authAttempted = false
+                    }
+                }
+        } catch (e: Exception) {
+            Log.d("Error:", "$e")
+        }
         }
     }
+
 
     fun emptySleepDataList() {
         sleepDataList.clear()
     }
 
-    private fun getSleepDataToCharts(date: String, x: Int) {
-        val dateFitbit = Utils.formatForFitbit(date)
+    private fun getSleepDataToCharts(date: String) {
+        val startDateFitbit = Utils.formatForFitbit(date)
+        val endDate = Utils.getDateWeekFromNow(date)
+        val endDateFitbit = Utils.formatForFitbit(endDate)
         try {
-            val accessToken = Utils.readSharedSettingString(Graph.appContext, "access_token", "")
-            Log.d("GetSleepDataFromThisWeek", "week's date: $dateFitbit")
+            val accessToken = Utils.readSharedSettingString("access_token", "")
+            Log.d("GetSleepDataFromThisWeek", "week's date: $startDateFitbit")
             FuelManager.instance.basePath = "https://api.fitbit.com/1.2/user/-"
-            val url = "/sleep/date/$dateFitbit.json"
+            val url = "/sleep/date/$startDateFitbit.json"
 
             val (_, response, result) = url.httpGet().header(
                 "Authorization" to
@@ -177,15 +257,15 @@ class ChartViewModel: ViewModel() {
             val (sleepData, error) = result
             Log.d("GetSleepData", "sleepData: $sleepData")
             if (response.isSuccessful) {
-                if (sleepData == null) {
+                val jsonObject = JSONTokener(sleepData).nextValue() as JSONObject
+                val jsonArray = jsonObject.getJSONArray("sleep")
+                if (jsonArray.isNull(0)) {
                     //No data for this date
-                    sleepDataList[x] = (
-                        SleepDataForChart(Utils.formatDateForChart(date), BarEntry(x.toFloat(), 0f))
-                    )
+                    sleepDataList[0] = (
+                            SleepDataForChart(Utils.formatDateForChart(date), BarEntry(0.toFloat(), 0f))
+                            )
                 }
                 else {
-                    val jsonObject = JSONTokener(sleepData).nextValue() as JSONObject
-                    val jsonArray = jsonObject.getJSONArray("sleep")
                     val obj = jsonArray.getJSONObject(0)
                     val dateOfSleep = obj.getString("dateOfSleep")
                     val sleepLogDay = Utils.formatDateStringFromFitbit(dateOfSleep)
@@ -195,8 +275,8 @@ class ChartViewModel: ViewModel() {
                     val remSleep = summary.getString("rem")
                     val wakeSleep = summary.getString("wake")
                     Log.i("Sleep", "Date of sleep : $sleepLogDay")
-                    sleepDataList[x] =
-                        SleepDataForChart(Utils.formatDateForChart(sleepLogDay), BarEntry(x.toFloat(),
+                    sleepDataList[0] =
+                        SleepDataForChart(Utils.formatDateForChart(sleepLogDay), BarEntry(0.toFloat(),
                             floatArrayOf(deepSleep.toFloat(),
                                 lightSleep.toFloat(),
                                 remSleep.toFloat(),
@@ -204,13 +284,8 @@ class ChartViewModel: ViewModel() {
                     authAttempted = false
                 }
             } else if (response.statusCode == 401) {
-                var code = Utils.readSharedSettingString(
-                    Graph.appContext,
-                    "authorization_code", ""
-                )
-                var state = Utils.readSharedSettingString(
-                    Graph.appContext, "state", ""
-                )
+                var code = Utils.readSharedSettingString("authorization_code", "")
+                var state = Utils.readSharedSettingString("state", "")
                 return if (code!!.isNotEmpty() && state!!.isNotEmpty() && !authAttempted) {
                     Log.d("GetSleepDataFailure", "Re-authorizing")
                     getRefreshToken(code, state)
@@ -219,13 +294,10 @@ class ChartViewModel: ViewModel() {
                 } else {
                     authAttempted = false
                 }
-            } else {
-                emptySleepDataList()
             }
         } catch (e: Exception) {
             authAttempted = false
             Log.d("Fitbit Authorization(Get Sleep Data)", "Error: $e")
-            emptySleepDataList()
         }
     }
 

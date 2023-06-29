@@ -52,8 +52,7 @@ class ConsentFragment : Fragment(R.layout.fragment_consent) {
             result = true
             Log.d("Consent", "Consent given")
             //setFragmentResult("consentGiven", bundleOf("consent" to result))
-            Utils.saveSharedSettingBoolean(Graph.appContext,
-                "consent_given", true)
+            Utils.saveSharedSettingBoolean("consent_given", true)
 
               //  null, "userInfoFragment", false)
             //removeFragmentByTag(MainActivity, "consentFragment")
@@ -71,7 +70,6 @@ class ConsentFragment : Fragment(R.layout.fragment_consent) {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
     }
 
     companion object {

@@ -41,10 +41,10 @@ class KeyboardWorker(appContext: Context, workerParams: WorkerParameters):
         // Save data under the current timeslot with an unique id for each
         val dateString = event.date
         val participantId = Utils.readSharedSettingString(
-            applicationContext,
             "p_id",
             "")
-        myRef.child(participantId.toString())
+        val authId = Utils.readSharedSettingString("firebase_auth_uid", "").toString()
+        myRef.child(participantId.toString()).child(authId)
             .child(dateString).child("keyboardEvents").child(timeslot.toString())
                 .child(event.id.toString()).setValue(event)
     }

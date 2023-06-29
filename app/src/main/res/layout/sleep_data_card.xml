@@ -41,26 +41,20 @@
                 android:id="@+id/FitbitLoginPrompt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/light_grey"
-                android:layout_marginStart="90dp"
-                android:layout_marginEnd="91dp"
-                android:layout_marginVertical="20dp"
-                android:paddingVertical="15dp"
+                android:gravity="center"
+                android:layout_margin="8dp"
+                android:paddingVertical="5dp"
                 android:text="@string/to_view_your_sleep_data_you_need_to_log_in_to_your_fitbit_account"
                 android:textAlignment="center"
-                android:textSize="18sp"
-                android:gravity="center" />
+                android:textColor="@color/light_grey"
+                android:textSize="18sp" />
 
             <Button
                 android:id="@+id/FitbitBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:background="@drawable/roundstyle"
-                android:backgroundTint="#C2B6DF"
-                android:padding="10dp"
-                android:text="@string/fitbit_login"
-                android:textColor="@color/white" />
+                style="@style/btn"
+                android:text="Login"
+                android:layout_gravity="center"
+                />
         </LinearLayout>
 
         <LinearLayout
@@ -152,7 +146,7 @@
                     android:padding="5dp"
                     android:text="9.00"
                     android:textColor="@color/white"
-                    android:textSize="24sp"
+                    android:textSize="20sp"
                     android:layout_alignBottom="@id/wakeUpImage"
                     android:layout_toRightOf="@id/wakeUpImage"
                     android:layout_weight="1"
@@ -189,7 +183,7 @@
                     android:text="23.00"
                     android:layout_marginVertical="5dp"
                     android:textColor="@color/white"
-                    android:textSize="24sp"
+                    android:textSize="20sp"
                     android:textAlignment="center"
                     android:fontFamily="@font/roboto"
                     android:layout_gravity="center_vertical"
@@ -224,7 +218,7 @@
                 android:text="7h 30m"
                 android:textAlignment="center"
                 android:gravity="center_horizontal"
-                android:textColor="@color/light_grey"
+                android:textColor="@color/white"
                 android:textSize="26sp" />
 
 

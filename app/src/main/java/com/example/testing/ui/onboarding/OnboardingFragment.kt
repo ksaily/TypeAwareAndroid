@@ -98,22 +98,12 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
     }
 
     private fun onboardingFinished() {
-        Utils.saveSharedSettingBoolean(
-            Graph.appContext, "onboarding_complete",true)
+        Log.d("Onboarding", "Saved onboarding complete")
+        Utils.saveSharedSettingBoolean(getString(R.string.sharedpref_onboarding),true)
         //Utils.saveSharedSettingBoolean(Graph.appContext, "first_login_done", true)
-        //parentFragmentManager.beginTransaction().remove(this).commit()
-        parentFragmentManager.popBackStack()
+        parentFragmentManager.beginTransaction().remove(this).commit()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        binding.vp2Pager.unregisterOnPageChangeCallback(onBoardingPageChangeCallback)
-    }
 
     /**
      * Update slider circle view based on fragment position

@@ -25,6 +25,8 @@ class KeyboardHelper {
         var newPackage: String = ""
         var dataList: MutableList<KeyboardEvents> = mutableListOf()
         var newString: String = ""
+        var startTime: Long = 0L
+        var endTime: Long = 0L
 
         /** Count the current timeslot (10 minute windows) **/
         fun countTimeSlot(): Int {
@@ -79,9 +81,22 @@ class KeyboardHelper {
                 } else {
                     var newChar = text.last()
                     if (newChar.isLetterOrDigit()) {
+                        //Save endtime in case of session change
+                        endTime = System.nanoTime()
                         //Check if character is something other than space or punctuation
                         //Replace the character with 'a'
                         newChar = 'a'
+                        startTime = System.nanoTime()
+                    } else {
+                        // End of a word
+                        endTime = System.nanoTime()
+                        // Time elapsed in seconds:
+                        timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
+                        if (startTime != 0L) {
+                            typingTimes.add(timeElapsed)
+                        }
+                        // Set start time at 0 so another space won't start a word
+                        startTime = 0L
                     }
                     if (sameSession) {
                         beforeString += newChar

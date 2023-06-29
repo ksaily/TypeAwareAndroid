@@ -20,16 +20,24 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
-class DailyQuestionnaireDialog : DialogFragment(),
-    SharedPreferences.OnSharedPreferenceChangeListener {
+/**
+ * First week, show only survey for the user: How do you think you did this week
+ * Second week, survey first and then reveal them the data
+ * Q1: How many words did you type during date x?
+ * Q2: Were you generally typing faster than normally
+ * (Compare the participant's performance to others, how they feel about it)
+ * Q2: How often did you have to correct your typing? (Scale 1-7)
+ * Q3: At what time of day were you most active with typing? (some kind of selector)
+ *
+ */
+class DailyQuestionnaireDialog : DialogFragment(){
 
     private var _binding: DialogDailyQuestionnaireBinding? = null
     private val binding get() = _binding!!
 
     private var currentDate: String = Utils.currentDate
     private val myRef = Firebase.database.getReference("Data")
-    private val participantId = Utils.readSharedSettingString(Graph.appContext,
-        "p_id", "").toString()
+    private val participantId = Utils.readSharedSettingString("p_id", "").toString()
     private val questionnaireCompleteString = "QuestionnaireCompleted"
     //private val viewModel: DailyQuestionnaireViewModel by activityViewModels()
 
@@ -45,6 +53,7 @@ class DailyQuestionnaireDialog : DialogFragment(),
     private var currentQuestionIndex = 0
     private var currentAnswer = ""
     private var isFirstWeek = true
+    private var isFinished = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -58,30 +67,37 @@ class DailyQuestionnaireDialog : DialogFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (activity != null) {
-            if (!Utils.readSharedSettingBoolean(Graph.appContext,
-                "isQuestionnaireAnswered", false)) {
+            if (!Utils.readSharedSettingBoolean("isQuestionnaireAnswered", false)) {
                 setUpNumberPicker()
                 showNextQuestion()
                 setupClickListener()
             }
-            Utils.getSharedPrefs().registerOnSharedPreferenceChangeListener(this)
         }
     }
 
-    override fun onSharedPreferenceChanged(sharedPref: SharedPreferences?, key: String?) {
-        if (key == getString(R.string.sharedpref_firstweek_done) &&
-                Utils.readSharedSettingBoolean(Graph.appContext,
-                getString(R.string.sharedpref_firstweek_done), false)) {
-            changeToSecondWeek()
-        }
-    }
-
-    private fun changeToSecondWeek() {
+    fun changeToSecondWeek() {
+        Log.d("Questionnaire", "Changed to second week")
+        isFirstWeek = false
+        isFinished = false
         questions = listOf(
             "Q1: Yesterday reflected a normal day for me.",
             "Q2: I found yesterday’s data meaningful.",
             "Q3: Did you find anything surprising in yesterday’s data?",
             "Q4: Based on yesterday’s data, I would be likely to change my digital or sleep-related behaviour."
+        )
+    }
+
+    private fun changeToEndQuestionnaire() {
+        Log.d("Questionnaire", "Changed to end questionnaire")
+        isFirstWeek = false
+        isFinished = true
+        questions = listOf(
+            "You have now completed two weeks of the study! Please finish the study by answering the following end questionnaire.",
+            "Q1: Would you make any life or behavioral changes based on data like this? Why or why not?",
+            "Q2: What type of changes would you make in your life based on data like this?",
+            "Q3: Have you made some behavioral changes to accommodate your digital wellbeing prior to this study? How effective/ineffective were they?",
+            "Q4: How suitable would this information be for other people or is it more useful just for you?",
+            "You now have answered all the questionnaires and finished the study, congratulations!"
         )
     }
 
@@ -102,7 +118,6 @@ class DailyQuestionnaireDialog : DialogFragment(),
             amountOfWordsAnswer.isVisible = wordAnswerVisible
             numberPicker.isVisible = numberPickerVisible
             week2Q2.isVisible = secondWeekWordAnswerVisible
-
         }
     }
 
@@ -128,12 +143,40 @@ class DailyQuestionnaireDialog : DialogFragment(),
                 4 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options2)
                 5 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options3)
             }
-        } else {
+        } else if (!isFinished) {
             when (currentQuestionIndex) {
                 0 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options_week2)
                 1 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options_week2)
                 2 -> chooseViewsToShow(false, false, false, true)
                 3 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options_week2)
+            }
+        } else {
+            binding.questionnaireTitle.text = "End questionnaire"
+            when (currentQuestionIndex) {
+                0 -> {
+                    chooseViewsToShow(false, false, false, false)
+                    binding.submitButton.text = "Continue"
+                }
+                1 -> {
+                    chooseViewsToShow(false, false, false, true)
+                    binding.submitButton.text = "Submit"
+                }
+                2 -> {
+                    chooseViewsToShow(false, false, false, false)
+                    binding.openAnswer.isVisible = true
+                }
+                3 -> {
+                    chooseViewsToShow(false, false, false, true)
+                    binding.openAnswer.isVisible = false
+                }
+                4 -> {
+                    chooseViewsToShow(false, false, false, false)
+                    binding.openAnswer.isVisible = true
+                }
+                5 -> {
+                    binding.openAnswer.isVisible = false
+                    binding.submitButton.text = "Finish"
+                }
             }
         }
     }
@@ -144,33 +187,63 @@ class DailyQuestionnaireDialog : DialogFragment(),
         binding.submitButton.setOnClickListener {
             if (isFirstWeek) {
                 when (currentQuestionIndex) {
-                    (0 or 1 or 4 or 5) -> {
+                    0 -> {
+                        val selectedRadioButtonId = binding.radioGroup1.checkedRadioButtonId
+                        currentAnswer = getSelectedOptionIndex(selectedRadioButtonId).toString()
+                    }
+                    1 -> {
                         val selectedRadioButtonId = binding.radioGroup1.checkedRadioButtonId
                         currentAnswer = getSelectedOptionIndex(selectedRadioButtonId).toString()
                     }
                     2 -> currentAnswer = binding.amountOfWordsAnswer.text.toString()
 
                     3 -> currentAnswer = binding.numberPicker.value.toString()
+                    4 -> {
+                        val selectedRadioButtonId = binding.radioGroup1.checkedRadioButtonId
+                        currentAnswer = getSelectedOptionIndex(selectedRadioButtonId)
+                    }
+                    5 -> {
+                        val selectedRadioButtonId = binding.radioGroup1.checkedRadioButtonId
+                        currentAnswer = getSelectedOptionIndex(selectedRadioButtonId)
+                    }
                 }
-                saveAnswerToDatabase(currentQuestionIndex, currentAnswer)
+                saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
                 currentQuestionIndex++
                 showNextQuestion()
-            } else {
+            } else if (!isFinished) {
+                // If second week is of questionnaires
                 when (currentQuestionIndex) {
-                    (0 or 1 or 3) -> {
-                        val selectedRadioButtonId = binding.radioGroup1.checkedRadioButtonId
-                        currentAnswer = getSelectedOptionIndex(selectedRadioButtonId).toString()
-                    }
+                    0 -> { val selectedRadioButtonId = binding.radioGroup1.checkedRadioButtonId
+                        currentAnswer = getSelectedOptionIndex(selectedRadioButtonId) }
+                    1 -> { val selectedRadioButtonId = binding.radioGroup1.checkedRadioButtonId
+                        currentAnswer = getSelectedOptionIndex(selectedRadioButtonId) }
                     2 -> {
                         val selectedRadioButtonId = binding.radioGroup2.checkedRadioButtonId
                         val ans = getSelectedOptionIndex(selectedRadioButtonId)
                         val textAns = binding.explainAnswer.text
                         currentAnswer = "$ans, $textAns"
                     }
+                    3 -> { val selectedRadioButtonId = binding.radioGroup1.checkedRadioButtonId
+                        currentAnswer = getSelectedOptionIndex(selectedRadioButtonId) }
                 }
-                saveAnswerToDatabase(currentQuestionIndex, currentAnswer)
+                saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
                 currentQuestionIndex++
                 showNextQuestion()
+            } else {
+                when (currentQuestionIndex) {
+                    0 -> {}
+                    1 -> {
+                        val selectedRadioButtonId = binding.radioGroup2.checkedRadioButtonId
+                        val ans = getSelectedOptionIndex(selectedRadioButtonId)
+                        val textAns = binding.explainAnswer.text
+                        currentAnswer = "$ans, $textAns"
+                    }
+                    2 -> {
+                        val ans = binding.openAnswer.text
+                        currentAnswer = "$ans"
+                    }
+                    3 -> {}
+                }
             }
         }
     }
@@ -184,41 +257,17 @@ class DailyQuestionnaireDialog : DialogFragment(),
         dialog?.setCanceledOnTouchOutside(false)
     }
 
-/**
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-         // Use the Builder class for convenient dialog construction
-        Log.d("AlertDialog", "onCreateDialog")
-            _binding = DialogDailyQuestionnaireBinding.inflate(layoutInflater).apply {
-                binding.questionTextView.text = questions[currentQuestionIndex]
-            }
-            val builder = AlertDialog.Builder(context)
 
-            return builder
-                .setView(binding.root)
-                .setPositiveButton("Submit") { dialog, _ ->
-                        val selectedRadioButtonId = binding.radioGroup.checkedRadioButtonId
-                        val selectedOptionIndex = getSelectedOptionIndex(selectedRadioButtonId)
-
-                        saveAnswerToDatabase(selectedOptionIndex)
-                        currentQuestionIndex++
-                        showNextQuestion()
-
-                    }.create()
-
-            // Create the AlertDialog object and return it
-    }**/
-
-
-    private fun getSelectedOptionIndex(selectedRadioButtonId: Int): Int {
+    private fun getSelectedOptionIndex(selectedRadioButtonId: Int): String {
         return when (selectedRadioButtonId) {
-            R.id.likertScale1 -> 0
-            R.id.likertScale2 -> 1
-            R.id.likertScale3 -> 2
-            R.id.likertScale4 -> 3
-            R.id.likertScale5 -> 4
-            R.id.likertScale6 -> 5
-            R.id.likertScale7 -> 6
-            else -> -1
+            R.id.likertScale1 -> "1"
+            R.id.likertScale2 -> "2"
+            R.id.likertScale3 -> "3"
+            R.id.likertScale4 -> "4"
+            R.id.likertScale5 -> "5"
+            R.id.likertScale6 -> "6"
+            R.id.likertScale7 -> "7"
+            else -> "-"
         }
     }
 
@@ -230,8 +279,10 @@ class DailyQuestionnaireDialog : DialogFragment(),
         if (!isFirstDay) {
 
             lifecycleScope.launch(Dispatchers.IO) {
+                val authId = Utils.readSharedSettingString("firebase_auth_uid", "").toString()
 
-                myRef.child(participantId).child(today).child("questionnaire")
+
+                myRef.child(authId).child(participantId).child(today).child("questionnaire")
                     .child(questionnaireCompleteString).get().addOnSuccessListener { snapshot ->
                         Log.d("Firebase", "Questionnaire listener")
                         isQuestionnaireAnswered = (snapshot.exists() &&
@@ -239,8 +290,7 @@ class DailyQuestionnaireDialog : DialogFragment(),
                         Log.d("isQuestionnaireAnswered",
                             isQuestionnaireAnswered.toString())// both need to be true
 
-                        Utils.saveSharedSettingBoolean(Graph.appContext,
-                            "isQuestionnaireAnswered", isQuestionnaireAnswered)
+                        Utils.saveSharedSettingBoolean("isQuestionnaireAnswered", isQuestionnaireAnswered)
                     }.addOnFailureListener {
                         // Error occurred while checking if questionnaire is answered, show home screen
                         showHomeScreen()
@@ -254,15 +304,45 @@ class DailyQuestionnaireDialog : DialogFragment(),
             setupView()
         }
         else {
+            // Save info to Firebase and sharedPrefs on questionnaire completed
             lifecycleScope.launch(Dispatchers.IO) {
                 val today = Utils.getCurrentDateString()
-                val questionnaireRef = myRef.child(participantId).child(today).child("questionnaire")
+                val authId = Utils.readSharedSettingString("firebase_auth_uid", "").toString()
+
+                val questionnaireRef = myRef.child(authId).child(participantId).child(today).child("questionnaire")
 
                 questionnaireRef.child(questionnaireCompleteString).setValue(true).await()
-                Utils.saveSharedSettingBoolean(Graph.appContext,
-                    "isQuestionnaireAnswered", true)
+                Utils.saveSharedSettingBoolean("isQuestionnaireAnswered", true)
+                if (isFinished) {
+                    Utils.saveSharedSettingBoolean("study_finished", true)
+                    questionnaireRef.child("endQuestionnaireAnswered").setValue(true)
+                }
             }
-            showHomeScreen()
+            //Check how many questionnaires have been answered
+            val answered = Utils.readSharedSettingInt("number_of_questionnaires", 0)
+            if (answered == null) {
+                Log.d("QuestionnaireAnswerAmount", "Was 0, now 1")
+                Utils.saveSharedSettingInt("number_of_questionnaires", 1)
+            }
+            else {
+                val answeredNew = answered + 1
+                Utils.saveSharedSettingInt("number_of_questionnaires", answeredNew)
+                when (answered) {
+                    in 7..13 -> {
+                        Log.d("QuestionnaireAnswerAmount", "Was $answered, now $answeredNew")
+                        changeToSecondWeek()
+                        Utils.saveSharedSettingBoolean("first_week_done", true)
+                    }
+                    14 -> {
+                        changeToEndQuestionnaire()
+                        showNextQuestion()
+                    }
+                    else -> {
+                        showHomeScreen()
+                    }
+                }
+
+            }
         }
     }
 
@@ -271,28 +351,28 @@ class DailyQuestionnaireDialog : DialogFragment(),
 
             val qstn = "Q$question"
             // Save data under the current timeslot with an unique id for each
-            myRef.child(participantId)
-                .child(currentDate).child("questionnaire").child(qstn)
-                .setValue(answer)
-
-
-                // Save the answered date to indicate the questionnaire has been answered for today
-                //myRef.child(currentDate).setValue(true)
-
+            if (isFirstWeek) {
+                myRef.child(participantId)
+                    .child(currentDate).child("questionnaire1").child(qstn)
+                    .setValue(answer)
+            } else if (!isFinished) {
+                myRef.child(participantId)
+                    .child(currentDate).child("questionnaire1").child(qstn)
+                    .setValue(answer)
+            } else {
+                myRef.child(participantId)
+                    .child(currentDate).child("endQuestionnaire").child(qstn)
+                    .setValue(answer)
+            }
         }
     }
 
     private fun showHomeScreen() {
-        if (dialog != null) {
+        if (dialog != null && dialog!!.isShowing) {
             dismiss()
         }
-        _binding = null
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
 
     companion object {
 

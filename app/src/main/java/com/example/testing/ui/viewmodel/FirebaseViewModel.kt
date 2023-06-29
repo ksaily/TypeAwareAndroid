@@ -67,19 +67,21 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
     fun saveSleepDataToFirebase(date: String, data: SleepData, participantId: String) {
         viewModelScope.launch {
             val myRef = Firebase.database.getReference("Data")
+            val authId = Utils.readSharedSettingString("firebase_auth_uid", "").toString()
+
             // Save data under the current timeslot with an unique id for each
-            myRef.child(participantId.toString())
+            myRef.child(participantId).child(authId)
                 .child(date).child("sleep").setValue(data)
         }
     }
 
     fun getFromFirebase(date: String, isToday: Boolean) {
             val rootRef = Firebase.database.getReference("Data")
+        val authId = Utils.readSharedSettingString("firebase_auth_uid", "").toString()
             val participantId = Utils.readSharedSettingString(
-                Graph.appContext,
                 "p_id",
                 "").toString()
-            val ref = rootRef.child(participantId).child(date)
+            val ref = rootRef.child(participantId).child(authId).child(date)
                 .child("keyboardEvents")
             clearLists()
             val errorRateList = mutableListOf<Double>()
@@ -124,14 +126,16 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
                                 totalErr = totalErrList.average()
                                 Log.d("FirebaseDebug", "totalErr: $totalErr")
                                 totalSpeed = speedsList.average()
-                                Log.d("FirebaseDebug", "TotalSpeed: $totalSpeed")
+                                    val timeTakenInMinutes = totalSpeed / 60.0
+                                    val averageWPM = wordCount / timeTakenInMinutes
+                                    Log.d("FirebaseDebug", "TotalSpeed: $totalSpeed")
                                 var data = KeyboardStats(
                                     date,
                                     timeWindow,
                                     totalErr,
                                     totalSpeed,
                                     totalErrorRate,
-                                    wordCount)
+                                    averageWPM)
                                 println(data)
                                 //addToListOfFirebaseData(data)
                                 dataList.add(data)
@@ -162,7 +166,10 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
         errorsList.clear()
         speedsList.clear()
         totalSpeedsList.clear()
+        speedsList.clear()
+        totalAvgErrors.clear()
         totalErrList.clear()
+        sessionCount = 0L
         wordCount = 0
     }
 }

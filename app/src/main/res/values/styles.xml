@@ -7,6 +7,7 @@
         <item name="android:background">@drawable/roundstyle</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">5dp</item>
     </style>
 
     <!-- Chart switch styles -->

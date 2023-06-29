@@ -12,14 +12,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.datastore.preferences.preferencesKey
 import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.example.testing.Graph
 import com.example.testing.R
-import com.example.testing.databinding.FragmentDateBinding
 import com.example.testing.databinding.FragmentSettingsBinding
 import com.example.testing.utils.Utils
 
@@ -94,8 +92,7 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
     }
 
     private fun setAccessibilityPref(pref: Preference?) {
-        if (Utils.readSharedSettingBoolean(Graph.appContext,
-                "accessibility_permission", false)) {
+        if (Utils.readSharedSettingBoolean("accessibility_permission", false)) {
             pref?.title = getString(R.string.accessibility_perm_enabled)
             pref?.summary = getString(R.string.click_here_to_make_changes)
             pref?.icon = Graph.appContext.getDrawable(
@@ -109,8 +106,7 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
     }
 
     private fun setBatteryOptPref(pref: Preference?) {
-        if (Utils.readSharedSettingBoolean(Graph.appContext,
-                "battery_opt_off", false)) {
+        if (Utils.readSharedSettingBoolean("battery_opt_off", false)) {
             pref?.title = getString(R.string.battery_opt_off_prompt)
             //pref?.summary = getString(R.string.click_here_to_make_changes)
             pref?.icon = Graph.appContext.getDrawable(

@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
 
     <application
         android:name=".TypeAware"
@@ -21,19 +23,17 @@
 
         <activity
             android:name=".fitbit.AuthenticationActivity"
-            android:autoVerify="true"
             android:exported="true"
-            android:launchMode="singleInstance">
-            <intent-filter>
+            android:launchMode="singleTop">
+
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:scheme="https"
-                    android:host="alertness-level-monitor.com"
-                    android:pathPrefix="/callback" />
+                <data android:scheme="https"/>
+                <data android:host="type-aware-katri.com" />
             </intent-filter>
         </activity>
         <activity
@@ -42,21 +42,24 @@
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
 
-        <receiver android:name="com.example.testing.notifications.BootReceiver" android:enabled="true"
+
+        <receiver
+            android:name="com.example.testing.notifications.AlarmReceiver"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
-        <receiver android:name="com.example.testing.notifications.AlarmReceiver" android:enabled="true"/>
 
 
         <service

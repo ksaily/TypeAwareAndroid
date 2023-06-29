@@ -66,7 +66,6 @@ class UserInfoFragment : Fragment(R.layout.fragment_user_info) {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        _binding = null
     }
 
 

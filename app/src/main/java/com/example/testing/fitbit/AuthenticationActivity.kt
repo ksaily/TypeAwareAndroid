@@ -54,26 +54,64 @@ class AuthenticationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val authorizationUrl = buildUrl(fitbitAuthUrl)
+        launchAuthorizationPage(authorizationUrl)
 
-        mCustomTabsServiceConnection = object : CustomTabsServiceConnection() {
-            override fun onCustomTabsServiceConnected(componentName: ComponentName, customTabsClient: CustomTabsClient) {
-                //Pre-warming
-                mClient = customTabsClient
-                mClient?.warmup(0L)
-                mCustomTabsSession = mClient?.newSession(null)
-            }
-
-            override fun onServiceDisconnected(name: ComponentName) {
-                mClient = null
-            }
-        }
-
-        CustomTabsClient.bindCustomTabsService(this, CUSTOM_TAB_PACKAGE_NAME,
-            mCustomTabsServiceConnection as CustomTabsServiceConnection)
-
+/**
+        val builder = CustomTabsIntent.Builder()
+        val customTabsIntent = builder.build()
         //intent.putExtra(Intent.EXTRA_REFERRER,
         //    Uri.parse("android-app://" + Graph.appContext.packageName))
+        Log.d("Authorization", "Activity started")
+        try {
+            customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+            customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            Log.d("Authorization", "$authorizationUrl")
+            customTabsIntent.launchUrl(this, Uri.parse(authorizationUrl))
+        } catch (e: Exception) {
+            Log.d("Error", "$e")
+        }**/
+    }
 
+    private fun launchAuthorizationPage(uri: Uri) {
+
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        intent.putExtra(Intent.EXTRA_REFERRER,
+              Uri.parse("android-app://" + Graph.appContext.packageName))
+        startActivity(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // Step 3: Handle the Redirect
+        val uri = intent.data
+        Log.d("Auth", uri.toString())
+        if (uri != null && uri.toString().startsWith(REDIRECT_URL)) {
+            handleRedirect(uri)
+        }
+    }
+
+    private fun handleRedirect(uri: Uri) {
+        Log.d("Authorization", "On new intent")
+        val code = uri.getQueryParameter("code")
+        val state = uri.getQueryParameter("state")
+        if (code != null && state != null) {
+            Utils.saveSharedSetting("authorization_code", code)
+            Utils.saveSharedSetting("state", state)
+            AUTH_CODE = code
+            uniqueState = state
+            lifecycleScope.launch(Dispatchers.IO) {
+                try {
+                    FitbitApiService.authorizeRequestToken(code, state)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+
+            }
+            finish()
+            return
+        }
     }
 
 
@@ -84,13 +122,8 @@ class AuthenticationActivity : AppCompatActivity() {
         val state = intent.data?.getQueryParameter("state")
         //val redirect = intent?.data?.getQueryParameter("redirect")
         if (code != null && state != null) {
-            Log.d("Authorization", "Authorization code is: $code")
-            Log.d("Authorization", "Authorization state is: $state")
-            Log.d("Authorization", "Redirect uri is $intent")
-            Utils.saveSharedSetting(Graph.appContext,
-            "authorization_code", code)
-            Utils.saveSharedSetting(Graph.appContext,
-                "state", state)
+            Utils.saveSharedSetting("authorization_code", code)
+            Utils.saveSharedSetting("state", state)
             AUTH_CODE = code
             uniqueState = state
             lifecycleScope.launch(Dispatchers.IO) {
@@ -100,19 +133,7 @@ class AuthenticationActivity : AppCompatActivity() {
                     e.printStackTrace()
                 }
 
-            }/**
-            Thread(Runnable {
-                try {
-                    if (!runningThread) {
-                        return@Runnable
-                    }
-                    FitbitApiService.authorizeRequestToken(code, state)
-                    //FitbitApiService.getSleepData("2022-12-10")
-                    //Utils.saveSharedSettingBoolean(Graph.appContext, "loggedInFitbit", true)
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                }
-            }).start()**/
+            }
             finish()
             return
         } else {
@@ -123,26 +144,15 @@ class AuthenticationActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        Log.d("Authorization", "Activity started")
-        try {
-            Log.d("Authorization", "$authorizationUrl")
-            customTabsIntent.intent.addFlags(FLAG_ACTIVITY_NO_HISTORY)
-            customTabsIntent.intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-            customTabsIntent.launchUrl(this, Uri.parse(authorizationUrl))
-        } catch (e: Exception) {
-            Log.d("Error", "$e")
-        }
-    }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         super.onBackPressed()
         finish()
         return
     }
 
-    private fun buildUrl(url: String): String {
+    private fun buildUrl(url: String): Uri {
         uniqueState = UUID.randomUUID().toString()
             val uri = Uri.parse(url)
                 .buildUpon()
@@ -152,8 +162,9 @@ class AuthenticationActivity : AppCompatActivity() {
                 .appendQueryParameter("code_challenge", CodeChallenge.getCodeChallenge(CODE_VERIFIER))
                 .appendQueryParameter("code_challenge_method", "S256")
                 .appendQueryParameter("scope", "sleep")
+                .appendQueryParameter("prompt", "login")
                 .appendQueryParameter("state", uniqueState)
-                .build()
-        return uri.toString()
+
+        return uri.build()
     }
 }

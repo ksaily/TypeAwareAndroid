@@ -75,13 +75,10 @@ class FitbitApiService {
                         val jsonObject = JSONTokener(auth).nextValue() as JSONObject
                         accessToken = jsonObject.getString("access_token")
                         refreshToken = jsonObject.getString("refresh_token")
-                        Utils.saveSharedSetting(Graph.appContext,
-                            "access_token", accessToken)
-                        Utils.saveSharedSetting(Graph.appContext,
-                            "refresh_token", refreshToken)
+                        Utils.saveSharedSetting("access_token", accessToken)
+                        Utils.saveSharedSetting("refresh_token", refreshToken)
                         Log.d("Authorization: ", "Refresh token: $refreshToken")
-                        Utils.saveSharedSettingBoolean(Graph.appContext,
-                            "loggedInFitbit", true)
+                        Utils.saveSharedSettingBoolean("loggedInFitbit", true)
                         fitbitPermission = true
                     }
                     is Result.Failure -> {
@@ -90,15 +87,14 @@ class FitbitApiService {
                             getRefreshToken(code, state)
                         } else {
                             // Handle other types of failure
-                            Utils.saveSharedSettingBoolean(Graph.appContext,
-                                "loggedInFitbit",
+                            Utils.saveSharedSettingBoolean("loggedInFitbit",
                                 false)
                             Log.d("Authorization", "Redirecting user back to main screen")
                         }
                     }
                 }
             } catch (e: Exception) {
-                Utils.saveSharedSettingBoolean(Graph.appContext, "loggedInFitbit", false)
+                Utils.saveSharedSettingBoolean("loggedInFitbit", false)
                 Log.d("Authorization", "Error: $e")
             }
         }
@@ -115,17 +111,13 @@ class FitbitApiService {
                     refreshToken = jsonObject.getString("refresh_token")
                     userId = jsonObject.getString("user_id")
                     Log.d("Authorization", "Access token updated")
-                    Utils.saveSharedSetting(Graph.appContext,
-                        "access_token", accessToken)
-                    Utils.saveSharedSetting(Graph.appContext,
-                        "refresh_token", refreshToken)
-                    Utils.saveSharedSettingBoolean(Graph.appContext,
-                        "loggedInFitbit", true)
+                    Utils.saveSharedSetting("access_token", accessToken)
+                    Utils.saveSharedSetting("refresh_token", refreshToken)
+                    Utils.saveSharedSettingBoolean("loggedInFitbit", true)
                     fitbitPermission = true
                 }
                 is Result.Failure -> {
-                    Utils.saveSharedSettingBoolean(Graph.appContext,
-                        "loggedInFitbit", false)
+                    Utils.saveSharedSettingBoolean("loggedInFitbit", false)
                     Log.d("Authorization", "Error, Access token not updated")
                     fitbitPermission = false
                 }
@@ -135,7 +127,7 @@ class FitbitApiService {
 
         fun getSleepData(date: String): SleepData {
                 try {
-                    accessToken = Utils.readSharedSettingString(Graph.appContext, "access_token", "")
+                    accessToken = Utils.readSharedSettingString("access_token", "")
                     Log.d("GetSleepData", "original date: $date")
                     FuelManager.instance.basePath = "https://api.fitbit.com/1.2/user/-"
                     val url = "/sleep/date/$date.json"
@@ -167,13 +159,8 @@ class FitbitApiService {
                         return SleepData(true, minutesAsleep, startTime, endTime)
                     } else if (response.statusCode == 401) {
                         // Get refresh token
-                        val code = Utils.readSharedSettingString(
-                            Graph.appContext,
-                            "authorization_code", ""
-                        )
-                        val state = Utils.readSharedSettingString(
-                            Graph.appContext, "state", ""
-                        )
+                        val code = Utils.readSharedSettingString("authorization_code", "")
+                        val state = Utils.readSharedSettingString("state", "")
                         return if (code!!.isNotEmpty() && state!!.isNotEmpty() && !authAttempted) {
                             Log.d("GetSleepDataFailure", "Re-authorizing")
                             getRefreshToken(code, state)
@@ -209,9 +196,7 @@ class FitbitApiService {
                     "grant_type" to grant
                 )).responseString()
             } else {
-                refreshToken = Utils.readSharedSettingString(
-                    Graph.appContext, "refresh_token", ""
-                )
+                refreshToken = Utils.readSharedSettingString("refresh_token", "")
                 Log.d("Authorization", "Refresh token needed")
                 fitbitTokenUrl.httpPost(listOf(
                     "grant_type" to "refresh_token",

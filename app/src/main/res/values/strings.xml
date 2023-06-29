@@ -20,11 +20,11 @@
     <string name="con_title">Consent to Participate</string>
     <string name="con_intro">Welcome to TypeAware! This app is part of a scientific study, which focuses on tracking users\' smartphone typing behaviour during the day. During the first week, the app will send you a notification every day to complete a brief questionnaire about how you have experienced your own typing behaviour, after which you can take a look at the data collected by the app. On the second week of the study you will always be shown an overview of the data that the app has collected and you will also be asked to answer a daily questionnaire. If you do not receive a notification or a daily questionnaire within 24hours after installation, please let us know.</string>
     <string name="con_contact">"This study is conducted by Katri Säily and Aku Visuri at the University of Oulu. In case you have questions, please contact us at katri.saily@oulu.fi"</string>
-    <string name="con_data">By pressing accept, you allow TypeAware to anonymously collect app and keyboard usage data. All data will be securely stored on a server in compliance with European data protection laws (BGBl. I S. 2325). All the keyboard data will be encrypted before sending it to the server so nobody can see exactly what you have written. Logs will only be uploaded when you are connected to WiFi to prevent any upload cost. Your data will only be used in the context of our research and will never be shared with third parties. You can withdraw from the study at any moment by simply uninstalling the app. Thanks! And have fun with the learning more about your typing behaviour!</string>
+    <string name="con_data">By pressing accept, you allow TypeAware to anonymously collect app and keyboard usage data. All data will be securely stored on a server in compliance with European data protection laws (BGBl. I S. 2325). All the keyboard data will be encrypted before sending it to the server so nobody can see exactly what you have written. Your data will only be used in the context of our research and will never be shared with third parties. You can withdraw from the study at any moment by simply uninstalling the app. Thanks! And have fun with learning more about your typing behaviour!</string>
     <string name="con_btn_give_consent">Accept</string>
     <string name="con_btn_not_now">Not Now</string>
     <string name="con_could_not_register">No connection to our servers - are you connected to the Internet?</string>
-    <string name="con_not_now_prompt">Without permission to access your data, the app can not track your behaviour and therefore does not fulfill the purpose of this study. If you still wish to participate in the study, please click accept.</string>
+    <string name="con_not_now_prompt">If you wish to participate in the study, please click accept.</string>
     <string name="title_activity_consent">ConsentActivity</string>
 
     <!-- User information -->
@@ -38,7 +38,7 @@
     <string name="email_prompt">Your email will only be used to contact you if problems occur.</string>
 
     <!-- Onboarding -->
-    <string name="skip_prompt">Are you sure you don\'t want to finish the onboarding? \n If you click skip, you will move straight to Home screen without onboarding.</string>
+    <string name="skip_prompt">Are you sure you don\'t want to finish the onboarding?\nIf you click skip, you will move straight to Home screen without onboarding.</string>
     <string name="skip">Skip</string>
     <string name="skip_title">Skip onboarding</string>
     <string name="finish">Finish</string>
@@ -73,6 +73,14 @@
     <string name="sharedpref_secondweek_start_date">second_week_start_date</string>
     <string name="sharedpref_secondweek_end_date">second_week_end_date</string>
     <string name="sharedpref_secondweek_done">second_week_done</string>
+
+    <!-- Questionnaire -->
+    <string name="questionnaire_title_daily">Daily questionnaire</string>
+    <string name="questionnaire_title_end">End questionnaire</string>
+    <string name="questionnaire_explanation_yes">If yes, please explain here</string>
+    <string name="questionnaire_explanation_open">Write your answer here</string>
+    <string name="submit_btn">Submit</string>
+    <string name="continue_btn">Continue</string>
 
     <!-- Preference Titles and prompts-->
     <string name="notifications_header">Notifications</string>
