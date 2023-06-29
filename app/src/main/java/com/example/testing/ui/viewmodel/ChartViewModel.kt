@@ -53,6 +53,12 @@ class ChartViewModel: ViewModel() {
     val dates = arrayListOf<String>()
     private val sleepDataList = ArrayList<SleepDataForChart>()
 
+    fun getFirebaseData(date: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            getFromFirebaseToChart(date)
+        }
+    }
+
 
     fun getFromFirebaseToChart(date: String) {
         //val dataFound: Boolean = false
@@ -62,7 +68,7 @@ class ChartViewModel: ViewModel() {
         val participantId = Utils.readSharedSettingString(
             "p_id",
             "").toString()
-        val ref = rootRef.child("Data").child(participantId).child(authId).child(date)
+        val ref = rootRef.child("Data").child(authId).child(participantId).child(date)
             .child("keyboardEvents")
         val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -79,7 +85,7 @@ class ChartViewModel: ViewModel() {
                     val speedsAvgList = mutableListOf<Double>()
                     val iterErrList = mutableListOf<BarEntry>()
                     val iterSpeedList = mutableListOf<BarEntry>()
-                    for (i in 36..144) {
+                    for (i in 0..144) {
                         dataList.add(BarEntry(i.toFloat(), 0f))
                         iterErrList.add(BarEntry(i.toFloat(), 0f))
                         iterSpeedList.add(BarEntry(i.toFloat(), 0f))
@@ -90,8 +96,9 @@ class ChartViewModel: ViewModel() {
                         try {
                             child.forEach {
                                 var y = it.child("errorAmount").value as Long
-                                var speeds = it.child("typingSpeed").value as MutableList<Double>
+                                var speeds = it.child("typingSpeed").value
                                 if (speeds != null) {
+                                    speeds as MutableList<Double>
                                     var avgForOne = speeds.average()
                                     speedsAvgList.add(avgForOne)
                                 }
@@ -104,7 +111,7 @@ class ChartViewModel: ViewModel() {
                             Log.d("Firebase", "Error: $e ")
                         }
 
-                        val avgDurationInMinutes = wordCount * speedsAvgList.average() / 60
+                        val avgDurationInMinutes = wordCount * (speedsAvgList.average() / 60)
                         val averageWPM = wordCount / avgDurationInMinutes
 
                         for (i in iterErrList) {
@@ -146,22 +153,19 @@ class ChartViewModel: ViewModel() {
     }
 
     fun getSleepDataFromThisWeek(startDate: String) {
-        sleepDataList.clear()
-        dates.clear()
-        var previousDay = startDate
-        for (i in 0 .. 6) {
-            sleepDataList.add(SleepDataForChart("", BarEntry(0f, floatArrayOf(0f,0f,0f))))
-        }
-        val dates = ArrayList<String>()
-        val dateRange = ArrayList<String>()
-
-        for (i in 0..6) {
-            dates.add(previousDay)
-            previousDay = Utils.getPreviousDateString(previousDay)
-        }
-        dates.reverse()
-
         viewModelScope.launch(Dispatchers.IO) {
+            sleepDataList.clear()
+            dates.clear()
+            var previousDay = startDate
+            for (i in 0 .. 6) {
+                sleepDataList.add(SleepDataForChart("", BarEntry(0f, floatArrayOf(0f,0f,0f))))
+            }
+
+            for (i in 0..6) {
+                dates.add(previousDay)
+                previousDay = Utils.getPreviousDateString(previousDay)
+            }
+            dates.reverse()
 
             val accessToken = Utils.readSharedSettingString("access_token", "")
             FuelManager.instance.basePath = "https://api.fitbit.com/1.2/user/-"
@@ -180,18 +184,26 @@ class ChartViewModel: ViewModel() {
                 val (sleepData, error) = result
                 if (response.isSuccessful) {
                     val jsonObject = JSONTokener(sleepData).nextValue() as JSONObject
-                    val jsonArray = jsonObject.getJSONArray("sleep")
+                    val jsonArray = jsonObject.optJSONArray("sleep")
                     println(jsonArray)
-                    if (!jsonArray.isNull(0)) {
+                    if (jsonArray != null && jsonArray.length() > 0) {
                         for (i in 0 until jsonArray.length()) {
                             val obj = jsonArray.getJSONObject(i)
+                            Log.d("Obj", obj.toString())
                             val dateOfSleep = obj.getString("dateOfSleep")
+                            Log.d("DateOfSleep", dateOfSleep.toString())
                             val sleepLogDay = Utils.formatDateStringFromFitbit(dateOfSleep)
+                            Log.d("levels", obj.getJSONObject("levels").toString())
                             val summary = obj.getJSONObject("levels").getJSONObject("summary")
+                            Log.d("levels", summary.toString())
                             val deepSleep = summary.getJSONObject("deep").getInt("minutes")
                             val lightSleep = summary.getJSONObject("light").getInt("minutes")
                             val remSleep = summary.getJSONObject("rem").getInt("minutes")
                             val wakeSleep = summary.getJSONObject("wake").getInt("minutes")
+                            Log.d("deep", deepSleep.toString())
+                            Log.d("light", lightSleep.toString())
+                            Log.d("rem", remSleep.toString())
+                            Log.d("wake", wakeSleep.toString())
 
 
                             val index = dates.indexOf(sleepLogDay)

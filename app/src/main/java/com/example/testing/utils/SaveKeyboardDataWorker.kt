@@ -48,7 +48,7 @@ class SaveKeyboardDataWorker(appContext: Context, workerParams: WorkerParameters
      * If yes, add written character to string and typing time to an arraylist. **/
     private fun checkSession(packageName: String, text: String, beforeText: String) {
 
-        if (KeyboardHelper.sameSession(packageName.toString(), KeyboardHelper.timeElapsed)) {
+        if (KeyboardHelper.checkSameSession(packageName.toString(), KeyboardHelper.timeElapsed)) {
             //Same session as before
             if (KeyboardHelper.timeElapsed != 0.0) {
                 KeyboardHelper.typingTimes.add(KeyboardHelper.timeElapsed)

@@ -212,7 +212,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             if (viewModel.chartSelected == 0) {
                 val stats = viewModel.chartErrorValues.value
                 if (stats != null) {
-                    updateChart(stats, "Errors made", "Errors", barChart1!!)
+                    updateChart(stats, "Average errors made", "Errors", barChart1!!)
                     barChart1!!.notifyDataSetChanged()
                 }
             }
@@ -243,7 +243,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             Log.d("ChartView", "Sleep values found")
             val stats = viewModel.sleepDataValues.value
             if (stats != null) {
-                updateStackedChart(stats, "Weekly sleep quality", "Sleep quality")
+                updateStackedChart(stats, "Sleep stages in minutes", "Sleep quality")
                 stackedBarChart!!.notifyDataSetChanged()
             }
         }
@@ -253,7 +253,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                     dateViewModel.selectedDate.value)
             lifecycleScope.launch(Dispatchers.IO){
                 try {
-                    viewModel.getFromFirebaseToChart(dateViewModel.selectedDate.value.toString())
+                    viewModel.getFirebaseData(dateViewModel.selectedDate.value.toString())
                     viewModel.getSleepDataFromThisWeek(dateViewModel.selectedDate.value.toString())
                 } catch (e: Exception) {
                     Log.d("Error", "$e")
@@ -374,6 +374,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
     private fun prepareChartData(chart: BarChart, data: BarData) {
         chart.data = data
         chart.barData.barWidth = BAR_WIDTH
+        data.setValueFormatter(MyValueFormatter())
         chart.invalidate()
         if (chart == stackedBarChart) {
             chart.setVisibleXRangeMaximum(7f)
@@ -447,12 +448,23 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
 
         //If you want to show values on the linechart, create custom market for that
         // Remember to create a layout for this
-        val markerView = CustomMarker(Graph.appContext, R.layout.marker_view)
-        chart!!.marker = markerView
+        //val markerView = CustomMarker(Graph.appContext, R.layout.marker_view)
+        //chart!!.marker = markerView
     }
 
 
     override fun onNothingSelected() {}
+
+    private class MyValueFormatter: ValueFormatter() {
+        override fun getFormattedValue(value: Float): String {
+            return if (value > 0) {
+                value.toInt().toString()
+            }// Format the float value as an integer
+            else {
+                ""
+            }
+        }
+    }
 
 
     companion object {

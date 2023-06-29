@@ -57,17 +57,17 @@ class AuthenticationActivity : AppCompatActivity() {
         val authorizationUrl = buildUrl(fitbitAuthUrl)
         launchAuthorizationPage(authorizationUrl)
 
-/**
+        /**
         val builder = CustomTabsIntent.Builder()
         val customTabsIntent = builder.build()
-        //intent.putExtra(Intent.EXTRA_REFERRER,
-        //    Uri.parse("android-app://" + Graph.appContext.packageName))
+        customTabsIntent.intent.putExtra(Intent.EXTRA_REFERRER,
+            Uri.parse("android-app://" + Graph.appContext.packageName))
         Log.d("Authorization", "Activity started")
         try {
             customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
             customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             Log.d("Authorization", "$authorizationUrl")
-            customTabsIntent.launchUrl(this, Uri.parse(authorizationUrl))
+            customTabsIntent.launchUrl(this, Uri.parse(authorizationUrl.toString()))
         } catch (e: Exception) {
             Log.d("Error", "$e")
         }**/
@@ -122,6 +122,7 @@ class AuthenticationActivity : AppCompatActivity() {
         val state = intent.data?.getQueryParameter("state")
         //val redirect = intent?.data?.getQueryParameter("redirect")
         if (code != null && state != null) {
+            Log.d("Authorization", "Access and refresh tokens acquired")
             Utils.saveSharedSetting("authorization_code", code)
             Utils.saveSharedSetting("state", state)
             AUTH_CODE = code

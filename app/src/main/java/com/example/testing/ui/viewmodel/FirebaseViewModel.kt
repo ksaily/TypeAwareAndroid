@@ -70,7 +70,7 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
             val authId = Utils.readSharedSettingString("firebase_auth_uid", "").toString()
 
             // Save data under the current timeslot with an unique id for each
-            myRef.child(participantId).child(authId)
+            myRef.child(authId).child(participantId)
                 .child(date).child("sleep").setValue(data)
         }
     }
@@ -81,7 +81,7 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
             val participantId = Utils.readSharedSettingString(
                 "p_id",
                 "").toString()
-            val ref = rootRef.child(participantId).child(authId).child(date)
+            val ref = rootRef.child(authId).child(participantId).child(date)
                 .child("keyboardEvents")
             clearLists()
             val errorRateList = mutableListOf<Double>()
@@ -89,30 +89,28 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
                 val dataList = mutableListOf<KeyboardStats>()
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
+                        try {
                             val children = snapshot.children
                             children.forEach { dataSnapshot ->
                                 var child = dataSnapshot.children
                                 child.forEach {
-                                    try {
-                                        val speeds =
-                                            it.child("typingSpeed").value as MutableList<*>
-                                        Log.d("FirebaseDebug", "Speed: $speeds")
-                                        if (speeds.isNotEmpty()) {
-                                            speeds as MutableList<Double>
-                                            var avgForOne = speeds.average()
-                                            Log.d("FirebaseDebug", "Avg speed for one: $avgForOne")
-                                            speedsList.add(avgForOne)
-                                        }
-                                        wordCount = (wordCount + it.child("wordCount").value as Long).toInt()
-                                        errorsList.add(it.child("errorAmount").value as Long)
-                                        errorRateList.add((it.child("errorRate").value as Number).toDouble())
-                                        //Add the average for one instance to a new list
-                                        Log.d("FirebaseDebug", "SpeedsList: $speedsList")
-                                        Log.d("FirebaseDebug", "ErrorsList: $errorsList")
-                                        Log.d("FirebaseDebug", "ErrorRateList: $errorRateList")
-                                    } catch (e: Exception) {
-                                        Log.d("FirebaseDebug", "Error: $e")
-                                        // skip this value
+                                    val speeds =
+                                        it.child("typingSpeed").value
+                                    Log.d("FirebaseDebug", "Speed: $speeds")
+                                    if (speeds != null) {
+                                        speeds as MutableList<Double>
+                                        val avgForOne = speeds.average()
+                                        Log.d("FirebaseDebug", "Avg speed for one: $avgForOne")
+                                        speedsList.add(avgForOne)
+                                    }
+                                    wordCount =
+                                        (wordCount + it.child("wordCount").value as Long).toInt()
+                                    errorsList.add(it.child("errorAmount").value as Long)
+                                    errorRateList.add((it.child("errorRate").value as Number).toDouble())
+                                    //Add the average for one instance to a new list
+                                    Log.d("FirebaseDebug", "SpeedsList: $speedsList")
+                                    Log.d("FirebaseDebug", "ErrorsList: $errorsList")
+                                    Log.d("FirebaseDebug", "ErrorRateList: $errorRateList")
                                 }
                                 totalErrList = (totalErrList + errorsList).toMutableList()
                                 //totalSpeedsList.add(speedsList.toMutableList())
@@ -124,11 +122,12 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
                                 //println(data)
                                 val totalErrorRate = errorRateList.average()
                                 totalErr = totalErrList.average()
-                                Log.d("FirebaseDebug", "totalErr: $totalErr")
+                                //Log.d("FirebaseDebug", "totalErr: $totalErr")
                                 totalSpeed = speedsList.average()
-                                    val timeTakenInMinutes = totalSpeed / 60.0
-                                    val averageWPM = wordCount / timeTakenInMinutes
-                                    Log.d("FirebaseDebug", "TotalSpeed: $totalSpeed")
+                                val avgDurationInMinutes = wordCount * (totalSpeed / 60)
+                                val averageWPM = wordCount / avgDurationInMinutes
+                                //Log.d("FirebaseDebug", "TotalSpeed: $totalSpeed")
+                                //
                                 var data = KeyboardStats(
                                     date,
                                     timeWindow,
@@ -143,14 +142,15 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
                             Log.d("FirebaseDatalist", dataList.toString())
                             _keyboardData.postValue(dataList)
                             Log.d("Firebase", "Data fetched from firebase")
+                        } catch (e: Exception) {
+                            Log.d("FirebaseDebug", "Error: $e")
+                            // skip this value
                         }
-                    }
-                    else {
+                    } else {
                         Log.d("Firebase", "No data found")
                         _keyboardData.postValue(mutableListOf())
                     }
                 }
-
                 override fun onCancelled(error: DatabaseError) {
                     Log.d("Firebase", error.message)
                 }

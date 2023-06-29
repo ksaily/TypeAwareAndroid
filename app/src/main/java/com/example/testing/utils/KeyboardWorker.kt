@@ -7,6 +7,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.testing.utils.KeyboardHelper.Companion.dataList
 import com.example.testing.utils.KeyboardHelper.Companion.previousTimeSlot
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
@@ -38,14 +39,24 @@ class KeyboardWorker(appContext: Context, workerParams: WorkerParameters):
 
     private fun saveToFirebase(timeslot: Int, event: KeyboardEvents) {
         val myRef = Firebase.database.getReference("Data")
+        println(myRef)
         // Save data under the current timeslot with an unique id for each
         val dateString = event.date
         val participantId = Utils.readSharedSettingString(
             "p_id",
             "")
         val authId = Utils.readSharedSettingString("firebase_auth_uid", "").toString()
-        myRef.child(participantId.toString()).child(authId)
-            .child(dateString).child("keyboardEvents").child(timeslot.toString())
-                .child(event.id.toString()).setValue(event)
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            FirebaseAuth.getInstance().signInAnonymously()
+        }
+        println(user!!.uid)
+        println("SaveToFirebase")
+        myRef.child(user!!.uid).child(participantId.toString())
+            .child(dateString).child("keyboardEvents")
+            .child(timeslot.toString()).child(event.id.toString()).setValue(event)
+        println(myRef.child(user!!.uid).child(participantId.toString())
+            .child(dateString).child("keyboardEvents")
+            .child(timeslot.toString()).child(event.id.toString()).setValue(event))
     }
 }

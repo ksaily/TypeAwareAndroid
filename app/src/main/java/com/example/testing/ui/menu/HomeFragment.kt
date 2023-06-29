@@ -108,7 +108,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
 
 
         checkFitbitLogin()
-        setFirebaseDataToUI()
 
         binding.keyboardChart.openAccessibilitySettingsBtn.setOnClickListener {
             checkAccessibilityPermission(Graph.appContext, true)
@@ -137,6 +136,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
             Log.d("FirebaseViewModel","Sleep data updated")
             hideFitbitLogin(firebaseViewModel.sleepData.value!!)
         }
+        updateKeyboardData()
 
         //sharedPrefs.registerOnSharedPreferenceChangeListener(this)
 
@@ -156,6 +156,13 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
         super.onResume()
         if (!isLoggedInFitbit()) {
             showFitbitLogin()
+        } else {
+            binding.sleepDataContainer.apply {
+                SleepDataView.isVisible = true
+                FitbitLoginVisible.isVisible = false
+                sleepData.isVisible = false
+                sleepDataNotFound.isVisible = true
+            }
         }
     }
 
@@ -281,7 +288,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
 
     private fun setFirebaseDataToUI() {
         Log.d("FirebaseDebug2", "KeyboardData: ${firebaseViewModel.keyboardData.value}")
-        if (firebaseViewModel.keyboardData.value != null) {
+        if (firebaseViewModel.keyboardData.value.isNullOrEmpty()) {
             val totalErr = mutableListOf<Double>()
             val totalSpeed = mutableListOf<Double>()
             val totalErrRate = mutableListOf<Double>()
@@ -302,7 +309,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
             binding.keyboardChart.keyboardDataNotFound.isVisible = false
             binding.keyboardChart.dataAvailable.isVisible = true
             val s = wordsPerMinute.average().toString() //words per minute
-            val clippedString = s.substring(0, s.length.coerceAtMost(4))
+            val clippedString = s.substring(0, s.length.coerceAtMost(5))
             binding.keyboardChart.speedData.text = clippedString
             binding.keyboardChart.ProgressTextView.text =
                 showPercentage(totalErrRate.average(),

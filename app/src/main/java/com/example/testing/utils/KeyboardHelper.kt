@@ -2,10 +2,7 @@ package com.example.testing.utils
 
 import android.util.Log
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
 import java.util.*
-import java.util.concurrent.TimeUnit
-import java.util.logging.SimpleFormatter
 import kotlin.NoSuchElementException
 import kotlin.collections.ArrayList
 
@@ -56,8 +53,8 @@ class KeyboardHelper {
             }
         }
 
-        fun sameSession(session: String, timeElapsed: Double): Boolean {
-            return (session == thisPackage) && (timeElapsed < 10.0)
+        fun checkSameSession(session: String, timeElapsedd: Double): Boolean {
+            return (session == thisPackage) && (timeElapsedd < 10.0)
         }
 
         fun checkDeletedChars(currentText: String, beforeText: String): Boolean {
@@ -72,7 +69,7 @@ class KeyboardHelper {
                     val newStr = beforeString.substring(0, beforeString.length - 1)
                     if (sameSession) {
                         Log.d("KeyboardEvents", "String after deleting a char: $newStr")
-                        deletedChars ++
+                        deletedChars++
                         beforeString = newStr
                     } else { //In case new session is started by deleting a char
                         Log.d("KeyboardEvents", "String after deleting a char: $newStr")
@@ -80,36 +77,64 @@ class KeyboardHelper {
                     }
                 } else {
                     var newChar = text.last()
+                    val isWordStart = checkWordStart(newChar, beforeText)
+                    val isWordEnd = checkWordEnd(newChar, beforeText)
                     if (newChar.isLetterOrDigit()) {
-                        //Save endtime in case of session change
-                        endTime = System.nanoTime()
-                        //Check if character is something other than space or punctuation
-                        //Replace the character with 'a'
                         newChar = 'a'
-                        startTime = System.nanoTime()
-                    } else {
-                        // End of a word
-                        endTime = System.nanoTime()
-                        // Time elapsed in seconds:
-                        timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
-                        if (startTime != 0L) {
-                            typingTimes.add(timeElapsed)
-                        }
-                        // Set start time at 0 so another space won't start a word
-                        startTime = 0L
                     }
                     if (sameSession) {
+                        if (isWordStart) {
+                            //Log.d("Firstletter", "ofWord")
+                            startTime = System.nanoTime()
+                        } else if (isWordEnd) {
+                            endTime = System.nanoTime()
+                            //Log.d("Lastletter", "ofWord")
+                            // To seconds
+                            timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
+                            typingTimes.add(timeElapsed)
+                        } else {
+                            // Record endtime in case of session change
+                            endTime = System.nanoTime()
+                        }
                         beforeString += newChar
-                        Log.d("KeyboardEvents", "New char is: $newChar")
+                        //Log.d("KeyboardEvents", "New char is: $newChar")
                         Log.d("KeyboardEvents", "Current string is: $beforeString")
                     } else {
+                        //Different sessions between newchar and beforechar
+                        timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
+                        typingTimes.add(timeElapsed)
+                        if (isWordStart) {
+                            startTime = System.nanoTime()
+                        }
                         newString += newChar
-                        Log.d("KeyboardEvents", "New char is: $newChar")
+                        //Log.d("KeyboardEvents", "New char is: $newChar")
                         Log.d("KeyboardEvents", "Current string is: $newString")
                     }
                 }
-            } catch (_: NoSuchElementException) {
             }
+            catch (e: Error) {
+                Log.d("Error", "$e")
+            }
+        }
+
+        private fun checkWordStart(currentChar: Char, beforeTxt: String): Boolean {
+            // Check if the character is the first character of a word (after a space)
+            val isSpaceBefore: Boolean = if (beforeTxt.isNotEmpty()) {
+                !beforeTxt.last().isLetterOrDigit()
+            } else {
+                true //Before text is empty
+            }
+            return isSpaceBefore && currentChar.isLetterOrDigit()
+        }
+
+        private fun checkWordEnd(currentChar: Char, beforeTxt: String): Boolean {
+            // Check if the character is the first character of a word (after a space)
+            val isLetterBefore: Boolean = if (beforeTxt.isNotEmpty()) {
+                beforeTxt.last().isLetterOrDigit()
+            } else {
+                false
+            }
+            return isLetterBefore && !currentChar.isLetterOrDigit()
         }
 
         fun countErrorRate(): Double {

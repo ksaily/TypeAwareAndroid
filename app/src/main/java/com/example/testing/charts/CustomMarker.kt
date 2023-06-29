@@ -13,6 +13,7 @@ class CustomMarker(context: Context, layoutResource: Int = R.layout.marker_view)
     private var _binding: MarkerViewBinding? = null
     private val binding get() = _binding!!
 
+
     override fun refreshContent(entry: Entry?, highlight: Highlight?) {
         val value = entry?.y?.toDouble() ?: 0.0
         var resText = ""

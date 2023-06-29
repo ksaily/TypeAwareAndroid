@@ -8,6 +8,7 @@
             app:title="@string/keyboard_data_to_show"
             app:entryValues="@array/pref_keyboard_values"
             app:entries="@array/pref_choose_keyboard_stats"
+            app:isPreferenceVisible="false"
             />
 
         <SwitchPreferenceCompat
@@ -17,7 +18,8 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="@string/notifications_header">
+    <PreferenceCategory app:title="@string/notifications_header"
+        app:isPreferenceVisible="false">
 
         <SwitchPreferenceCompat
             app:key="@string/notifications_key"

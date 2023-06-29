@@ -10,6 +10,7 @@ import androidx.work.workDataOf
 import com.example.testing.utils.*
 import com.example.testing.utils.KeyboardHelper.Companion.addToString
 import com.example.testing.utils.KeyboardHelper.Companion.beforeString
+import com.example.testing.utils.KeyboardHelper.Companion.checkSameSession
 import com.example.testing.utils.KeyboardHelper.Companion.countErrorRate
 import com.example.testing.utils.KeyboardHelper.Companion.countTimeSlot
 import com.example.testing.utils.KeyboardHelper.Companion.countWords
@@ -19,20 +20,19 @@ import com.example.testing.utils.KeyboardHelper.Companion.deletedChars
 import com.example.testing.utils.KeyboardHelper.Companion.newPackage
 import com.example.testing.utils.KeyboardHelper.Companion.newString
 import com.example.testing.utils.KeyboardHelper.Companion.previousTimeSlot
-import com.example.testing.utils.KeyboardHelper.Companion.sameSession
 import com.example.testing.utils.KeyboardHelper.Companion.thisPackage
 import com.example.testing.utils.KeyboardHelper.Companion.timeElapsed
 import com.example.testing.utils.KeyboardHelper.Companion.timeStampBeginning
 import com.example.testing.utils.KeyboardHelper.Companion.typingTimes
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import java.lang.System.nanoTime
 import java.util.*
 import kotlin.concurrent.schedule
 
 class MyAccessibilityService : AccessibilityService() {
-    private var startTime: Long = 0
-    private var endTime: Long = 0
+    private var startTimeBetweenChars: Long = 0L
+    private var endTimeBetweenChars: Long = 0L
+    private var timeElapsedBetweenChars: Double = 0.0
 
     override fun onDestroy() {
         super.onDestroy()
@@ -64,18 +64,16 @@ class MyAccessibilityService : AccessibilityService() {
                 Log.d("MyAccessibilityEvent", "Exception: $e")
             }
             **/
-            if (startTime == 0L) {
+            if (startTimeBetweenChars == 0L) {
                 //First character in a session, don't add to typing times
                 thisPackage = event.packageName.toString()
-                timeElapsed = 0.0
+                timeElapsedBetweenChars = 0.0
                 Log.d("KeyboardEvents", "This is the first char of this session")
             } else {
-                endTime = nanoTime()
-                // Time elapsed in seconds:
-                timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
-                //typingTimes.add(timeElapsed)
-                }
-            startTime = nanoTime()
+                endTimeBetweenChars = System.nanoTime()
+                timeElapsedBetweenChars = ((endTimeBetweenChars - startTimeBetweenChars).toDouble() / 1_000_000_000)
+            }
+            startTimeBetweenChars = System.nanoTime()
             timeStampBeginning = System.currentTimeMillis()
             checkSession(event)
         }
@@ -85,24 +83,20 @@ class MyAccessibilityService : AccessibilityService() {
      * If yes, add written character to string and typing time to an arraylist. **/
     private fun checkSession(event: AccessibilityEvent) {
 
-            if (sameSession(event.packageName.toString(), timeElapsed)) {
+            if (checkSameSession(event.packageName.toString(), timeElapsedBetweenChars)) {
             //Same session as before
-                saveCharIfNotPassword(event)
+                saveCharIfNotPassword(event, true)
             } else { // Session has changed
                 newPackage = event.packageName.toString()
-                timeElapsed = ((KeyboardHelper.endTime - KeyboardHelper.startTime).toDouble() / 1_000_000_000)
-                if (startTime != 0L) {
-                    typingTimes.add(timeElapsed)
-                }
-                saveCharIfNotPassword(event)
+                saveCharIfNotPassword(event, false)
                 onSessionChange()
             }
     }
 
-    private fun saveCharIfNotPassword(event: AccessibilityEvent) {
+    private fun saveCharIfNotPassword(event: AccessibilityEvent, sameSession: Boolean) {
         if (!event.isPassword) {
             addToString(event.text.toString().removeSurrounding("[", "]"),
-                event.beforeText.toString(), false)
+                event.beforeText.toString(), sameSession)
         }
     }
 
