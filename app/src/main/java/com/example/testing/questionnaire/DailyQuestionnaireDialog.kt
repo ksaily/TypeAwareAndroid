@@ -46,7 +46,7 @@ class DailyQuestionnaireDialog : DialogFragment(){
         "Q3: How many words did you type during yesterday?",
         "Q4: At what hour of the day were you typing the most yesterday? Choose the starting hour.",
         "Q5: Compared to an average day, how did you sleep yesterday?",
-        "Q6: Did you go to bed earlier or later yesterday compared to an average day?",
+        "Q6: Did you go to bed earlier or later yesterday compared to an average day?"
     )
     private var currentQuestionIndex = 0
     private var currentAnswer = ""
@@ -71,6 +71,17 @@ class DailyQuestionnaireDialog : DialogFragment(){
                 setupClickListener()
             }
         }
+    }
+
+    fun firstWeekQuestions() {
+        questions = listOf(
+            "Q1: How much did you have to correct your typing yesterday compared to an average day?",
+            "Q2: How fast was your typing speed yesterday compared to an average day?",
+            "Q3: How many words did you type during yesterday?",
+            "Q4: At what hour of the day were you typing the most yesterday? Choose the starting hour.",
+            "Q5: Compared to an average day, how did you sleep yesterday?",
+            "Q6: Did you go to bed earlier or later yesterday compared to an average day?"
+        )
     }
 
     fun changeToSecondWeek() {
@@ -220,8 +231,6 @@ class DailyQuestionnaireDialog : DialogFragment(){
                     }
                 }
                 saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
-                currentQuestionIndex++
-                showNextQuestion()
             } else if (!isFinished) {
                 // If second week is of questionnaires
                 when (currentQuestionIndex) {
@@ -231,32 +240,44 @@ class DailyQuestionnaireDialog : DialogFragment(){
                         currentAnswer = getSelectedOptionIndex(selectedRadioButtonId) }
                     2 -> {
                         val selectedRadioButtonId = binding.radioGroup2.checkedRadioButtonId
-                        val ans = getSelectedOptionIndex(selectedRadioButtonId)
                         val textAns = binding.explainAnswer.text
-                        currentAnswer = "$ans, $textAns"
+                        currentAnswer = "$selectedRadioButtonId, $textAns"
                     }
                     3 -> { val selectedRadioButtonId = binding.radioGroup1.checkedRadioButtonId
                         currentAnswer = getSelectedOptionIndex(selectedRadioButtonId) }
                 }
                 saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
-                currentQuestionIndex++
-                showNextQuestion()
             } else {
                 when (currentQuestionIndex) {
                     0 -> {}
                     1 -> {
                         val selectedRadioButtonId = binding.radioGroup2.checkedRadioButtonId
-                        val ans = getSelectedOptionIndex(selectedRadioButtonId)
                         val textAns = binding.explainAnswer.text
-                        currentAnswer = "$ans, $textAns"
+                        currentAnswer = "$selectedRadioButtonId, $textAns"
+                        saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
                     }
                     2 -> {
                         val ans = binding.openAnswer.text
                         currentAnswer = "$ans"
+                        saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
                     }
-                    3 -> {}
+                    3 -> {
+                        val selectedRadioButtonId = binding.radioGroup2.checkedRadioButtonId
+                        val textAns = binding.explainAnswer.text
+                        currentAnswer = "$selectedRadioButtonId, $textAns"
+                        saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
+                    }
+                    4 -> {
+                        val ans = binding.openAnswer.text
+                        currentAnswer = "$ans"
+                        saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
+                    }
+                    5 -> {}
                 }
+
             }
+            currentQuestionIndex++
+            showNextQuestion()
         }
     }
 

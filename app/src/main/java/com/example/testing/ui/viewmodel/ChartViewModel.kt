@@ -59,6 +59,13 @@ class ChartViewModel: ViewModel() {
         }
     }
 
+    fun clearChartArrays() {
+        _chartErrorValues.postValue(listOf())
+        _chartSessions.postValue(listOf())
+        _chartSpeedValues.postValue(listOf())
+        _sleepDataValues.postValue(listOf())
+    }
+
 
     fun getFromFirebaseToChart(date: String) {
         //val dataFound: Boolean = false

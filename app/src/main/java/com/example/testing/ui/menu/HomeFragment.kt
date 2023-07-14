@@ -106,7 +106,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
 
         val sharedPrefs = Utils.getSharedPrefs()
 
-
+        binding.keyboardChart.dataAvailable.isVisible = false
+        binding.keyboardChart.keyboardDataNotFound.isVisible = true
         checkFitbitLogin()
 
         binding.keyboardChart.openAccessibilitySettingsBtn.setOnClickListener {
@@ -288,7 +289,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
 
     private fun setFirebaseDataToUI() {
         Log.d("FirebaseDebug2", "KeyboardData: ${firebaseViewModel.keyboardData.value}")
-        if (firebaseViewModel.keyboardData.value.isNullOrEmpty()) {
+        if (!firebaseViewModel.keyboardData.value.isNullOrEmpty()) {
             val totalErr = mutableListOf<Double>()
             val totalSpeed = mutableListOf<Double>()
             val totalErrRate = mutableListOf<Double>()
@@ -309,7 +310,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
             binding.keyboardChart.keyboardDataNotFound.isVisible = false
             binding.keyboardChart.dataAvailable.isVisible = true
             val s = wordsPerMinute.average().toString() //words per minute
-            val clippedString = s.substring(0, s.length.coerceAtMost(5))
+            val clippedString = s.substring(0, s.length.coerceAtMost(4))
             binding.keyboardChart.speedData.text = clippedString
             binding.keyboardChart.ProgressTextView.text =
                 showPercentage(totalErrRate.average(),

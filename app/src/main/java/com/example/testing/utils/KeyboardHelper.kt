@@ -75,7 +75,7 @@ class KeyboardHelper {
                         Log.d("KeyboardEvents", "String after deleting a char: $newStr")
                         deletedChars = 1
                     }
-                } else {
+                } else if (text.isNotEmpty()) {
                     var newChar = text.last()
                     val isWordStart = checkWordStart(newChar, beforeText)
                     val isWordEnd = checkWordEnd(newChar, beforeText)
@@ -92,17 +92,21 @@ class KeyboardHelper {
                             // To seconds
                             timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
                             typingTimes.add(timeElapsed)
-                        } else {
-                            // Record endtime in case of session change
-                            endTime = System.nanoTime()
                         }
+                        // Record endtime in case of session change
+                        endTime = System.nanoTime()
+
                         beforeString += newChar
                         //Log.d("KeyboardEvents", "New char is: $newChar")
                         Log.d("KeyboardEvents", "Current string is: $beforeString")
                     } else {
                         //Different sessions between newchar and beforechar
                         timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
-                        typingTimes.add(timeElapsed)
+                        if (timeElapsed > 0) {
+                            typingTimes.add(timeElapsed)
+                        } else {
+                            typingTimes.add(0.0)
+                        }
                         if (isWordStart) {
                             startTime = System.nanoTime()
                         }

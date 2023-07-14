@@ -233,8 +233,8 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             Log.d("ChartView", "Session values found")
             val stats = viewModel.chartSessions.value
             if (stats != null) {
-                    updateChart(stats, "Sessions", "Amount of sessions", barChart2!!)
-                    barChart2!!.notifyDataSetChanged()
+                updateChart(stats, "Sessions", "Amount of sessions", barChart2!!)
+                barChart2!!.notifyDataSetChanged()
             }
         }
 
@@ -251,6 +251,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         dateViewModel.selectedDate.observe(viewLifecycleOwner) {
             Log.d("Dateviewmodel", "Date changed to: " +
                     dateViewModel.selectedDate.value)
+            clearAllChartData()
             lifecycleScope.launch(Dispatchers.IO){
                 try {
                     viewModel.getFirebaseData(dateViewModel.selectedDate.value.toString())
@@ -267,6 +268,17 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         //configureBarChart(barChart2!!, "Sessions per timewindow", labels2)
         //prepareChartData(barChart1!!, data1)
         //prepareChartData(barChart2!!, data2)
+    }
+
+    private fun clearAllChartData() {
+        viewModel.clearChartArrays()
+        /**
+        barChart1!!.invalidate()
+        barChart1!!.clear()
+        barChart2!!.invalidate()
+        barChart2!!.clear()
+        stackedBarChart!!.invalidate()
+        stackedBarChart!!.clear()**/
     }
 
     private fun isLoggedInFitbit(): Boolean {
@@ -407,8 +419,8 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         xAxis.position = XAxis.XAxisPosition.BOTTOM
 
 
-        xAxis.axisMinimum = 0 + 0.5f; //to center the bars inside the vertical grid lines we need + 0.5 step
-        xAxis.axisMaximum = 144f + 0.5f; //to center the bars inside the vertical grid lines we need + 0.5 step
+        //xAxis.axisMinimum = 0 + 0.5f; //to center the bars inside the vertical grid lines we need + 0.5 step
+        //xAxis.axisMaximum = 144f + 0.5f; //to center the bars inside the vertical grid lines we need + 0.5 step
         //xAxis.setLabelCount(12, false); //show only 5 labels (5 vertical grid lines)
         xAxis.xOffset = 0f; //labels x offset in dps
         xAxis.yOffset = 0f; //labels y offset in dps
