@@ -109,56 +109,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
 
         statValues.clear()
         viewModel.chartSelected = 0 //Initiate selected charts to error
-        //
-        /**
-        for (i in 1 .. MAX_X_VALUE) {
-            values1.add(
-                BarEntry(
-                    i.toFloat(),
-                    (Math.random()).toFloat()
-                )
-            )
-            labels1.add(i.toString())
-        }
 
-        for (i in 1.. MAX_X_VALUE) {
-            values2.add(
-                BarEntry(
-                    i.toFloat(),
-                    (Math.random() * 3).toFloat()
-                )
-            )
-            labels2.add(i.toString())
-        }
-        //
-        ////After preparing our data set, we need to display the data in our bar chart
-        val v1: BarDataSet = BarDataSet(values1, "TestDataset1")
-        // BarDataSet(firebaseViewModel.chartErrorValues.value, "Errors made")
-        val v2: BarDataSet = BarDataSet(values2, "TestDataset2")
-        val v3: BarDataSet = BarDataSet(values2, "TestDataset3")
-        // BarDataSet(firebaseViewModel.chartSessions.value, "Sessions")
-
-
-
-        val v4: BarDataSet = BarDataSet(values1, "TestDataset4")
-        val data1: BarData = BarData()
-        val data2: BarData = BarData()
-
-
-
-        v1.setDrawValues(false)
-        v1.color = R.color.light_purple
-        v1.valueTextColor = R.color.dark_purple
-
-        v3.setDrawValues(false)
-        v3.color = R.color.light_purple
-        v3.valueTextColor = R.color.dark_purple
-
-        //data1.addDataSet(v1)
-        //data1.addDataSet(v2)
-        data2.addDataSet(v3)
-        //data2.addDataSet(v4)
-        Log.d("Dataset1", data1.toString())**/
         dateViewModel.checkDate()
         lifecycleScope.launch {
             viewModel.getFromFirebaseToChart(dateViewModel.selectedDate.value.toString())
@@ -180,8 +131,8 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                 val stats = viewModel.chartSpeedValues.value
                 if (stats != null) {
                     updateChart(
-                        viewModel.chartSpeedValues.value!!, "Time window",
-                        "WPM", barChart1!!
+                        viewModel.chartSpeedValues.value!!, "WPM",
+                        "Time window", barChart1!!
                     )
                 }
             }
@@ -199,8 +150,8 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                 val stats = viewModel.chartErrorValues.value
                 if (stats != null) {
                     updateChart(
-                        viewModel.chartErrorValues.value!!, "Time window",
-                        "Errors", barChart1!!
+                        viewModel.chartErrorValues.value!!, "Errors",
+                        "Time window", barChart1!!
                     )
                 }
             }
@@ -213,7 +164,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             if (viewModel.chartSelected == 0) {
                 val stats = viewModel.chartErrorValues.value
                 if (stats != null) {
-                    updateChart(stats, "Time window", "Errors", barChart1!!)
+                    updateChart(stats, "Errors", "Time window", barChart1!!)
                     barChart1!!.notifyDataSetChanged()
                 }
             }
@@ -224,7 +175,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             if (viewModel.chartSelected == 1) {
                 val stats = viewModel.chartSpeedValues.value
                 if (stats != null) {
-                    updateChart(stats, "Time window", "WPM", barChart1!!)
+                    updateChart(stats, "WPM", "Time window", barChart1!!)
                     barChart1!!.notifyDataSetChanged()
                 }
             }
@@ -234,7 +185,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             Log.d("ChartView", "Session values found")
             val stats = viewModel.chartSessions.value
             if (stats != null) {
-                updateChart(stats, "Time window", "Sessions", barChart2!!)
+                updateChart(stats, "Sessions", "Time window", barChart2!!)
                 barChart2!!.notifyDataSetChanged()
             }
         }

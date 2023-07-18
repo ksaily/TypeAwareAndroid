@@ -8,8 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.testing.Graph
 import com.example.testing.fitbit.FitbitApiService.Companion.authorizeRequestToken
 import com.example.testing.fitbit.FitbitApiService.Companion.getRefreshToken
-import com.example.testing.ui.data.KeyboardChart
-import com.example.testing.ui.data.SleepData
+import com.example.testing.data.KeyboardChart
+import com.example.testing.data.SleepData
 import com.example.testing.utils.KeyboardStats
 import com.example.testing.utils.Utils
 import com.github.kittinunf.fuel.core.FuelManager

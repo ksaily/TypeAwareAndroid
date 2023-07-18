@@ -1,4 +1,4 @@
-package com.example.testing.ui.data
+package com.example.testing.data
 
 import com.github.mikephil.charting.data.BarEntry
 

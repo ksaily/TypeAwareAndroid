@@ -2,11 +2,11 @@ package com.example.testing
 
 import android.accessibilityservice.AccessibilityService
 import android.util.Log
-import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.example.testing.data.KeyboardEvents
 import com.example.testing.utils.*
 import com.example.testing.utils.KeyboardHelper.Companion.addToString
 import com.example.testing.utils.KeyboardHelper.Companion.beforeString
@@ -21,13 +21,9 @@ import com.example.testing.utils.KeyboardHelper.Companion.newPackage
 import com.example.testing.utils.KeyboardHelper.Companion.newString
 import com.example.testing.utils.KeyboardHelper.Companion.previousTimeSlot
 import com.example.testing.utils.KeyboardHelper.Companion.thisPackage
-import com.example.testing.utils.KeyboardHelper.Companion.timeElapsed
 import com.example.testing.utils.KeyboardHelper.Companion.timeStampBeginning
 import com.example.testing.utils.KeyboardHelper.Companion.typingTimes
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import java.util.*
-import kotlin.concurrent.schedule
 
 class MyAccessibilityService : AccessibilityService() {
     private var startTimeBetweenChars: Long = 0L

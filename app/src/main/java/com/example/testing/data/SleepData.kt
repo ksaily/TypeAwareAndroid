@@ -1,4 +1,4 @@
-package com.example.testing.ui.data
+package com.example.testing.data
 
 data class SleepData(
     val dataAvailable: Boolean,

@@ -22,7 +22,7 @@ class AlarmReceiver: BroadcastReceiver() {
     companion object {
         private const val NOTIFICATION_CHANNEL_ID = "DailyQuestionnaireChannel"
         private const val NOTIFICATION_ID = 1
-        private const val DAILY_REMINDER_HOUR = 5
+        private const val DAILY_REMINDER_HOUR = 18
 
         fun scheduleNotification(context: Context) {
             Log.d("ScheduleNotification", "created")

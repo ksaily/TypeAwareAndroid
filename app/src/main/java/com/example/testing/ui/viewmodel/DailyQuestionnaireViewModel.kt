@@ -3,7 +3,7 @@ package com.example.testing.ui.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.testing.ui.data.KeyboardChart
+import com.example.testing.data.KeyboardChart
 
 class DailyQuestionnaireViewModel: ViewModel() {
 

@@ -24,7 +24,7 @@ import com.example.testing.R
 import com.example.testing.databinding.FragmentHomeBinding
 import com.example.testing.fitbit.AuthenticationActivity
 import com.example.testing.fitbit.FitbitApiService
-import com.example.testing.ui.data.SleepData
+import com.example.testing.data.SleepData
 import com.example.testing.ui.viewmodel.DateViewModel
 import com.example.testing.ui.viewmodel.FirebaseViewModel
 import com.example.testing.utils.Utils

@@ -12,7 +12,7 @@ import com.example.testing.fitbit.CodeChallenge.Companion.CLIENT_ID
 import com.example.testing.fitbit.CodeChallenge.Companion.CODE_VERIFIER
 import com.example.testing.fitbit.CodeChallenge.Companion.REDIRECT_URL
 import com.example.testing.fitbit.CodeChallenge.Companion.getCodeChallenge
-import com.example.testing.ui.data.SleepData
+import com.example.testing.data.SleepData
 import com.example.testing.utils.Utils
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.Request

@@ -1,4 +1,4 @@
-package com.example.testing.utils
+package com.example.testing.data
 
 import android.provider.ContactsContract.Data
 import java.util.*

@@ -1,12 +1,11 @@
 package com.example.testing.utils
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.example.testing.data.KeyboardEvents
 import com.example.testing.utils.KeyboardHelper.Companion.dataList
-import com.example.testing.utils.KeyboardHelper.Companion.previousTimeSlot
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
