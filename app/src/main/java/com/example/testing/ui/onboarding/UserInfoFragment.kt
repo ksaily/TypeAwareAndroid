@@ -49,15 +49,19 @@ class UserInfoFragment : Fragment(R.layout.fragment_user_info) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.saveUserInfo.setOnClickListener {
-            //Save user info to shared pref
-            var p_id = binding.participantId.text.toString()
-            //setFragmentResult("userInfo", bundleOf("username" to username,
-            //"email" to email, "p_id" to p_id))
-            Utils.getSharedPrefs().edit()
-                .putString("p_id", p_id)
-                .putBoolean("user_info_saved", true)
-                .commit()
-            Log.d("UserInfoFragment", "Start onboarding")
+            if (!binding.participantId.text.isNullOrEmpty()) {
+                //Save user info to shared pref
+                var p_id = binding.participantId.text.toString()
+                Utils.getSharedPrefs().edit()
+                    .putString("p_id", p_id)
+                    .putBoolean("user_info_saved", true)
+                    .commit()
+                Log.d("UserInfoFragment", "Start onboarding")
+            }
+            else {
+                Toast.makeText(Graph.appContext, "Please enter your Prolific ID", Toast.LENGTH_SHORT)
+                    .show()
+            }
             //parentFragmentManager.beginTransaction().replace(R.id.container, OnboardingFragment())
             //startActivity(Intent(Graph.appContext, OnboardingActivity::class.java))
             //removeFragmentByTag(MainActivity, "userInfoFragment")

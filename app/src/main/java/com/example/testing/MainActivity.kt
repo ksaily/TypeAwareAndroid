@@ -119,7 +119,8 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             Log.d("DailyQuestionnaire", "Questionnaire not answered")
             questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
             }
-            else {
+            else if (!readSharedSettingBoolean(
+                    getString(R.string.sharedpref_questionnaire_ans), false)) {
                 Log.d("Second week", "started")
                 binding.secondWeekQstnrBtn.isVisible = true
                 binding.secondWeekQstnrBtn.setOnClickListener {
@@ -163,6 +164,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
 
         if (key=="study_finished" && readSharedSettingBoolean("study_finished", false)) {
             Log.d("Study finished", "true")
+            questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
             }
         /**else if (key == "accessibility_permission" && !readSharedSettingBoolean(
                 Graph.appContext, "accessibility_permission", false)

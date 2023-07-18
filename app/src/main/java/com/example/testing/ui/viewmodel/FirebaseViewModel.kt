@@ -124,8 +124,9 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
                                 totalErr = totalErrList.average()
                                 //Log.d("FirebaseDebug", "totalErr: $totalErr")
                                 totalSpeed = speedsList.average()
-                                val avgDurationInMinutes = wordCount * (totalSpeed / 60)
-                                val averageWPM = wordCount / avgDurationInMinutes
+                                //val avgDurationInMinutes = wordCount * (totalSpeed / 60)
+                                //val averageWPM = wordCount / avgDurationInMinutes
+                                val averageWPM = 60 / totalSpeed
                                 //Log.d("FirebaseDebug", "TotalSpeed: $totalSpeed")
                                 //
                                 var data = KeyboardStats(

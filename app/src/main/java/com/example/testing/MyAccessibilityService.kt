@@ -104,24 +104,36 @@ class MyAccessibilityService : AccessibilityService() {
              * and if the timeslot has changed, also set up a worker that saves info to Firebase.
              * After that, reset values. **/
             private fun onSessionChange() {
-                val date = KeyboardHelper.dateFormatter(Date())
-                currentTimeSlot = countTimeSlot()
-                val keyboardEvent = KeyboardEvents(UUID.randomUUID().toString(), countWords(), typingTimes, deletedChars,
-                countErrorRate(), timeStampBeginning, System.currentTimeMillis(), thisPackage,
-                beforeString, currentTimeSlot, date
-                )
-                if (currentTimeSlot != previousTimeSlot) {
-                    val setUpWork = OneTimeWorkRequestBuilder<KeyboardWorker>()
-                    .setInputData(workDataOf(
-                    "TIMESLOT" to previousTimeSlot
-                    ))
-                    .build()
-                    WorkManager.getInstance(applicationContext).enqueue(setUpWork)
+                if (beforeString.isNullOrEmpty() && typingTimes.isEmpty()) {
+                    resetValues()
+                } else {
+                    val date = KeyboardHelper.dateFormatter(Date())
+                    currentTimeSlot = countTimeSlot()
+                    val keyboardEvent = KeyboardEvents(UUID.randomUUID().toString(),
+                        countWords(),
+                        typingTimes,
+                        deletedChars,
+                        countErrorRate(),
+                        timeStampBeginning,
+                        System.currentTimeMillis(),
+                        thisPackage,
+                        beforeString,
+                        currentTimeSlot,
+                        date
+                    )
+                    if (currentTimeSlot != previousTimeSlot) {
+                        val setUpWork = OneTimeWorkRequestBuilder<KeyboardWorker>()
+                            .setInputData(workDataOf(
+                                "TIMESLOT" to previousTimeSlot
+                            ))
+                            .build()
+                        WorkManager.getInstance(applicationContext).enqueue(setUpWork)
                     }
                     //Add the current event to a list of KeyboardEvents
                     dataList.add(keyboardEvent)
                     Log.d("KeyboardEvents", "$dataList")
                     resetValues()
+                }
             }
 
             private fun resetValues() {

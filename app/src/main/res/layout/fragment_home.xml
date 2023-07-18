@@ -9,27 +9,33 @@
     android:paddingVertical="10dp"
     android:background="@color/white">
 
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/dateContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:layout_constraintHeight_min="100dp"
             android:layout_alignParentTop="true"
             tools:layout="@layout/fragment_date" />
 
+
+
         <include
             android:id="@+id/keyboardChart"
-            layout="@layout/keyboard_data_card" />
+            layout="@layout/keyboard_data_card"
+           />
 
 
         <include
             android:id="@+id/sleepDataContainer"
-            layout="@layout/sleep_data_card" />
-
+            layout="@layout/sleep_data_card"
+            />
 
     </LinearLayout>
 

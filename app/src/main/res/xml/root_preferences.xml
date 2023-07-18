@@ -1,5 +1,6 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
 
     <PreferenceCategory app:title="@string/pref_header">
 
@@ -44,6 +45,12 @@
             app:key="@string/battery_opt_key"
             app:summary="@string/battery_optimization_prompt"
             />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/help">
+        <EditTextPreference
+            app:summary="@string/contact_info"/>
 
     </PreferenceCategory>
 

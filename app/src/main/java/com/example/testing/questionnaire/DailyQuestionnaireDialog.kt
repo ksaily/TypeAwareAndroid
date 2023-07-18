@@ -1,11 +1,15 @@
 package com.example.testing.questionnaire
 
+import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.view.inputmethod.InputMethodManager
 import android.widget.RadioButton
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.lifecycleScope
@@ -88,13 +92,17 @@ class DailyQuestionnaireDialog : DialogFragment(){
         Log.d("Questionnaire", "Changed to second week")
         isFirstWeek = false
         isFinished = false
+        secondWeekQuestions()
+        Log.d("Questions:", "$questions")
+    }
+
+    private fun secondWeekQuestions() {
         questions = listOf(
             "Q1: Yesterday reflected a normal day for me.",
             "Q2: I found yesterday’s data meaningful.",
             "Q3: Did you find anything surprising in yesterday’s data?",
             "Q4: Based on yesterday’s data, I would be likely to change my digital or sleep-related behaviour."
         )
-        Log.d("Questions:", "$questions")
     }
 
     override fun show(manager: FragmentManager, tag: String?) {
@@ -111,6 +119,10 @@ class DailyQuestionnaireDialog : DialogFragment(){
         Log.d("Questionnaire", "Changed to end questionnaire")
         isFirstWeek = false
         isFinished = true
+        endQuestions()
+    }
+
+    private fun endQuestions() {
         questions = listOf(
             "You have now completed two weeks of the study! Please finish the study by answering the following end questionnaire.",
             "Q1: Would you make any life or behavioral changes based on data like this? Why or why not?",
@@ -142,6 +154,18 @@ class DailyQuestionnaireDialog : DialogFragment(){
         }
     }
 
+    fun Fragment.hideKeyboard() {
+        view?.let { activity?.hideKeyboard(it) }
+    }
+    fun Activity.hideKeyboard() {
+        hideKeyboard(currentFocus ?: View(this))
+    }
+
+    fun Context.hideKeyboard(view: View) {
+        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
     private fun loopForLikertScaleQuestions(arrayId: Int) {
         val radioGroup = binding.radioGroup1
         chooseViewsToShow(true, false, false, false)
@@ -155,17 +179,25 @@ class DailyQuestionnaireDialog : DialogFragment(){
     private fun setupView() {
         binding.questionTextView.text = questions[currentQuestionIndex]
         val rgGroup1 = binding.radioGroup1
+        rgGroup1.clearCheck()
+        binding.radioGroup2.clearCheck()
+        binding.openAnswer.text.clear()
         if (isFirstWeek) {
+            firstWeekQuestions()
             chooseViewsToShow(true, false, false, false)
             when (currentQuestionIndex) {
                 0 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options1)
                 1 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options2)
                 2 -> chooseViewsToShow(false, true, false, false)
-                3 -> chooseViewsToShow(false, false, true, false)
+                3 ->  {
+                    hideKeyboard()
+                    chooseViewsToShow(false, false, true, false)
+                }
                 4 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options2)
                 5 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options3)
             }
         } else if (!isFinished) {
+            secondWeekQuestions()
             chooseViewsToShow(true, false, false, false)
             when (currentQuestionIndex) {
                 0 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options_week2)
@@ -174,6 +206,7 @@ class DailyQuestionnaireDialog : DialogFragment(){
                 3 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options_week2)
             }
         } else {
+            endQuestions()
             binding.questionnaireTitle.text = "End questionnaire"
             when (currentQuestionIndex) {
                 0 -> {
@@ -359,6 +392,7 @@ class DailyQuestionnaireDialog : DialogFragment(){
             val answered = Utils.readSharedSettingInt("number_of_questionnaires", 0)
             Log.d("Questionnaires answered", answered.toString())
             if (answered == null) {
+                firstWeekQuestions()
                 Log.d("QuestionnaireAnswerAmount", "Was 0, now 1")
                 Utils.saveSharedSettingInt("number_of_questionnaires", 1)
             }

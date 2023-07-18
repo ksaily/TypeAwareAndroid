@@ -1,5 +1,6 @@
 package com.example.testing.ui.menu
 
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
@@ -172,6 +173,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
         //Remove observers?
     }
 
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -309,8 +311,23 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
             Log.d("HomeFragment", "Total speed: ${totalErrRate.average()}l")
             binding.keyboardChart.keyboardDataNotFound.isVisible = false
             binding.keyboardChart.dataAvailable.isVisible = true
-            val s = wordsPerMinute.average().toString() //words per minute
-            val clippedString = s.substring(0, s.length.coerceAtMost(4))
+            val clippedString: String
+            if (!wordsPerMinute.average().isNaN() || !wordsPerMinute.average().isFinite()
+                || !wordsPerMinute.average().isInfinite() || wordsPerMinute.average() != 0.0) {
+                val s = wordsPerMinute.average().toString() //words per minute
+                clippedString = s.substring(0, s.length.coerceAtMost(4))
+                binding.keyboardChart.textViewStats.isVisible = true
+                if (wordsPerMinute.average() > 15.0) {
+                    binding.keyboardChart.textViewStats.text =
+                        getString(R.string.home_keyboard_wpm_stats_faster_than_avg)
+                } else {
+                    binding.keyboardChart.textViewStats.text =
+                        getString(R.string.home_keyboard_wpm_stats_slower_than_avg)
+                }
+            } else {
+                clippedString = "-"
+                binding.keyboardChart.textViewStats.isVisible = false
+            }
             binding.keyboardChart.speedData.text = clippedString
             binding.keyboardChart.ProgressTextView.text =
                 showPercentage(totalErrRate.average(),
@@ -321,9 +338,23 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
         binding.keyboardChart.textViewStats.isVisible = false
         binding.keyboardChart.ProgressTextView.text = "--"
         binding.keyboardChart.progressCircular.isVisible = false**/
-            binding.keyboardChart.keyboardDataNotFound.isVisible = true
             binding.keyboardChart.dataAvailable.isVisible = false
+            checkAccessibilityEnabled()
             Log.d("UpdateUI", "No data on keyboardList")
+        }
+    }
+
+    private fun checkAccessibilityEnabled() {
+        binding.keyboardChart.keyboardDataNotFound.isVisible = true
+        if (readSharedSettingBoolean(getString(R.string.sharedpref_accessibility), false)) {
+            binding.keyboardChart.checkAccessibilitySettingsPrompt.isVisible = false
+            binding.keyboardChart.openAccessibilitySettingsBtn.isVisible = false
+            binding.keyboardChart.waitForDataToUpdate.isVisible = true
+        } else {
+            binding.keyboardChart.checkAccessibilitySettingsPrompt.isVisible = true
+            binding.keyboardChart.openAccessibilitySettingsBtn.isVisible = true
+            binding.keyboardChart.waitForDataToUpdate.isVisible = false
+
         }
     }
 

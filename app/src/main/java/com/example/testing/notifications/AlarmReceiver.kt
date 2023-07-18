@@ -12,6 +12,8 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.example.testing.Graph
+import com.example.testing.MainActivity
 import com.example.testing.R
 import com.example.testing.utils.Utils
 import java.util.*
@@ -20,7 +22,7 @@ class AlarmReceiver: BroadcastReceiver() {
     companion object {
         private const val NOTIFICATION_CHANNEL_ID = "DailyQuestionnaireChannel"
         private const val NOTIFICATION_ID = 1
-        private const val DAILY_REMINDER_HOUR = 14
+        private const val DAILY_REMINDER_HOUR = 5
 
         fun scheduleNotification(context: Context) {
             Log.d("ScheduleNotification", "created")
@@ -56,23 +58,23 @@ class AlarmReceiver: BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         Log.d("OnReceive", "AlarmReceiver")
 
-        if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            // Ensure that receiver only triggered by the intended system
-            Log.d("NotificationReceiver", "onReceive")
-            if (!Utils.readSharedSettingBoolean("isQuestionnaireAnswered", false))
-                showNotification(context)
+        if (!Utils.readSharedSettingBoolean("isQuestionnaireAnswered", false)) {
+            showNotification(context)
         }
     }
 
     private fun showNotification(context: Context) {
         createNotificationChannel(context)
-
+        Log.d("NotificationReceiver", "Shownotification")
+        val appIntent = Intent(Graph.appContext, MainActivity::class.java)
+        val retunIntent = PendingIntent.getActivity(Graph.appContext, 0, appIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         val notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notifications_black_24dp)
             .setContentTitle("Daily Questionnaire")
             .setContentText("Remember to answer your daily questionnaire")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
+            .setContentIntent(retunIntent)
 
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

@@ -29,6 +29,7 @@ import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -179,7 +180,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                 val stats = viewModel.chartSpeedValues.value
                 if (stats != null) {
                     updateChart(
-                        viewModel.chartSpeedValues.value!!, "Words per minute",
+                        viewModel.chartSpeedValues.value!!, "Time window",
                         "WPM", barChart1!!
                     )
                 }
@@ -198,7 +199,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                 val stats = viewModel.chartErrorValues.value
                 if (stats != null) {
                     updateChart(
-                        viewModel.chartErrorValues.value!!, "Errors made",
+                        viewModel.chartErrorValues.value!!, "Time window",
                         "Errors", barChart1!!
                     )
                 }
@@ -212,7 +213,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             if (viewModel.chartSelected == 0) {
                 val stats = viewModel.chartErrorValues.value
                 if (stats != null) {
-                    updateChart(stats, "Average errors made", "Errors", barChart1!!)
+                    updateChart(stats, "Time window", "Errors", barChart1!!)
                     barChart1!!.notifyDataSetChanged()
                 }
             }
@@ -223,7 +224,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             if (viewModel.chartSelected == 1) {
                 val stats = viewModel.chartSpeedValues.value
                 if (stats != null) {
-                    updateChart(stats, "Words per minute", "WPM", barChart1!!)
+                    updateChart(stats, "Time window", "WPM", barChart1!!)
                     barChart1!!.notifyDataSetChanged()
                 }
             }
@@ -233,7 +234,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             Log.d("ChartView", "Session values found")
             val stats = viewModel.chartSessions.value
             if (stats != null) {
-                updateChart(stats, "Sessions", "Amount of sessions", barChart2!!)
+                updateChart(stats, "Time window", "Sessions", barChart2!!)
                 barChart2!!.notifyDataSetChanged()
             }
         }
@@ -243,7 +244,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             Log.d("ChartView", "Sleep values found")
             val stats = viewModel.sleepDataValues.value
             if (stats != null) {
-                updateStackedChart(stats, "Sleep stages in minutes", "Sleep quality")
+                updateStackedChart(stats, "Sleep stages in minutes", "Date")
                 stackedBarChart!!.notifyDataSetChanged()
             }
         }
@@ -294,7 +295,8 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             label1.add(i.x.toInt().toString())
         }
         val v1: BarDataSet = BarDataSet(stats, label)
-        v1.setDrawValues(false)
+        v1.setDrawValues(true)
+        v1.label = description
         if (chart == barChart2) {
             v1.color = mutedPurple
         } else {
@@ -311,20 +313,33 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                             description: String) {
         val labels = ArrayList<String>()
         val datasetList = ArrayList<BarEntry>()
+        // Create a HashMap to store label-color mappings
+        val colorMap = HashMap<String, Int>()
+        colorMap["deep"] = darkPurple
+        colorMap["light"] = lightPurple
+        colorMap["rem"] = teal
+        colorMap["wake"] = mutedPurple
+
+        // Create a custom color array large enough to accommodate all possible entries
+        val customColors = ArrayList<Int>()
+        val colors = mutableListOf(darkPurple,lightPurple,teal,mutedPurple)
         for (i in stats) {
             labels.add(i.date)
             datasetList.add(i.entry)
+            if (!i.date.isNullOrEmpty()) {
+                customColors.add(darkPurple)
+                customColors.add(lightPurple)
+                customColors.add(teal)
+                customColors.add(mutedPurple)
+            }
         }
         val v1: BarDataSet = BarDataSet(datasetList, label)
         v1.setDrawValues(false)
-        val lightPurple = resources.getColor(R.color.light_purple)
-        val teal = resources.getColor(R.color.teal_200)
-        val darkPurple = resources.getColor(R.color.dark_purple)
-        val mutedPurple = resources.getColor(R.color.muted_light_purple)
         v1.stackLabels = arrayOf("deep", "light", "rem", "wake")
-        v1.colors = listOf(darkPurple, lightPurple, teal, mutedPurple)
-        val data = BarData()
-        data.addDataSet(v1)
+        v1.colors = customColors
+
+        val data = BarData(v1)
+        // data.addDataSet(v1)
         configureBarChart(stackedBarChart!!, description, labels)
         prepareChartData(stackedBarChart!!, data)
     }
@@ -400,8 +415,8 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         //chart!!.setDrawBarShadow(false)
         chart!!.setDrawGridBackground(false)
 
-        chart!!.description.isEnabled = false
-        //chart!!.description.text = description
+        chart!!.description.isEnabled = true
+        chart!!.description.text = description
         //chart!!.description.textColor = R.color.dark_purple
         val leftAxis = chart.axisLeft
         if (chart == barChart2) {
@@ -412,22 +427,27 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             }
         }
 
+        if (chart == barChart2 || chart == barChart1) {
+            chart.setDrawValueAboveBar(true)
+        }
+
         val xAxis = chart!!.xAxis
         //xAxis.labelCount = 12
         xAxis.setDrawLabels(true)
+
         xAxis.granularity = 1f
         xAxis.position = XAxis.XAxisPosition.BOTTOM
 
 
-        //xAxis.axisMinimum = 0 + 0.5f; //to center the bars inside the vertical grid lines we need + 0.5 step
-        //xAxis.axisMaximum = 144f + 0.5f; //to center the bars inside the vertical grid lines we need + 0.5 step
+        xAxis.axisMinimum = 0 + 0.5f; //to center the bars inside the vertical grid lines we need + 0.5 step
+        xAxis.axisMaximum = 144f + 0.5f; //to center the bars inside the vertical grid lines we need + 0.5 step
         //xAxis.setLabelCount(12, false); //show only 5 labels (5 vertical grid lines)
         xAxis.xOffset = 0f; //labels x offset in dps
         xAxis.yOffset = 0f; //labels y offset in dps
         xAxis.setDrawGridLines(false)
         xAxis.valueFormatter = IndexAxisValueFormatter(xAxisValues)
         chart!!.xAxis.isEnabled = true
-        Log.d("Chart labels", labels1.toString())
+        Log.d("xAxis values", xAxisValues.toString())
         leftAxis.setDrawGridLines(false)
         //leftAxis.spaceTop = 35f
         leftAxis.axisMinimum = 0f

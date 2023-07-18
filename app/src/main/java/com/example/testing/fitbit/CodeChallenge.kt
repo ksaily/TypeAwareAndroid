@@ -8,7 +8,7 @@ import java.security.SecureRandom
 class CodeChallenge {
     companion object {
         const val CLIENT_ID: String = "2393N9"
-        const val REDIRECT_URL: String = "https://type-aware-katri.com"
+        const val REDIRECT_URL: String = "https://ksaily.github.io"
         val CODE_VERIFIER = getCodeVerifier()
         var authorizationCode : String? = null
         var uniqueState: String? = null

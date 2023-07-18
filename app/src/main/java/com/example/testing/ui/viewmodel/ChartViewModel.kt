@@ -118,8 +118,9 @@ class ChartViewModel: ViewModel() {
                             Log.d("Firebase", "Error: $e ")
                         }
 
-                        val avgDurationInMinutes = wordCount * (speedsAvgList.average() / 60)
-                        val averageWPM = wordCount / avgDurationInMinutes
+                        //val avgDurationInMinutes = wordCount * (speedsAvgList.average() / 60)
+                        //val averageWPM = wordCount / avgDurationInMinutes
+                        val averageWPM = 60 / speedsAvgList.average()
 
                         for (i in iterErrList) {
                             val timewindow = dataSnapshot.key?.toInt()
@@ -165,7 +166,7 @@ class ChartViewModel: ViewModel() {
             dates.clear()
             var previousDay = startDate
             for (i in 0 .. 6) {
-                sleepDataList.add(SleepDataForChart("", BarEntry(0f, floatArrayOf(0f,0f,0f))))
+                sleepDataList.add(SleepDataForChart("", BarEntry(0f, floatArrayOf(0f,0f,0f,0f))))
             }
 
             for (i in 0..6) {
