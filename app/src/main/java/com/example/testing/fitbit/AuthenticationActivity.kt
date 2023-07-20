@@ -81,6 +81,9 @@ class AuthenticationActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+
+    /**
+
     override fun onResume() {
         super.onResume()
 
@@ -89,6 +92,10 @@ class AuthenticationActivity : AppCompatActivity() {
         Log.d("Auth", uri.toString())
         if (uri != null && uri.toString().startsWith(REDIRECT_URL)) {
             handleRedirect(uri)
+        }
+        else {
+            finish()
+            return
         }
     }
 
@@ -112,7 +119,7 @@ class AuthenticationActivity : AppCompatActivity() {
             finish()
             return
         }
-    }
+    }**/
 
 
     override fun onNewIntent(intent: Intent) {

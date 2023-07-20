@@ -9,7 +9,7 @@ import kotlin.collections.ArrayList
 class KeyboardHelper {
 
     companion object {
-        private var wordCount: Int = 0
+        var wordCount: Int = 0
         var typingTimes: ArrayList<Double> = arrayListOf()
         var thisPackage: String = ""
         var timeElapsed: Double = 0.0
@@ -87,6 +87,7 @@ class KeyboardHelper {
                             //Log.d("Firstletter", "ofWord")
                             startTime = System.nanoTime()
                         } else if (isWordEnd) {
+                            wordCount ++ // Count words even if characters would be deleted after
                             endTime = System.nanoTime()
                             //Log.d("Lastletter", "ofWord")
                             // To seconds
@@ -107,7 +108,7 @@ class KeyboardHelper {
                         } else {
                             typingTimes.add(0.0)
                         }
-                        if (isWordStart) {
+                        if (newChar.isLetterOrDigit()) {
                             startTime = System.nanoTime()
                         }
                         newString += newChar
@@ -142,7 +143,7 @@ class KeyboardHelper {
         }
 
         fun countErrorRate(): Double {
-            return  deletedChars.toDouble() / (deletedChars + (beforeString.length - 1))
+            return  deletedChars.toDouble() / (deletedChars + (beforeString.length))
         }
 
         fun dateFormatter(date: Date): String {

@@ -132,6 +132,8 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
                         Toast.LENGTH_SHORT).show()
                     }
                 }
+            } else {
+                binding.secondWeekQstnrBtn.isVisible = false
             }
         }
     }
@@ -164,16 +166,9 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
 
         if (key=="study_finished" && readSharedSettingBoolean("study_finished", false)) {
             Log.d("Study finished", "true")
+            questionnaireDialog.changeToEndQuestionnaire()
             questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
             }
-        /**else if (key == "accessibility_permission" && !readSharedSettingBoolean(
-                Graph.appContext, "accessibility_permission", false)
-            && readSharedSettingBoolean(Graph.appContext,
-                "first_login_done", false)
-        ) {
-            Log.d("Timer", "check permissions")
-            checkPermissions(applicationContext)
-        }**/
     }
 
     private fun afterPermissionsReceived() {

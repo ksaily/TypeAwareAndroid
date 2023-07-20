@@ -52,6 +52,14 @@ class ChartViewModel: ViewModel() {
     var authAttempted = false
     val dates = arrayListOf<String>()
     private val sleepDataList = ArrayList<SleepDataForChart>()
+    var dataList = mutableListOf<BarEntry>()
+    var errorsAvgList = mutableListOf<Double>()
+    var speedsAvgList = mutableListOf<Double>()
+    var iterErrList = mutableListOf<BarEntry>()
+    var iterSpeedList = mutableListOf<BarEntry>()
+    var sessionCount: Long = 0L
+    var wordCount = 0
+    var averageWPM : Double = 0.0
 
     fun getFirebaseData(date: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -64,6 +72,23 @@ class ChartViewModel: ViewModel() {
         _chartSessions.postValue(listOf())
         _chartSpeedValues.postValue(listOf())
         _sleepDataValues.postValue(listOf())
+    }
+
+    private fun clearLists() {
+        sessionCount = 0
+        dataList.clear()
+        wordCount = 0
+        dataFound = true
+        averageWPM = 0.0
+        errorsAvgList.clear()
+        speedsAvgList.clear()
+        iterErrList.clear()
+        iterSpeedList.clear()
+        for (i in 0..143) {
+            dataList.add(BarEntry(i.toFloat(), 0f))
+            iterErrList.add(BarEntry(i.toFloat(), 0f))
+            iterSpeedList.add(BarEntry(i.toFloat(), 0f))
+        }
     }
 
 
@@ -80,54 +105,52 @@ class ChartViewModel: ViewModel() {
         val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    val errList = mutableListOf<BarEntry>()
-                    val dataList = mutableListOf<BarEntry>()
-                    val speedList = mutableListOf<BarEntry>()
-                    var wordCount = 0
-                    dataFound = true
-                    val averageWPMList = mutableListOf<Double>()
-                    val averageWPM = Double
-                    var sessionCount = 0
-                    val errorsAvgList = mutableListOf<Long>()
-                    val speedsAvgList = mutableListOf<Double>()
-                    val iterErrList = mutableListOf<BarEntry>()
-                    val iterSpeedList = mutableListOf<BarEntry>()
-                    for (i in 0..144) {
-                        dataList.add(BarEntry(i.toFloat(), 0f))
-                        iterErrList.add(BarEntry(i.toFloat(), 0f))
-                        iterSpeedList.add(BarEntry(i.toFloat(), 0f))
-                    }
                     val children = snapshot.children
                     children.forEach { dataSnapshot ->
+                        clearLists()
                         val child = dataSnapshot.children
-                        try {
-                            child.forEach {
-                                var y = it.child("errorAmount").value as Long
-                                var speeds = it.child("typingSpeed").value
+                        child.forEach {
+                            try {
+                                val y = it.child("errorRate").value as Any
+                                if (y is Double) {
+                                    errorsAvgList.add(y.toDouble())
+                                }
+                                val speeds = it.child("typingSpeed").value as Any
                                 if (speeds != null) {
                                     speeds as MutableList<Double>
                                     var avgForOne = speeds.average()
                                     speedsAvgList.add(avgForOne)
                                 }
-                                errorsAvgList.add(y)
+                                //errorsAvgList.add(y)
                                 sessionCount += 1
                                 wordCount = (wordCount + it.child("wordCount").value as Long).toInt()
                                 Log.d("ChartViewModel", "ErrorAmount: $y")
+                            } catch (e: Exception) {
+                                Log.d("FirebaseError", "$e")
                             }
-                        } catch (e: Exception) {
-                            Log.d("Firebase", "Error: $e ")
                         }
+                        if (checkDoubleNotNull(speedsAvgList.average())) {
+                            averageWPM = 60 / speedsAvgList.average() }
+                        else { averageWPM = 0.0
+                        }
+                        val averageError: Double
+                        averageError = if (checkDoubleNotNull(errorsAvgList.average())) {
+                            errorsAvgList.average()
+                        } else {
+                            0.0
+                        }
+
 
                         //val avgDurationInMinutes = wordCount * (speedsAvgList.average() / 60)
                         //val averageWPM = wordCount / avgDurationInMinutes
-                        val averageWPM = 60 / speedsAvgList.average()
 
+                        val timewindow = dataSnapshot.key?.toInt()
                         for (i in iterErrList) {
-                            val timewindow = dataSnapshot.key?.toInt()
-                            if (timewindow!! < 144) {
+                            //val timewindow = dataSnapshot.key?.toInt()?.plus(1)
+                            if (timewindow!! < iterErrList.size ) {
                                 iterErrList[timewindow!!] = BarEntry(
                                     timewindow.toFloat(),
-                                    errorsAvgList.average().toFloat()
+                                    averageError.toFloat()
                                 )
                                 dataList[timewindow!!] = BarEntry(
                                     timewindow.toFloat(),
@@ -160,25 +183,31 @@ class ChartViewModel: ViewModel() {
         ref.addValueEventListener(valueEventListener)
     }
 
+    private fun checkDoubleNotNull(double: Double): Boolean {
+        return (double.isFinite() && double != 0.0)
+    }
+
     fun getSleepDataFromThisWeek(startDate: String) {
         viewModelScope.launch(Dispatchers.IO) {
             sleepDataList.clear()
             dates.clear()
             var previousDay = startDate
-            for (i in 0 .. 6) {
+            for (i in 0 .. 7) {
                 sleepDataList.add(SleepDataForChart("", BarEntry(0f, floatArrayOf(0f,0f,0f,0f))))
             }
-
             for (i in 0..6) {
                 dates.add(previousDay)
                 previousDay = Utils.getPreviousDateString(previousDay)
             }
+            dates.add("") // Add one empty space for chart
             dates.reverse()
 
             val accessToken = Utils.readSharedSettingString("access_token", "")
             FuelManager.instance.basePath = "https://api.fitbit.com/1.2/user/-"
 
-            val startDateFitbit = Utils.formatForFitbit(dates.first())
+            val startDay = dates[1]
+
+            val startDateFitbit = Utils.formatForFitbit(startDay)
             val endDateFitbit = Utils.formatForFitbit(dates.last())
             Log.d("Dates reversed", dates.toString())
 

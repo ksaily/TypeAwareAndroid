@@ -110,6 +110,7 @@ class DateFragment : Fragment(R.layout.fragment_date) {
             )
             // at last we are calling show
             // to display our date picker dialog.
+            datePickerDialog.datePicker.maxDate = System.currentTimeMillis()
             datePickerDialog.show()
         }
 

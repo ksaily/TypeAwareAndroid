@@ -82,9 +82,9 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
             val ref = rootRef.child(authId).child(participantId).child(date)
                 .child("keyboardEvents")
             clearLists()
-            val errorRateList = mutableListOf<Double>()
             val valueEventListener = object : ValueEventListener {
                 val dataList = mutableListOf<KeyboardStats>()
+                val errorRateList = mutableListOf<Double>()
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
                         try {
@@ -93,7 +93,7 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
                                 var child = dataSnapshot.children
                                 child.forEach {
                                     val speeds =
-                                        it.child("typingSpeed").value
+                                        it.child("typingSpeed").value as Any
                                     Log.d("FirebaseDebug", "Speed: $speeds")
                                     if (speeds != null) {
                                         speeds as MutableList<Double>
@@ -101,8 +101,7 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
                                         Log.d("FirebaseDebug", "Avg speed for one: $avgForOne")
                                         speedsList.add(avgForOne)
                                     }
-                                    wordCount =
-                                        (wordCount + it.child("wordCount").value as Long).toInt()
+                                    wordCount = (wordCount + it.child("wordCount").value as Long).toInt()
                                     errorsList.add(it.child("errorAmount").value as Long)
                                     errorRateList.add((it.child("errorRate").value as Number).toDouble())
                                     //Add the average for one instance to a new list
@@ -133,8 +132,8 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
                                     totalErr,
                                     totalSpeed,
                                     totalErrorRate,
-                                    averageWPM)
-                                println(data)
+                                    averageWPM,
+                                )
                                 //addToListOfFirebaseData(data)
                                 dataList.add(data)
                             }

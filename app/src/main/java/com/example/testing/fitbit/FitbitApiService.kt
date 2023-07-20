@@ -26,6 +26,7 @@ import com.github.scribejava.core.model.OAuthConstants.CLIENT_SECRET
 import com.github.scribejava.core.oauth.OAuth20Service
 import com.google.gson.Gson
 import com.google.gson.internal.Streams.parse
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
 import org.json.JSONObject
@@ -37,6 +38,7 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.logging.Level.parse
+import kotlin.collections.HashMap
 import kotlin.coroutines.coroutineContext
 
 /**
@@ -156,7 +158,9 @@ class FitbitApiService {
                         Log.i("Sleep", "Date of sleep : $dateOfSleep")
                         runningThread = false
                         authAttempted = false
-                        return SleepData(true, minutesAsleep, startTime, endTime)
+                        val stringJson = jsonObject.toString(2)
+                        val jsonMap: Map<String, Any> = Gson().fromJson(stringJson, object : TypeToken<HashMap<String, Any>>() {}.type)
+                        return SleepData(true, minutesAsleep, startTime, endTime, jsonMap)
                     } else if (response.statusCode == 401) {
                         // Get refresh token
                         val code = Utils.readSharedSettingString("authorization_code", "")
@@ -168,16 +172,16 @@ class FitbitApiService {
                             getSleepData(date)
                         } else {
                             authAttempted = false
-                            SleepData(false, 0, "-", "-", )
+                            SleepData(false, 0, "-", "-", HashMap<String, Any>())
                         }
                     } else {
                         authAttempted = false
-                        return SleepData(false, 0, "-", "-")
+                        return SleepData(false, 0, "-", "-", HashMap<String, Any>())
                     }
                 } catch (e: Exception) {
                     authAttempted = false
                     Log.d("Fitbit Authorization(Get Sleep Data)", "Error: $e")
-                    return SleepData(false, 0, "-", "-", )
+                    return SleepData(false, 0, "-", "-", HashMap<String, Any>() )
                 }
         }
 

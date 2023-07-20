@@ -8,7 +8,7 @@
     app:cardPreventCornerOverlap="true"
     app:cardElevation="2dp"
     android:clipChildren="false"
-    android:layout_margin="5dp"
+    android:layout_marginHorizontal="5dp"
     android:clipToPadding="true"
     app:cardUseCompatPadding="true"
     app:cardBackgroundColor="@color/light_purple">
@@ -88,8 +88,7 @@
 
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingVertical="3dp">
+            android:layout_height="match_parent">
 
             <TextView
                 android:layout_width="match_parent"
@@ -128,35 +127,37 @@
 
                 <ImageView
                     android:id="@+id/wakeUpImage"
-                    android:layout_column="0"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_column="0"
                     android:layout_gravity="center"
-                    android:padding="5dp"
-                    android:paddingLeft="5dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:padding="2dp"
                     android:src="@drawable/wake_up_40" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/wakeUpTime"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginVertical="5dp"
-                    android:fontFamily="@font/roboto"
-                    android:padding="5dp"
+                    android:layout_marginVertical="8dp"
+                    android:fontFamily="@font/roboto_bold"
                     android:text="9.00"
                     android:textColor="@color/white"
-                    android:textSize="18sp"
+                    android:textSize="16sp"
+                    android:textAlignment="center"
                     android:layout_alignBottom="@id/wakeUpImage"
                     android:layout_toRightOf="@id/wakeUpImage"
-                    android:layout_weight="1"
-                    android:gravity="center_horizontal"/>
+                    android:layout_weight="1"/>
 
                 <TextView
                     android:id="@+id/bedTimeText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="10dp"
+                    android:paddingVertical="5dp"
                     android:text="Bedtime"
                     android:fontFamily="@font/roboto"
                     android:textColor="@color/light_grey"
@@ -171,8 +172,8 @@
                     android:layout_height="wrap_content"
                     android:layout_column="0"
                     android:layout_gravity="center"
-                    android:padding="5dp"
-                    android:paddingLeft="5dp"
+                    android:padding="2dp"
+                    android:layout_marginLeft="5dp"
                     android:src="@drawable/sleeping_in_bed_40"
                     android:layout_below="@id/bedTimeText"/>
 
@@ -183,9 +184,9 @@
                     android:text="23.00"
                     android:layout_marginVertical="5dp"
                     android:textColor="@color/white"
-                    android:textSize="18sp"
+                    android:textSize="16sp"
                     android:textAlignment="center"
-                    android:fontFamily="@font/roboto"
+                    android:fontFamily="@font/roboto_bold"
                     android:layout_gravity="center_vertical"
                     android:layout_below="@id/bedTimeText"
                     android:layout_alignBottom="@id/bedTimeImage"

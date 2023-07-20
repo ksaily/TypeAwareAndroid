@@ -6,5 +6,5 @@ data class KeyboardStats(
     val errors: Double,
     val speed: Double,
     val errorRate: Double,
-    val averageWPM: Double
+    val averageWPM: Double,
 )

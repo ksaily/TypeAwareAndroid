@@ -100,9 +100,9 @@
     <string name="battery_opt_off_prompt">Battery optimization is disabled</string>
     <string name="mobile_data_usage_off_prompt">It is not recommended to limit mobile data usage</string>
     <string name="accessibility_permission_change">Accessibility permission should be enabled for the app to run as intended. Click here and enable accessibility_service.</string>
-    <string name="click_here_to_make_changes">Click here to make changes</string>
+    <string name="click_here_to_make_changes">Click here to make changes.</string>
     <string name="battery_opt_snackbar_title">Battery optimization</string>
-    <string name="battery_opt_snackbar_msg">Click ok to disable battery optimization in settings</string>
+    <string name="battery_opt_snackbar_msg">Click ok to disable battery optimization in settings.</string>
     <string name="contact_info">In case of issues, please contact: \nkatri.saily@oulu.fi</string>
     <string name="help">Help</string>
 

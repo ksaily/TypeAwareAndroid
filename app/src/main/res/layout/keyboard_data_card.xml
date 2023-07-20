@@ -9,7 +9,6 @@
     app:cardElevation="2dp"
     android:outlineAmbientShadowColor="@color/cardview_shadow_end_color"
     android:clipChildren="false"
-    android:layout_margin="5dp"
     android:clipToPadding="false"
     app:cardUseCompatPadding="true"
     app:cardBackgroundColor="@color/light_purple">
@@ -34,7 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:visibility="visible "
+            android:visibility="gone"
             android:id="@+id/keyboardDataNotFound">
 
             <TextView
@@ -56,9 +55,11 @@
                 android:fontFamily="@font/roboto"
                 android:gravity="center"
                 android:textSize="12sp"
+                android:visibility="gone"
                 android:id="@+id/waitForDataToUpdate"
                 android:textAlignment="center"
-                android:paddingVertical="10dp" />
+                android:paddingBottom="10dp"
+                android:paddingTop="20dp"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -67,11 +68,10 @@
                 android:textColor="@color/light_grey"
                 android:fontFamily="@font/roboto"
                 android:gravity="center"
-                android:visibility="gone"
                 android:textSize="12sp"
                 android:id="@+id/checkAccessibilitySettingsPrompt"
                 android:textAlignment="center"
-                android:paddingVertical="5dp" />
+                android:paddingVertical="10dp" />
 
             <Button
                 android:layout_width="wrap_content"
@@ -83,6 +83,7 @@
                 android:layout_gravity="center"
                 android:textSize="12dp"
                 android:padding="5dp"
+                android:layout_marginTop="8dp"
                 android:id="@+id/openAccessibilitySettingsBtn"/>
 
         </LinearLayout>
@@ -94,7 +95,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:id="@+id/dataAvailable"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <TableRow
             android:layout_width="match_parent"
@@ -108,7 +109,7 @@
                 android:layout_weight="0"
                 android:paddingStart="10dp"
                 android:layout_height="match_parent"
-                android:text="Words per minute"
+                android:text="Typing speed"
                 android:textColor="@color/light_grey"
                 android:textSize="18sp" />
 
@@ -144,35 +145,48 @@
                     android:id="@+id/speedImage"
                     android:layout_width="55dp"
                     android:layout_height="54dp"
-                    android:paddingLeft="10dp"
+                    android:layout_marginHorizontal="10dp"
                     android:src="@drawable/speed_64" />
 
                 <TextView
-                    android:id="@+id/speedData"
+                    android:id="@+id/speedDataSeconds"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_toRightOf="@id/speedImage"
+                    android:gravity="center"
+                    android:text="1.02s"
+                    android:layout_marginVertical="2dp"
+                    android:textColor="@color/white"
+                    android:textSize="15sp"
+                    android:fontFamily="@font/roboto_black"/>
+
+                <TextView
+                    android:id="@+id/speedDataWPM"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/speedImage"
+                    android:layout_below="@id/speedDataSeconds"
                     android:layout_alignBottom="@id/speedImage"
                     android:gravity="center"
-                    android:text="-"
-                    android:layout_marginVertical="10dp"
+                    android:text="10 WPM"
+                    android:layout_marginVertical="2dp"
                     android:textColor="@color/white"
-                    android:textSize="24sp"
+                    android:textSize="15sp"
                     android:fontFamily="@font/roboto_black"/>
+
 
                 <TextView
                     android:id="@+id/textViewStats"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/speedImage"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="12dp"
                     android:fontFamily="@font/roboto"
-                    android:text="You were faster than on  \naverage!"
-                    android:textAlignment="center"
+                    android:text="You were faster than users  \n on average!"
                     android:gravity="center"
                     android:lines="2"
                     android:textColor="@color/light_grey"
-                    android:textSize="14sp" />
+                    android:textSize="13sp" />
             </RelativeLayout>
 
             </TableRow>
@@ -186,7 +200,7 @@
             <RelativeLayout
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
-                android:paddingVertical="8dp"
+                android:layout_margin="5dp"
                 android:gravity="center">
             <ProgressBar
                 style="?android:attr/progressBarStyleHorizontal"
@@ -205,7 +219,7 @@
                     android:id="@+id/ProgressTextView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:text="-"
+                    android:text="80%"
                     android:textColor="@color/white"
                     android:textSize="24sp"
                     android:gravity="center"

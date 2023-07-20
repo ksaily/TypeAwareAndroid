@@ -1,17 +1,16 @@
 package com.example.testing.ui.menu
 
-import android.content.res.Resources.Theme
-import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.content.res.ResourcesCompat.getColor
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.testing.Graph
@@ -29,11 +28,11 @@ import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
-import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.collections.ArrayList
+import java.lang.Math.random
+import java.util.*
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -75,6 +74,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
     private var darkPurple: Int = 0
     private var teal: Int = 0
     private var mutedPurple: Int = 0
+    private val xAxisTimeOfDayLabel: ArrayList<String> = arrayListOf()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -102,10 +102,10 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         val values2: ArrayList<BarEntry> = ArrayList()
         val typefaceBolded = ResourcesCompat.getFont(Graph.appContext, R.font.roboto_black)
         val typefaceNormal = ResourcesCompat.getFont(Graph.appContext, R.font.roboto_bold)
-        lightPurple = resources.getColor(R.color.light_purple)
-        teal = resources.getColor(R.color.teal_200)
-        darkPurple = resources.getColor(R.color.dark_purple)
-        mutedPurple = resources.getColor(R.color.muted_light_purple)
+        lightPurple = getColor(resources, R.color.light_purple, null)
+        teal = getColor(resources, R.color.teal_200, null)
+        darkPurple = getColor(resources, R.color.dark_purple, null)
+        mutedPurple = getColor(resources, R.color.muted_light_purple, null)
 
         statValues.clear()
         viewModel.chartSelected = 0 //Initiate selected charts to error
@@ -132,8 +132,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                 if (stats != null) {
                     updateChart(
                         viewModel.chartSpeedValues.value!!, "WPM",
-                        "Time window", barChart1!!
-                    )
+                        "Time of day", barChart1!! )
                 }
             }
         }
@@ -143,16 +142,15 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                 Log.d("ChartFragment", "Switching chart to error")
                 binding.switchToErrorsBtn.setTextAppearance(R.style.switchChartChosen)
                 binding.switchToWritingSpeedBtn.setTextAppearance(R.style.switchChartNotChosen)
-                binding.switchChartTitle.text = "Errors"
+                binding.switchChartTitle.text = "Error rates"
                 binding.switchToWritingSpeedBtn.setBackgroundResource(R.drawable.border_unselected)
                 binding.switchToErrorsBtn.setBackgroundResource(R.drawable.border_selected)
                 viewModel.chartSelected = 0
                 val stats = viewModel.chartErrorValues.value
                 if (stats != null) {
                     updateChart(
-                        viewModel.chartErrorValues.value!!, "Errors",
-                        "Time window", barChart1!!
-                    )
+                        viewModel.chartErrorValues.value!!, "Error rate",
+                        "Time of day", barChart1!! )
                 }
             }
         }
@@ -164,7 +162,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             if (viewModel.chartSelected == 0) {
                 val stats = viewModel.chartErrorValues.value
                 if (stats != null) {
-                    updateChart(stats, "Errors", "Time window", barChart1!!)
+                    updateChart(stats, "Error rate", "Time of day", barChart1!!)
                     barChart1!!.notifyDataSetChanged()
                 }
             }
@@ -175,7 +173,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             if (viewModel.chartSelected == 1) {
                 val stats = viewModel.chartSpeedValues.value
                 if (stats != null) {
-                    updateChart(stats, "WPM", "Time window", barChart1!!)
+                    updateChart(stats, "WPM", "Time of day", barChart1!!)
                     barChart1!!.notifyDataSetChanged()
                 }
             }
@@ -185,7 +183,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             Log.d("ChartView", "Session values found")
             val stats = viewModel.chartSessions.value
             if (stats != null) {
-                updateChart(stats, "Sessions", "Time window", barChart2!!)
+                updateChart(stats, "Sessions", "Time of day", barChart2!!)
                 barChart2!!.notifyDataSetChanged()
             }
         }
@@ -212,25 +210,42 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                     Log.d("Error", "$e")
                 }
             }
-            //barChart1!!.notifyDataSetChanged()
-            //barChart2!!.notifyDataSetChanged()
         }
 
-        //configureBarChart(barChart1!!, "Errors per timewindow", labels1)
-        //configureBarChart(barChart2!!, "Sessions per timewindow", labels2)
-        //prepareChartData(barChart1!!, data1)
-        //prepareChartData(barChart2!!, data2)
+        for (i in 0..143) {
+            when (i) {
+                0 -> xAxisTimeOfDayLabel.add("12AM")
+                6 -> xAxisTimeOfDayLabel.add("1AM")
+                12 -> xAxisTimeOfDayLabel.add("2AM")
+                18 -> xAxisTimeOfDayLabel.add("3AM")
+                24 -> xAxisTimeOfDayLabel.add("4AM")
+                30 -> xAxisTimeOfDayLabel.add("5AM")
+                36 -> xAxisTimeOfDayLabel.add("6AM")
+                42 -> xAxisTimeOfDayLabel.add("7AM")
+                48 -> xAxisTimeOfDayLabel.add("8AM")
+                54 -> xAxisTimeOfDayLabel.add("9AM")
+                60 -> xAxisTimeOfDayLabel.add("10AM")
+                66 -> xAxisTimeOfDayLabel.add("11AM")
+                72 -> xAxisTimeOfDayLabel.add("12PM")
+                78 -> xAxisTimeOfDayLabel.add("1PM")
+                84 -> xAxisTimeOfDayLabel.add("2PM")
+                90 -> xAxisTimeOfDayLabel.add("3PM")
+                96 -> xAxisTimeOfDayLabel.add("4PM")
+                102 -> xAxisTimeOfDayLabel.add("5PM")
+                108 -> xAxisTimeOfDayLabel.add("6PM")
+                114 -> xAxisTimeOfDayLabel.add("7PM")
+                120 -> xAxisTimeOfDayLabel.add("8PM")
+                126 -> xAxisTimeOfDayLabel.add("9PM")
+                132 -> xAxisTimeOfDayLabel.add("10PM")
+                138 -> xAxisTimeOfDayLabel.add("11PM")
+                else -> xAxisTimeOfDayLabel.add("")//java.lang.String.format(Locale.US, "%02d", i) + ":00")
+            }
+
+        }
     }
 
     private fun clearAllChartData() {
         viewModel.clearChartArrays()
-        /**
-        barChart1!!.invalidate()
-        barChart1!!.clear()
-        barChart2!!.invalidate()
-        barChart2!!.clear()
-        stackedBarChart!!.invalidate()
-        stackedBarChart!!.clear()**/
     }
 
     private fun isLoggedInFitbit(): Boolean {
@@ -239,15 +254,17 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                 Utils.getSharedPrefs().contains("access_token"))
     }
 
-    private fun updateChart(stats: List<BarEntry>, label: String,
-                            description: String, chart: BarChart) {
+    private fun updateChart(
+        stats: List<BarEntry>, label: String,
+        description: String, chart: BarChart,
+    ) {
         val label1 = ArrayList<String>()
         for (i in stats) {
             label1.add(i.x.toInt().toString())
         }
         val v1: BarDataSet = BarDataSet(stats, label)
         v1.setDrawValues(true)
-        v1.label = description
+        v1.label = label
         if (chart == barChart2) {
             v1.color = mutedPurple
         } else {
@@ -255,21 +272,19 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         }
         val data = BarData()
         data.addDataSet(v1)
-        configureBarChart(chart!!, description, label1)
+        configureBarChart(chart!!, description, xAxisTimeOfDayLabel)
         prepareChartData(chart!!, data)
     }
 
 
-    private fun updateStackedChart(stats: List<SleepDataForChart>, label: String,
-                            description: String) {
+
+    private fun updateStackedChart(
+        stats: List<SleepDataForChart>, label: String,
+        description: String,
+    ) {
         val labels = ArrayList<String>()
         val datasetList = ArrayList<BarEntry>()
         // Create a HashMap to store label-color mappings
-        val colorMap = HashMap<String, Int>()
-        colorMap["deep"] = darkPurple
-        colorMap["light"] = lightPurple
-        colorMap["rem"] = teal
-        colorMap["wake"] = mutedPurple
 
         // Create a custom color array large enough to accommodate all possible entries
         val customColors = ArrayList<Int>()
@@ -277,17 +292,17 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         for (i in stats) {
             labels.add(i.date)
             datasetList.add(i.entry)
-            if (!i.date.isNullOrEmpty()) {
+            /**if (!i.date.isNullOrEmpty()) {
                 customColors.add(darkPurple)
                 customColors.add(lightPurple)
                 customColors.add(teal)
                 customColors.add(mutedPurple)
-            }
+            //}**/
         }
         val v1: BarDataSet = BarDataSet(datasetList, label)
         v1.setDrawValues(false)
         v1.stackLabels = arrayOf("deep", "light", "rem", "wake")
-        v1.colors = customColors
+        v1.colors = colors
 
         val data = BarData(v1)
         // data.addDataSet(v1)
@@ -352,13 +367,20 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
     private fun prepareChartData(chart: BarChart, data: BarData) {
         chart.data = data
         chart.barData.barWidth = BAR_WIDTH
-        data.setValueFormatter(MyValueFormatter())
-        chart.invalidate()
+        //data.setValueFormatter(MyValueFormatter())
+        //chart.invalidate()
         if (chart == stackedBarChart) {
             chart.setVisibleXRangeMaximum(7f)
         } else {
-            chart.setVisibleXRangeMaximum(16f)
+            if (chart == barChart2) {
+                data.setValueFormatter(MyValueFormatter())
+            }
+            else {
+                data.setValueFormatter(MyValueFormatter2())
+            }
+            chart.setVisibleXRangeMaximum(15f)
         }
+        chart.invalidate()
     }
 
     private fun configureBarChart(chart: BarChart, description: String, xAxisValues: ArrayList<String>) {
@@ -378,20 +400,26 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             }
         }
 
-        if (chart == barChart2 || chart == barChart1) {
-            chart.setDrawValueAboveBar(true)
-        }
+
 
         val xAxis = chart!!.xAxis
         //xAxis.labelCount = 12
         xAxis.setDrawLabels(true)
+        if (chart == barChart2 || chart == barChart1) {
+            chart.setDrawValueAboveBar(true)
+            xAxis.valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return xAxisTimeOfDayLabel[value.toInt()]
+                }
+            }
+        }
 
         xAxis.granularity = 1f
         xAxis.position = XAxis.XAxisPosition.BOTTOM
 
 
         xAxis.axisMinimum = 0 + 0.5f; //to center the bars inside the vertical grid lines we need + 0.5 step
-        xAxis.axisMaximum = 144f + 0.5f; //to center the bars inside the vertical grid lines we need + 0.5 step
+        xAxis.axisMaximum = xAxisValues.size + 0.5f; //to center the bars inside the vertical grid lines we need + 0.5 step
         //xAxis.setLabelCount(12, false); //show only 5 labels (5 vertical grid lines)
         xAxis.xOffset = 0f; //labels x offset in dps
         xAxis.yOffset = 0f; //labels y offset in dps
@@ -441,9 +469,20 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
     private class MyValueFormatter: ValueFormatter() {
         override fun getFormattedValue(value: Float): String {
             return if (value > 0) {
-                value.toInt().toString()
-            }// Format the float value as an integer
-            else {
+                value.toInt().toString() // Format the float value as an integer
+            } else {
+                ""
+            }
+        }
+    }
+
+    private class MyValueFormatter2: ValueFormatter() {
+        override fun getFormattedValue(value: Float): String {
+            return if (value > 0) {
+                val s = value.toString()
+                val clippedString = s.substring(0, s.length.coerceAtMost(4))
+                clippedString // Format the float value as an integer
+            } else {
                 ""
             }
         }

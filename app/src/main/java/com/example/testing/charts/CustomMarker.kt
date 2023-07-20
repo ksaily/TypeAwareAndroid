@@ -17,8 +17,8 @@ class CustomMarker(context: Context, layoutResource: Int = R.layout.marker_view)
     override fun refreshContent(entry: Entry?, highlight: Highlight?) {
         val value = entry?.y?.toDouble() ?: 0.0
         var resText = ""
-        resText = if(value.toString().length > 8){
-            value.toString().substring(0,7)
+        resText = if(value.toString().length > 4){
+            value.toString().substring(0,3)
         } else{
             "$value"
         }

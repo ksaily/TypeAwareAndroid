@@ -7,12 +7,14 @@ import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.RadioButton
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.lifecycleScope
+import com.example.testing.Graph
 import com.example.testing.R
 import com.example.testing.databinding.DialogDailyQuestionnaireBinding
 import com.example.testing.utils.Utils
@@ -81,7 +83,7 @@ class DailyQuestionnaireDialog : DialogFragment(){
         questions = listOf(
             "Q1: How much did you have to correct your typing yesterday compared to an average day?",
             "Q2: How fast was your typing speed yesterday compared to an average day?",
-            "Q3: How many words did you type during yesterday?",
+            "Q3: How many words per minute did you type on average yesterday?",
             "Q4: At what hour of the day were you typing the most yesterday? Choose the starting hour.",
             "Q5: Compared to an average day, how did you sleep yesterday?",
             "Q6: Did you go to bed earlier or later yesterday compared to an average day?"
@@ -115,7 +117,7 @@ class DailyQuestionnaireDialog : DialogFragment(){
         }
     }
 
-    private fun changeToEndQuestionnaire() {
+    fun changeToEndQuestionnaire() {
         Log.d("Questionnaire", "Changed to end questionnaire")
         isFirstWeek = false
         isFinished = true
@@ -129,7 +131,10 @@ class DailyQuestionnaireDialog : DialogFragment(){
             "Q2: What type of changes would you make in your life based on data like this?",
             "Q3: Have you made some behavioral changes to accommodate your digital wellbeing prior to this study? How effective/ineffective were they?",
             "Q4: How suitable would this information be for other people or is it more useful just for you?",
-            "You now have answered all the questionnaires and finished the study, congratulations!"
+            "You now have answered all the questionnaires and finished the study, congratulations! \n" +
+                    "You can enter this code into Prolific to receive your compensation: \n" +
+                    "If you wish to fill out an additional end questionnaire, you can find the link on the initial instructions that you received." +
+                    "at the beginning of the study."
         )
     }
 
@@ -263,7 +268,7 @@ class DailyQuestionnaireDialog : DialogFragment(){
                         currentAnswer = getSelectedOptionIndex(selectedRadioButtonId)
                     }
                 }
-                saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
+                checkAnswerNotEmpty()
             } else if (!isFinished) {
                 // If second week is of questionnaires
                 when (currentQuestionIndex) {
@@ -279,36 +284,54 @@ class DailyQuestionnaireDialog : DialogFragment(){
                     3 -> { val selectedRadioButtonId = binding.radioGroup1.checkedRadioButtonId
                         currentAnswer = getSelectedOptionIndex(selectedRadioButtonId) }
                 }
-                saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
+                checkAnswerNotEmpty()
             } else {
                 when (currentQuestionIndex) {
-                    0 -> {}
+                    0 -> { currentQuestionIndex++
+                        showNextQuestion()}
                     1 -> {
                         val selectedRadioButtonId = binding.radioGroup2.checkedRadioButtonId
                         val textAns = binding.explainAnswer.text
                         currentAnswer = "$selectedRadioButtonId, $textAns"
-                        saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
+                        //saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
+                        checkAnswerNotEmpty()
                     }
                     2 -> {
                         val ans = binding.openAnswer.text
                         currentAnswer = "$ans"
-                        saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
+                        //saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
+                        checkAnswerNotEmpty()
                     }
                     3 -> {
                         val selectedRadioButtonId = binding.radioGroup2.checkedRadioButtonId
                         val textAns = binding.explainAnswer.text
                         currentAnswer = "$selectedRadioButtonId, $textAns"
-                        saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
+                        //saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
+                        checkAnswerNotEmpty()
                     }
                     4 -> {
                         val ans = binding.openAnswer.text
                         currentAnswer = "$ans"
-                        saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
+                        //saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
+                        checkAnswerNotEmpty()
                     }
-                    5 -> {}
+                    5 -> {
+                        currentQuestionIndex++
+                        showNextQuestion()
+                    }
                 }
 
             }
+            //currentQuestionIndex++
+            //showNextQuestion()
+        }
+    }
+
+    private fun checkAnswerNotEmpty() {
+        if (currentAnswer.isNullOrEmpty() || currentAnswer == "-1") {
+            Toast.makeText(Graph.appContext, "Please write or select an answer.", Toast.LENGTH_SHORT)
+        } else {
+            saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
             currentQuestionIndex++
             showNextQuestion()
         }
@@ -400,15 +423,15 @@ class DailyQuestionnaireDialog : DialogFragment(){
                 val answeredNew = answered + 1
                 Utils.saveSharedSettingInt("number_of_questionnaires", answeredNew)
                 when (answered) {
-                    in 7..13 -> {
+                    in 5..10 -> {
                         Log.d("QuestionnaireAnswerAmount", "Was $answered, now $answeredNew")
                         Utils.saveSharedSettingBoolean("first_week_done", true)
                         showHomeScreen()
                     }
-                    14 -> {
+                    11 -> {
                         Log.d("End qstnr", "changed")
-                        changeToEndQuestionnaire()
-                        showNextQuestion()
+                        Utils.saveSharedSettingBoolean("study_finished", true)
+                        showHomeScreen()
                     }
                     else -> {
                         showHomeScreen()

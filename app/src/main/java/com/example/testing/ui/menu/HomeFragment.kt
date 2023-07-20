@@ -41,6 +41,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
@@ -80,7 +81,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
     var dateFragment = DateFragment()
     private val dateViewModel: DateViewModel by activityViewModels()
     private val firebaseViewModel: FirebaseViewModel by activityViewModels()
-    var data = SleepData(false, 0, "", "")
+    var data = SleepData(false, 0, "", "", HashMap<String, Any>())
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
             if (key == "access_token") {
@@ -311,13 +312,14 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
             Log.d("HomeFragment", "Total speed: ${totalErrRate.average()}l")
             binding.keyboardChart.keyboardDataNotFound.isVisible = false
             binding.keyboardChart.dataAvailable.isVisible = true
-            val clippedString: String
-            if (!wordsPerMinute.average().isNaN() || !wordsPerMinute.average().isFinite()
-                || !wordsPerMinute.average().isInfinite() || wordsPerMinute.average() != 0.0) {
-                val s = wordsPerMinute.average().toString() //words per minute
-                clippedString = s.substring(0, s.length.coerceAtMost(4))
+            val clippedStringWPM: String
+            val clippedStringSpeed: String
+            val avgWPM = wordsPerMinute.average()
+            if (avgWPM.isFinite() && avgWPM != 0.0) {
+                val s = avgWPM.toString() //words per minute
+                clippedStringWPM = s.substring(0, s.length.coerceAtMost(4)) + "WPM"
                 binding.keyboardChart.textViewStats.isVisible = true
-                if (wordsPerMinute.average() > 15.0) {
+                if (wordsPerMinute.average() > 25.0) {
                     binding.keyboardChart.textViewStats.text =
                         getString(R.string.home_keyboard_wpm_stats_faster_than_avg)
                 } else {
@@ -325,10 +327,22 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
                         getString(R.string.home_keyboard_wpm_stats_slower_than_avg)
                 }
             } else {
-                clippedString = "-"
+                clippedStringWPM = "- WPM"
                 binding.keyboardChart.textViewStats.isVisible = false
             }
-            binding.keyboardChart.speedData.text = clippedString
+            val speedAvg = totalSpeed.average()
+            if (speedAvg.isFinite() && speedAvg != 0.0) {
+                binding.keyboardChart.textViewStats.isVisible = true
+                val s = speedAvg.toString() //words per minute
+                clippedStringSpeed = s.substring(0, s.length.coerceAtMost(4)) + "s"
+            }
+            else {
+                clippedStringSpeed = "- s"
+                binding.keyboardChart.textViewStats.isVisible = false
+            }
+
+            binding.keyboardChart.speedDataSeconds.text = clippedStringSpeed
+            binding.keyboardChart.speedDataWPM.text = clippedStringWPM
             binding.keyboardChart.ProgressTextView.text =
                 showPercentage(totalErrRate.average(),
                     binding.keyboardChart.progressCircular).toString() + "%"

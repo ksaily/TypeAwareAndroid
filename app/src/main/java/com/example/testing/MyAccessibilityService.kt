@@ -23,6 +23,7 @@ import com.example.testing.utils.KeyboardHelper.Companion.previousTimeSlot
 import com.example.testing.utils.KeyboardHelper.Companion.thisPackage
 import com.example.testing.utils.KeyboardHelper.Companion.timeStampBeginning
 import com.example.testing.utils.KeyboardHelper.Companion.typingTimes
+import com.example.testing.utils.KeyboardHelper.Companion.wordCount
 import java.util.*
 
 class MyAccessibilityService : AccessibilityService() {
@@ -100,13 +101,13 @@ class MyAccessibilityService : AccessibilityService() {
              * and if the timeslot has changed, also set up a worker that saves info to Firebase.
              * After that, reset values. **/
             private fun onSessionChange() {
-                if (beforeString.isNullOrEmpty() && typingTimes.isEmpty()) {
+                if (beforeString.isNullOrEmpty()) {
                     resetValues()
                 } else {
                     val date = KeyboardHelper.dateFormatter(Date())
                     currentTimeSlot = countTimeSlot()
                     val keyboardEvent = KeyboardEvents(UUID.randomUUID().toString(),
-                        countWords(),
+                        wordCount,
                         typingTimes,
                         deletedChars,
                         countErrorRate(),
@@ -138,6 +139,7 @@ class MyAccessibilityService : AccessibilityService() {
                 thisPackage = newPackage
                 beforeString = newString
                 newString = ""
+                wordCount = 0
             }
 
 }

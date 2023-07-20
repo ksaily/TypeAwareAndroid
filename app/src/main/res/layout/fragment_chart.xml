@@ -26,17 +26,19 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="5dp">
+            android:padding="5dp"
+            android:background="@color/white">
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="320dp">
+                android:layout_height="320dp"
+                android:background="@color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                android:backgroundTint="@color/white">
+                android:background="@color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -46,7 +48,7 @@
                     android:gravity="center">
 
                     <TextView
-                        android:text="Errors"
+                        android:text="Error rates"
                         android:id="@+id/switchToErrorsBtn"
                         android:layout_marginHorizontal="5dp"
                         style="@style/switchChartChosen">
@@ -66,7 +68,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Errors"
+                    android:text="Error rates"
                     android:id="@+id/switchChartTitle"
                     android:textSize="15sp"
                     android:layout_gravity="left"
@@ -89,14 +91,15 @@
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="250dp">
+                android:layout_height="250dp"
+                android:background="@color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:paddingVertical="10dp"
-                    android:backgroundTint="@color/white">
+                    android:background="@color/white">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -120,14 +123,16 @@
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="350dp">
+                android:layout_height="350dp"
+                android:background="@color/white">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:paddingVertical="10dp"
-                    android:backgroundTint="@color/white">
+                    android:background="@color/white"
+                    android:paddingBottom="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
