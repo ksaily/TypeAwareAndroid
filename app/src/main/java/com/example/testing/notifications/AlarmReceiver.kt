@@ -67,7 +67,7 @@ class AlarmReceiver: BroadcastReceiver() {
         createNotificationChannel(context)
         Log.d("NotificationReceiver", "Shownotification")
         val appIntent = Intent(Graph.appContext, MainActivity::class.java)
-        val retunIntent = PendingIntent.getActivity(Graph.appContext, 0, appIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val retunIntent = PendingIntent.getActivity(Graph.appContext, 0, appIntent, PendingIntent.FLAG_IMMUTABLE)
         val notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notifications_black_24dp)
             .setContentTitle("Daily Questionnaire")

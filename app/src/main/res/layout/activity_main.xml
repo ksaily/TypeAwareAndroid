@@ -23,10 +23,10 @@
         android:id="@+id/secondWeekQstnrBtn"
         android:minHeight="15dp"
         android:layout_above="@id/bottomNav"
-        android:paddingTop="8dp"
+        android:paddingVertical="5dp"
         android:textColor="@color/white"
         android:textAlignment="center"
-        android:text="You have not answered today's questionnaire. Click here to answer."
+        android:text="@string/click_to_answer"
         android:background="@color/teal_800"
         android:visibility="gone"/>
 

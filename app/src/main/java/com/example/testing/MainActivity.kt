@@ -38,6 +38,8 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.*
+import kotlin.concurrent.schedule
 
 class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
 
@@ -92,48 +94,47 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         //bottomNav.selectedItemId = R.id.homeFragment
 
         getSharedPrefs().registerOnSharedPreferenceChangeListener(this)
-        /**if (readSharedSettingBoolean(
-                "permissions_granted", false)) {
-            // Don't show questionnaire if it is the first day
-            questionnaireDialog.showQuestionnaire(
-                currentDate == readSharedSettingString(
-                getString(R.string.sharedpref_questionnaire_day), ""
-            ))
-        }**/
+
         AlarmReceiver.scheduleNotification(Graph.appContext)
+        binding.secondWeekQstnrBtn.setOnClickListener {
+            if (!readSharedSettingBoolean(getString(R.string.sharedpref_questionnaire_ans), false) && !questionnaireDialog.isVisible) {
+                questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog2")
+                binding.secondWeekQstnrBtn.isVisible = false
+            }
+            else if (readSharedSettingBoolean("study_finished", false) && !questionnaireDialog.isVisible
+                && !readSharedSettingBoolean("end_questionnaire_finished", false)
+            ) {
+                questionnaireDialog.changeToEndQuestionnaire()
+                questionnaireDialog.show(supportFragmentManager, "EndQuestionnaireDialog")
+                binding.secondWeekQstnrBtn.isVisible = false
+            }
+            else {
+                Toast.makeText(this, "You have already answered today's questionnaire",
+                    Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun checkDailyQuestionnaire() {
-        println(!readSharedSettingBoolean(
-            getString(R.string.sharedpref_questionnaire_ans), false))
-        println(questionnaireDialog.isVisible)
-        println(getCurrentDateString() != readSharedSettingString(getString(R.string.sharedpref_questionnaire_day), ""))
         if (readSharedSettingBoolean(getString(R.string.sharedpref_first_login), false) &&
-            !readSharedSettingBoolean(
+            !questionnaireDialog.isVisible && !readSharedSettingBoolean(
                 getString(R.string.sharedpref_questionnaire_ans), false) &&
-            !questionnaireDialog.isVisible &&
-            getCurrentDateString() != readSharedSettingString(getString(R.string.sharedpref_questionnaire_day), "")
+            getCurrentDateString() != readSharedSettingString(getString(R.string.sharedpref_questionnaire_day),
+                "")
         ) {
             if (!readSharedSettingBoolean(getString(R.string.sharedpref_firstweek_done), false)) {
-            //Check that user info is given before showing questionnaire
-            Log.d("DailyQuestionnaire", "Questionnaire not answered")
-            questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
-            }
-            else if (!readSharedSettingBoolean(
-                    getString(R.string.sharedpref_questionnaire_ans), false)) {
+                questionnaireDialog.firstWeekQuestions()
+                //Check that user info is given before showing questionnaire
+                Log.d("DailyQuestionnaire", "Questionnaire not answered")
+                questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
+
+            } else if (!readSharedSettingBoolean(getString(R.string.sharedpref_questionnaire_ans),
+                    false) &&
+                readSharedSettingBoolean(getString(R.string.sharedpref_firstweek_done), false) &&
+                !readSharedSettingBoolean("study_finished", false)
+            ) {
                 Log.d("Second week", "started")
-                binding.secondWeekQstnrBtn.isVisible = true
-                binding.secondWeekQstnrBtn.setOnClickListener {
-                    if (!readSharedSettingBoolean(getString(R.string.sharedpref_questionnaire_ans), false)) {
-                        questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
-                    }
-                    else {
-                        Toast.makeText(this, "You have already answered today's questionnaire",
-                        Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } else {
-                binding.secondWeekQstnrBtn.isVisible = false
+                questionnaireDialog.changeToSecondWeek()
             }
         }
     }
@@ -147,36 +148,49 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         checkFirstLogin()
         checkPermissions(applicationContext)
         afterPermissionsReceived()
-        checkDailyQuestionnaire()
     }
 
     override fun onSharedPreferenceChanged(sharedPref: SharedPreferences?, key: String?) {
-        Log.d("SharedPref", "OnSharedPreferenceChanged")
         checkFirstLogin()
 
-
-        if (key == getString(R.string.sharedpref_questionnaire_ans)) {
-            Log.d("DailyQuestionnaire", "key changed")
+        if (key == getString(R.string.sharedpref_questionnaire_ans)
+        ) {
             checkDailyQuestionnaire()
         }
-        if (key == getString(R.string.sharedpref_firstweek_done) &&
-                readSharedSettingBoolean(getString(R.string.sharedpref_firstweek_done), false)) {
+        if (readSharedSettingBoolean(getString(R.string.sharedpref_firstweek_done), false)
+            && !readSharedSettingBoolean("study_finished", false)
+            && !readSharedSettingBoolean(getString(R.string.sharedpref_questionnaire_ans), false)) {
             questionnaireDialog.changeToSecondWeek()
+            binding.secondWeekQstnrBtn.isVisible = true
         }
 
-        if (key=="study_finished" && readSharedSettingBoolean("study_finished", false)) {
-            Log.d("Study finished", "true")
+        else if (key=="study_finished" && readSharedSettingBoolean("study_finished", false)) {
             questionnaireDialog.changeToEndQuestionnaire()
-            questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
-            }
+            binding.secondWeekQstnrBtn.isVisible = true
+            binding.secondWeekQstnrBtn.text = "Click to answer final questionnaire"
+        }
+    }
+
+    private fun checkSecondWeekBtn() {
+        if (readSharedSettingBoolean(getString(R.string.sharedpref_firstweek_done), false)
+            && !readSharedSettingBoolean("study_finished", false)) {
+            binding.secondWeekQstnrBtn.isVisible = !readSharedSettingBoolean(getString(R.string.sharedpref_questionnaire_ans), false)
+        } else if (readSharedSettingBoolean("study_finished", false) && !questionnaireDialog.isVisible) {
+            questionnaireDialog.changeToEndQuestionnaire()
+            checkDailyQuestionnaire()
+        }
     }
 
     private fun afterPermissionsReceived() {
         if (readSharedSettingBoolean(getString(R.string.sharedpref_permissions), false)
         ) { questionnaireDialog.showQuestionnaire(
             Utils.getCurrentDateString() == readSharedSettingString(getString(R.string.sharedpref_questionnaire_day), ""
-            )) }
-    }
+            ))
+            Timer("CheckQuestionnaire", false).schedule(2000) {
+                checkDailyQuestionnaire()
+            }
+            checkSecondWeekBtn()
+    }}
 
 
     private fun checkFirstLogin() {
@@ -247,17 +261,12 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             }
         }
         checkPermissions()
-        questionnaireDialog.showQuestionnaire(
-            currentDate == readSharedSettingString(getString(R.string.sharedpref_questionnaire_day), ""
-            ))
 
         if (!readSharedSettingBoolean(getString(
                 R.string.sharedpref_accessibility), false)) {
-            Log.d("afterFirstLoginDone", "check accessibility")
             showAlertDialog(this@MainActivity, 0)
         }
         if (!readSharedSettingBoolean(getString(R.string.sharedpref_battery), false)) {
-            Log.d("afterFirstLoginDone", "check battery")
             showAlertDialog(this@MainActivity, 1)
         }
     }

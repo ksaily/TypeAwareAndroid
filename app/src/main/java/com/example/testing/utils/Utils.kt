@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
@@ -11,6 +12,7 @@ import android.provider.Settings.Global.getString
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import com.example.testing.Graph
 import com.example.testing.R
@@ -160,16 +162,20 @@ class Utils {
          * Return true if in App's Battery settings "Not optimized" and false if "Optimizing battery use"
          */
         fun isIgnoringBatteryOptimizations(context: Context): Boolean {
-            val pwrm =
-                context.applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
-            val name = context.applicationContext.packageName
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                saveSharedSettingBoolean( "battery_opt_off",
-                    pwrm.isIgnoringBatteryOptimizations(name))
-                return pwrm.isIgnoringBatteryOptimizations(name)
-            }
-            saveSharedSettingBoolean("battery_opt_off", false)
-            return false
+            val permission = ContextCompat.checkSelfPermission(Graph.appContext, Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)
+            if (permission == PackageManager.PERMISSION_DENIED) {
+                val pwrm =
+                    context.applicationContext.getSystemService(Context.POWER_SERVICE) as PowerManager
+                val name = context.applicationContext.packageName
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    saveSharedSettingBoolean("battery_opt_off",
+                        pwrm.isIgnoringBatteryOptimizations(name))
+                    return pwrm.isIgnoringBatteryOptimizations(name)
+                }
+
+                saveSharedSettingBoolean("battery_opt_off", false)
+                return false
+            } else return true
         }
 
         /**

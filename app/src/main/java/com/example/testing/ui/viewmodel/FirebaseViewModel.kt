@@ -54,6 +54,8 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
     var sessionCount: Long = 0L
     var dataFound: Boolean = false
     var wordCount: Int = 0
+    val dataList = mutableListOf<KeyboardStats>()
+    val errorRateList = mutableListOf<Double>()
 
     fun getSleepData(date: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -81,24 +83,22 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
                 "").toString()
             val ref = rootRef.child(authId).child(participantId).child(date)
                 .child("keyboardEvents")
-            clearLists()
+            clearAllLists()
             val valueEventListener = object : ValueEventListener {
-                val dataList = mutableListOf<KeyboardStats>()
-                val errorRateList = mutableListOf<Double>()
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()) {
+                        clearAllLists()
                         try {
                             val children = snapshot.children
                             children.forEach { dataSnapshot ->
+                                clearLoopLists()
                                 var child = dataSnapshot.children
                                 child.forEach {
                                     val speeds =
                                         it.child("typingSpeed").value as Any
-                                    Log.d("FirebaseDebug", "Speed: $speeds")
                                     if (speeds != null) {
                                         speeds as MutableList<Double>
                                         val avgForOne = speeds.average()
-                                        Log.d("FirebaseDebug", "Avg speed for one: $avgForOne")
                                         speedsList.add(avgForOne)
                                     }
                                     wordCount = (wordCount + it.child("wordCount").value as Long).toInt()
@@ -110,22 +110,13 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
                                     Log.d("FirebaseDebug", "ErrorRateList: $errorRateList")
                                 }
                                 totalErrList = (totalErrList + errorsList).toMutableList()
-                                //totalSpeedsList.add(speedsList.toMutableList())
                                 timeWindow = dataSnapshot.key?.toInt()!!
-                                //Log.d("FirebaseDebug", "TotalSpeedsList: $totalSpeedsList")
-                                Log.d("FirebaseDebug", "TotalErrorsList: ${totalErrList}")
-                                //avgSpeed = countAvgSpeed(totalAvgSpeed)
-                                //var data = KeyboardStats(date, dataSnapshot.key, avgErrors, avgSpeed)
-                                //println(data)
                                 val totalErrorRate = errorRateList.average()
                                 totalErr = totalErrList.average()
-                                //Log.d("FirebaseDebug", "totalErr: $totalErr")
                                 totalSpeed = speedsList.average()
                                 //val avgDurationInMinutes = wordCount * (totalSpeed / 60)
                                 //val averageWPM = wordCount / avgDurationInMinutes
                                 val averageWPM = 60 / totalSpeed
-                                //Log.d("FirebaseDebug", "TotalSpeed: $totalSpeed")
-                                //
                                 var data = KeyboardStats(
                                     date,
                                     timeWindow,
@@ -137,7 +128,6 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
                                 //addToListOfFirebaseData(data)
                                 dataList.add(data)
                             }
-                            Log.d("FirebaseDatalist", dataList.toString())
                             _keyboardData.postValue(dataList)
                             Log.d("Firebase", "Data fetched from firebase")
                         } catch (e: Exception) {
@@ -160,11 +150,21 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
             }
         }
 
-    private fun clearLists() {
+    private fun clearAllLists() {
         errorsList.clear()
         speedsList.clear()
         totalSpeedsList.clear()
         speedsList.clear()
+        totalAvgErrors.clear()
+        totalErrList.clear()
+        sessionCount = 0L
+        wordCount = 0
+    }
+
+    private fun clearLoopLists() {
+        errorsList.clear()
+        speedsList.clear()
+        totalSpeedsList.clear()
         totalAvgErrors.clear()
         totalErrList.clear()
         sessionCount = 0L

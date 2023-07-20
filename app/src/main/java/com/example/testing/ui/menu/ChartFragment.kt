@@ -292,12 +292,6 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         for (i in stats) {
             labels.add(i.date)
             datasetList.add(i.entry)
-            /**if (!i.date.isNullOrEmpty()) {
-                customColors.add(darkPurple)
-                customColors.add(lightPurple)
-                customColors.add(teal)
-                customColors.add(mutedPurple)
-            //}**/
         }
         val v1: BarDataSet = BarDataSet(datasetList, label)
         v1.setDrawValues(false)
@@ -312,48 +306,11 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
 
     override fun onResume() {
         super.onResume()
-        //getFromFirebase("2023-01-05")
-        //binding.keyspeedData.text = avgSpeed.toString()
-        //Sets the progressbar correctly and returns
-        //binding.ProgressTextView.text = showPercentage(avgErrors, binding.progressCircular).toString()
-
     }
     override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
         //tvX!!.text = seekBarX!!.progress.toString()
         //tvY!!.text = seekBarY!!.progress.toString()
-        /**
-        val values = ArrayList<BarEntry>()
-        for (i in 0 until 10) {
-            val mul = (i + 1).toFloat()
-            val val1 = (Math.random() * mul).toFloat() + mul / 3
-            val val2 = (Math.random() * mul).toFloat() + mul / 3
-            val val3 = (Math.random() * mul).toFloat() + mul / 3
-            values.add(BarEntry(
-                i.toFloat(),
-                floatArrayOf(val1, val2, val3)))
-        }
-        val set1: BarDataSet
-        if (chart!!.data != null &&
-            chart!!.data.dataSetCount > 0
-        ) {
-            set1 = chart!!.data.getDataSetByIndex(0) as BarDataSet
-            set1.values = values
-            chart!!.data.notifyDataChanged()
-            chart!!.notifyDataSetChanged()
-        } else {
-            set1 = BarDataSet(values, "Statistics Vienna 2014")
-            set1.setDrawIcons(false)
-            //set1.setColors(*colors)
-            set1.stackLabels = arrayOf("Births", "Divorces", "Marriages")
-            val dataSets = ArrayList<IBarDataSet>()
-            dataSets.add(set1)
-            val data = BarData(dataSets)
-            //data.setValueFormatter(MyValueFormatter())
-            data.setValueTextColor(Color.WHITE)
-            chart!!.data = data
-        }
-        chart!!.setFitBars(true)
-        chart!!.invalidate()**/
+
     }
 
     override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -367,8 +324,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
     private fun prepareChartData(chart: BarChart, data: BarData) {
         chart.data = data
         chart.barData.barWidth = BAR_WIDTH
-        //data.setValueFormatter(MyValueFormatter())
-        //chart.invalidate()
+
         if (chart == stackedBarChart) {
             chart.setVisibleXRangeMaximum(7f)
         } else {

@@ -170,7 +170,7 @@ class AuthenticationActivity : AppCompatActivity() {
                 .appendQueryParameter("code_challenge", CodeChallenge.getCodeChallenge(CODE_VERIFIER))
                 .appendQueryParameter("code_challenge_method", "S256")
                 .appendQueryParameter("scope", "sleep")
-                .appendQueryParameter("prompt", "login")
+                //.appendQueryParameter("prompt", "login")
                 .appendQueryParameter("state", uniqueState)
 
         return uri.build()

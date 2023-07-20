@@ -84,9 +84,13 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
     var data = SleepData(false, 0, "", "", HashMap<String, Any>())
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-            if (key == "access_token") {
-                checkFitbitLogin()
-            }
+        if (key == "access_token") {
+            checkFitbitLogin()
+        }
+        if (key == getString(R.string.sharedpref_accessibility)) {
+            updateKeyboardData()
+        }
+
     }
 
     override fun onCreateView(
@@ -127,8 +131,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
         }
 
         dateViewModel.selectedDate.observe(viewLifecycleOwner) {
-            Log.d("Dateviewmodel", "Date changed to: " +
-            dateViewModel.selectedDate.value)
             //firebaseViewModel.clearListOfFirebaseData()
             updateKeyboardData()
             checkFitbitLogin()
@@ -141,7 +143,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
         }
         updateKeyboardData()
 
-        //sharedPrefs.registerOnSharedPreferenceChangeListener(this)
+        sharedPrefs.registerOnSharedPreferenceChangeListener(this)
 
     }
 
@@ -307,9 +309,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
                     wordsPerMinute.add(wordsPM)
                 }
             }
-            Log.d("HomeFragment", "Total speed: ${totalSpeed.average()}l")
-            Log.d("HomeFragment", "Total speed: ${totalErr.average()}l")
-            Log.d("HomeFragment", "Total speed: ${totalErrRate.average()}l")
+
             binding.keyboardChart.keyboardDataNotFound.isVisible = false
             binding.keyboardChart.dataAvailable.isVisible = true
             val clippedStringWPM: String
@@ -347,11 +347,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
                 showPercentage(totalErrRate.average(),
                     binding.keyboardChart.progressCircular).toString() + "%"
         } else {
-            /**
-        binding.keyboardChart.speedData.text = "No data"
-        binding.keyboardChart.textViewStats.isVisible = false
-        binding.keyboardChart.ProgressTextView.text = "--"
-        binding.keyboardChart.progressCircular.isVisible = false**/
+
             binding.keyboardChart.dataAvailable.isVisible = false
             checkAccessibilityEnabled()
             Log.d("UpdateUI", "No data on keyboardList")

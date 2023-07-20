@@ -79,7 +79,6 @@ class FitbitApiService {
                         refreshToken = jsonObject.getString("refresh_token")
                         Utils.saveSharedSetting("access_token", accessToken)
                         Utils.saveSharedSetting("refresh_token", refreshToken)
-                        Log.d("Authorization: ", "Refresh token: $refreshToken")
                         Utils.saveSharedSettingBoolean("loggedInFitbit", true)
                         fitbitPermission = true
                     }
@@ -130,7 +129,6 @@ class FitbitApiService {
         fun getSleepData(date: String): SleepData {
                 try {
                     accessToken = Utils.readSharedSettingString("access_token", "")
-                    Log.d("GetSleepData", "original date: $date")
                     FuelManager.instance.basePath = "https://api.fitbit.com/1.2/user/-"
                     val url = "/sleep/date/$date.json"
 
@@ -139,7 +137,6 @@ class FitbitApiService {
                                 "Bearer $accessToken"
                     ).responseString()
                     val (sleepData, error) = result
-                    Log.d("GetSleepData", "sleepData: $sleepData")
                     val endTime: String?
                     val startTime: String?
                     val minutesAsleep: Int?
@@ -154,8 +151,6 @@ class FitbitApiService {
                         endTime = convertISOTimeToTime(endDateTime)
                         val duration = jsonArray.getJSONObject(0).getString("duration")
                         val dateOfSleep = jsonArray.getJSONObject(0).getString("dateOfSleep")
-                        Log.i("Sleep", "Duration: $duration")
-                        Log.i("Sleep", "Date of sleep : $dateOfSleep")
                         runningThread = false
                         authAttempted = false
                         val stringJson = jsonObject.toString(2)

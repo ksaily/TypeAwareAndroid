@@ -74,14 +74,8 @@ class ChartViewModel: ViewModel() {
         _sleepDataValues.postValue(listOf())
     }
 
-    private fun clearLists() {
-        sessionCount = 0
+    private fun clearAllLists() {
         dataList.clear()
-        wordCount = 0
-        dataFound = true
-        averageWPM = 0.0
-        errorsAvgList.clear()
-        speedsAvgList.clear()
         iterErrList.clear()
         iterSpeedList.clear()
         for (i in 0..143) {
@@ -91,10 +85,18 @@ class ChartViewModel: ViewModel() {
         }
     }
 
+    private fun clearLoopLists() {
+        sessionCount = 0
+        wordCount = 0
+        dataFound = true
+        averageWPM = 0.0
+        errorsAvgList.clear()
+        speedsAvgList.clear()
+    }
+
 
     fun getFromFirebaseToChart(date: String) {
         //val dataFound: Boolean = false
-        var sessionCount = 0L
         val rootRef = FirebaseDatabase.getInstance().reference
         val authId = Utils.readSharedSettingString("firebase_auth_uid", "").toString()
         val participantId = Utils.readSharedSettingString(
@@ -105,9 +107,10 @@ class ChartViewModel: ViewModel() {
         val valueEventListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
+                    clearAllLists()
                     val children = snapshot.children
                     children.forEach { dataSnapshot ->
-                        clearLists()
+                        clearLoopLists()
                         val child = dataSnapshot.children
                         child.forEach {
                             try {
@@ -124,7 +127,6 @@ class ChartViewModel: ViewModel() {
                                 //errorsAvgList.add(y)
                                 sessionCount += 1
                                 wordCount = (wordCount + it.child("wordCount").value as Long).toInt()
-                                Log.d("ChartViewModel", "ErrorAmount: $y")
                             } catch (e: Exception) {
                                 Log.d("FirebaseError", "$e")
                             }
@@ -184,35 +186,35 @@ class ChartViewModel: ViewModel() {
     }
 
     private fun checkDoubleNotNull(double: Double): Boolean {
-        return (double.isFinite() && double != 0.0)
+        return (double.isFinite())
     }
 
     fun getSleepDataFromThisWeek(startDate: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            sleepDataList.clear()
-            dates.clear()
-            var previousDay = startDate
-            for (i in 0 .. 7) {
-                sleepDataList.add(SleepDataForChart("", BarEntry(0f, floatArrayOf(0f,0f,0f,0f))))
-            }
-            for (i in 0..6) {
-                dates.add(previousDay)
-                previousDay = Utils.getPreviousDateString(previousDay)
-            }
-            dates.add("") // Add one empty space for chart
-            dates.reverse()
-
-            val accessToken = Utils.readSharedSettingString("access_token", "")
-            FuelManager.instance.basePath = "https://api.fitbit.com/1.2/user/-"
-
-            val startDay = dates[1]
-
-            val startDateFitbit = Utils.formatForFitbit(startDay)
-            val endDateFitbit = Utils.formatForFitbit(dates.last())
-            Log.d("Dates reversed", dates.toString())
-
-            val url = "/sleep/date/$startDateFitbit/$endDateFitbit.json"
             try {
+                sleepDataList.clear()
+                dates.clear()
+                var previousDay = startDate
+                for (i in 0 .. 7) {
+                    sleepDataList.add(SleepDataForChart("", BarEntry(0f, floatArrayOf(0f,0f,0f,0f))))
+                }
+                for (i in 0..6) {
+                    dates.add(previousDay)
+                    previousDay = Utils.getPreviousDateString(previousDay)
+                }
+                dates.add("") // Add one empty space for chart
+                dates.reverse()
+
+                val accessToken = Utils.readSharedSettingString("access_token", "")
+                FuelManager.instance.basePath = "https://api.fitbit.com/1.2/user/-"
+
+                val startDay = dates[1]
+
+                val startDateFitbit = Utils.formatForFitbit(startDay)
+                val endDateFitbit = Utils.formatForFitbit(dates.last())
+                //Log.d("Dates reversed", dates.toString())
+
+                val url = "/sleep/date/$startDateFitbit/$endDateFitbit.json"
                 val (_, response, result) = url.httpGet().header(
                     "Authorization" to "Bearer $accessToken"
                 ).responseString()
@@ -226,13 +228,9 @@ class ChartViewModel: ViewModel() {
                     if (jsonArray != null && jsonArray.length() > 0) {
                         for (i in 0 until jsonArray.length()) {
                             val obj = jsonArray.getJSONObject(i)
-                            Log.d("Obj", obj.toString())
                             val dateOfSleep = obj.getString("dateOfSleep")
-                            Log.d("DateOfSleep", dateOfSleep.toString())
                             val sleepLogDay = Utils.formatDateStringFromFitbit(dateOfSleep)
-                            Log.d("levels", obj.getJSONObject("levels").toString())
                             val summary = obj.getJSONObject("levels").getJSONObject("summary")
-                            Log.d("levels", summary.toString())
                             val deepSleep = summary.getJSONObject("deep").getInt("minutes")
                             val lightSleep = summary.getJSONObject("light").getInt("minutes")
                             val remSleep = summary.getJSONObject("rem").getInt("minutes")
@@ -244,7 +242,6 @@ class ChartViewModel: ViewModel() {
 
 
                             val index = dates.indexOf(sleepLogDay)
-                            Log.d("Index", "$index Day $sleepLogDay")
                             if (index != -1) {
                                 sleepDataList[index] = SleepDataForChart(
                                     Utils.formatDateForChart(sleepLogDay),
@@ -257,9 +254,6 @@ class ChartViewModel: ViewModel() {
                                 )
                             }
                         }
-
-                        Log.d("SleepDataValuesList:", sleepDataList.toString())
-                        Log.d("SleepDataValues", "Post")
                         _sleepDataValues.postValue(sleepDataList)
                     }
                  else {
@@ -270,7 +264,6 @@ class ChartViewModel: ViewModel() {
                     val code = Utils.readSharedSettingString("authorization_code", "")
                     val state = Utils.readSharedSettingString("state", "")
                     if (code!!.isNotEmpty() && state!!.isNotEmpty() && !authAttempted) {
-                        Log.d("GetSleepDataFailure", "Re-authorizing")
                         getRefreshToken(code, state)
                         authAttempted = true
                         getSleepDataFromThisWeek(startDate)
