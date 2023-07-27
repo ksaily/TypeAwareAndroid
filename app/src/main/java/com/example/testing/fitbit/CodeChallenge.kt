@@ -26,6 +26,9 @@ class CodeChallenge {
             )
         }
 
+
+
+
         fun getCodeChallenge(verifier: String): String {
             val bytes = verifier.toByteArray()
             val messageDigest = MessageDigest.getInstance("SHA-256")

@@ -133,7 +133,7 @@ class DailyQuestionnaireDialog : DialogFragment(){
             "Q4: How suitable would this information be for other people or is it more useful just for you?",
             "You have now answered all the questionnaires and finished the study, congratulations! \n\n" +
                     "Enter this code into Prolific to receive your compensation: \n\nCFT8BY87 \n\n" +
-                    "If you wish to fill out an additional end questionnaire, you can find the link on the initial instructions that you received" +
+                    "If you wish to fill out an additional end questionnaire, you can find the link on the instructions website that you were directed to" +
                     " in the beginning of the study."
         )
     }
@@ -282,7 +282,7 @@ class DailyQuestionnaireDialog : DialogFragment(){
                     2 -> {
                         val selectedRadioButtonId = binding.radioGroup2.checkedRadioButtonId
                         val textAns = binding.explainAnswer.text
-                        currentAnswer = "${getSelectedOptionYesNoBtn(selectedRadioButtonId)} $textAns"
+                        currentAnswer = "${getSelectedOptionYesNoBtn(selectedRadioButtonId)}-$textAns"
                     }
                     3 -> { val selectedRadioButtonId = binding.radioGroup1.checkedRadioButtonId
                         currentAnswer = getSelectedOptionIndex(selectedRadioButtonId) }
@@ -295,7 +295,7 @@ class DailyQuestionnaireDialog : DialogFragment(){
                     1 -> {
                         val selectedRadioButtonId = binding.radioGroup2.checkedRadioButtonId
                         val textAns = binding.explainAnswer.text
-                        currentAnswer = "${getSelectedOptionYesNoBtn(selectedRadioButtonId)} $textAns"
+                        currentAnswer = "${getSelectedOptionYesNoBtn(selectedRadioButtonId)}-$textAns"
                         //saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
                         checkAnswerNotEmpty()
                     }
@@ -308,7 +308,7 @@ class DailyQuestionnaireDialog : DialogFragment(){
                     3 -> {
                         val selectedRadioButtonId = binding.radioGroup2.checkedRadioButtonId
                         val textAns = binding.explainAnswer.text
-                        currentAnswer = "${getSelectedOptionYesNoBtn(selectedRadioButtonId)} $textAns"
+                        currentAnswer = "${getSelectedOptionYesNoBtn(selectedRadioButtonId)}-$textAns"
                         //saveAnswerToDatabase(currentQuestionIndex+1, currentAnswer)
                         checkAnswerNotEmpty()
                     }
@@ -367,7 +367,7 @@ class DailyQuestionnaireDialog : DialogFragment(){
         return when (selectedRadioButtonId) {
             R.id.yesBtn -> "Yes"
             R.id.noBtn -> "No"
-            else -> "-"
+            else -> ""
         }
     }
 

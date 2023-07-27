@@ -277,39 +277,40 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     private fun showAlertDialog(context: Context, action: Int) {
         if (currentAlertDialog != null && currentAlertDialog!!.isShowing) {
             return
-        }
-        val alertDialog: AlertDialog.Builder = AlertDialog.Builder(context)
-        when (action) {
-            0 -> {
-                alertDialog.setTitle(R.string.accessibility_perm_snackbar_title)
-                alertDialog.setMessage(R.string.accessibility_perm_snackbar_msg)
-            }
-            1 -> {
-                alertDialog.setTitle(R.string.battery_opt_snackbar_title)
-                alertDialog.setMessage(R.string.battery_opt_snackbar_msg)
-            }
-        }
-        alertDialog.setPositiveButton(
-            "OK"
-        ) { _, _ ->
+        } else {
+            val alertDialog: AlertDialog.Builder = AlertDialog.Builder(context)
             when (action) {
                 0 -> {
-                    Utils.checkAccessibilityPermission(Graph.appContext, true)
+                    alertDialog.setTitle(R.string.accessibility_perm_snackbar_title)
+                    alertDialog.setMessage(R.string.accessibility_perm_snackbar_msg)
                 }
-
                 1 -> {
-                    Utils.checkBattery(Graph.appContext)
-
+                    alertDialog.setTitle(R.string.battery_opt_snackbar_title)
+                    alertDialog.setMessage(R.string.battery_opt_snackbar_msg)
                 }
             }
+            alertDialog.setPositiveButton(
+                "OK"
+            ) { _, _ ->
+                when (action) {
+                    0 -> {
+                        Utils.checkAccessibilityPermission(Graph.appContext, true)
+                    }
 
+                    1 -> {
+                        Utils.checkBattery(Graph.appContext)
+
+                    }
+                }
+
+            }
+            alertDialog.setNegativeButton(
+                "Cancel"
+            ) { _, _ ->
+            }
+            currentAlertDialog = alertDialog.create()
+            currentAlertDialog?.setCanceledOnTouchOutside(true)
+            currentAlertDialog?.show()
         }
-        alertDialog.setNegativeButton(
-            "Cancel"
-        ) { _, _ ->
-        }
-        currentAlertDialog = alertDialog.create()
-        currentAlertDialog?.setCanceledOnTouchOutside(true)
-        currentAlertDialog?.show()
     }
 }

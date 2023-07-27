@@ -54,10 +54,18 @@ class AuthenticationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val authorizationUrl = buildUrl(fitbitAuthUrl)
-        launchAuthorizationPage(authorizationUrl)
+        try {
+            val authorizationUrl = buildUrl(fitbitAuthUrl)
+            println(authorizationUrl)
+            launchAuthorizationPage(authorizationUrl)
+        }
+        catch (e: Exception) {
+            Log.d("Error", "$e")
+        }
+    }
 
         /**
+
         val builder = CustomTabsIntent.Builder()
         val customTabsIntent = builder.build()
         customTabsIntent.intent.putExtra(Intent.EXTRA_REFERRER,
@@ -68,16 +76,13 @@ class AuthenticationActivity : AppCompatActivity() {
             customTabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             Log.d("Authorization", "$authorizationUrl")
             customTabsIntent.launchUrl(this, Uri.parse(authorizationUrl.toString()))
-        } catch (e: Exception) {
-            Log.d("Error", "$e")
         }**/
-    }
 
     private fun launchAuthorizationPage(uri: Uri) {
 
         val intent = Intent(Intent.ACTION_VIEW, uri)
-        intent.putExtra(Intent.EXTRA_REFERRER,
-              Uri.parse("android-app://" + Graph.appContext.packageName))
+        //intent.putExtra(Intent.EXTRA_REFERRER,
+        //      Uri.parse("android-app://" + Graph.appContext.packageName))
         startActivity(intent)
     }
 
@@ -128,10 +133,12 @@ class AuthenticationActivity : AppCompatActivity() {
         val code = intent.data?.getQueryParameter("code")
         val state = intent.data?.getQueryParameter("state")
         //val redirect = intent?.data?.getQueryParameter("redirect")
+        Log.d("Intent", "$intent")
+        println(intent.data)
         if (code != null && state != null) {
             Log.d("Authorization", "Access and refresh tokens acquired")
-            Utils.saveSharedSetting("authorization_code", code)
             Utils.saveSharedSetting("state", state)
+            Utils.saveSharedSetting("authorization_code", code)
             AUTH_CODE = code
             uniqueState = state
             lifecycleScope.launch(Dispatchers.IO) {
@@ -162,16 +169,15 @@ class AuthenticationActivity : AppCompatActivity() {
 
     private fun buildUrl(url: String): Uri {
         uniqueState = UUID.randomUUID().toString()
-            val uri = Uri.parse(url)
-                .buildUpon()
-                .appendQueryParameter("response_type", "code")
-                .appendQueryParameter("client_id", CodeChallenge.CLIENT_ID)
-                .appendQueryParameter("redirect_uri", REDIRECT_URL)
-                .appendQueryParameter("code_challenge", CodeChallenge.getCodeChallenge(CODE_VERIFIER))
-                .appendQueryParameter("code_challenge_method", "S256")
-                .appendQueryParameter("scope", "sleep")
-                //.appendQueryParameter("prompt", "login")
-                .appendQueryParameter("state", uniqueState)
+        val uri = Uri.parse(url)
+            .buildUpon()
+            .appendQueryParameter("client_id", CLIENT_ID)
+            .appendQueryParameter("response_type", "code")
+            .appendQueryParameter("redirect_uri", REDIRECT_URL)
+            .appendQueryParameter("code_challenge", CodeChallenge.getCodeChallenge(CODE_VERIFIER))
+            .appendQueryParameter("code_challenge_method", "S256")
+            .appendQueryParameter("scope", "sleep")
+            .appendQueryParameter("state", uniqueState)
 
         return uri.build()
     }

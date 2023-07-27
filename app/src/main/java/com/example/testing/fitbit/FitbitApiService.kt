@@ -21,25 +21,14 @@ import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.core.isSuccessful
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.result.Result
-import com.github.scribejava.core.builder.ServiceBuilder
-import com.github.scribejava.core.model.OAuthConstants.CLIENT_SECRET
-import com.github.scribejava.core.oauth.OAuth20Service
 import com.google.gson.Gson
-import com.google.gson.internal.Streams.parse
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.runBlocking
-import org.json.JSONArray
 import org.json.JSONObject
 import org.json.JSONTokener
-import org.xml.sax.Parser
-import java.net.HttpURLConnection
-import java.net.URL
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.logging.Level.parse
 import kotlin.collections.HashMap
-import kotlin.coroutines.coroutineContext
 
 /**
  * Fitbit's OAuth2 client's implementation
@@ -49,7 +38,7 @@ import kotlin.coroutines.coroutineContext
 class FitbitApiService {
     companion object {
 
-        private val fitbitTokenUrl = "https://api.fitbit.com/oauth2/token"
+        private const val fitbitTokenUrl = "https://api.fitbit.com/oauth2/token"
         private val grantType: String? = null
         var accessToken: String? = null
         var refreshToken: String? = null
@@ -71,6 +60,10 @@ class FitbitApiService {
                     "authorization_code", code, state)
                 //Log.d("HTTP Result", "Result: $result")
                 Log.d("HTTP Response", "Response: $response")
+                Log.d("HTTP Request", "$request")
+                Log.d("HTTP result", "$result")
+                val header = request.headers
+                Log.d("Headers", "$header")
                 val (auth, err) = result
                 when (result) {
                     is Result.Success -> {
@@ -132,10 +125,11 @@ class FitbitApiService {
                     FuelManager.instance.basePath = "https://api.fitbit.com/1.2/user/-"
                     val url = "/sleep/date/$date.json"
 
-                    val (_, response, result) = url.httpGet().header(
-                        "Authorization" to
-                                "Bearer $accessToken"
-                    ).responseString()
+                    val (_, response, result) = url.httpGet()
+                        .header(
+                    "Authorization" to
+                                "Bearer $accessToken" )
+                        .responseString()
                     val (sleepData, error) = result
                     val endTime: String?
                     val startTime: String?
@@ -185,15 +179,15 @@ class FitbitApiService {
             code: String,
             state: String,
         ): Triple<Request, Response, Result<String, Exception>> {
+            //val encdodedStr = CodeChallenge.getHeader()
             return if (grant == "authorization_code") {
                 fitbitTokenUrl.httpPost(listOf(
                     "client_id" to CLIENT_ID,
+                    "grant_type" to "authorization_code",
                     "code" to code,
                     "code_verifier" to CODE_VERIFIER,
-                    "redirect_uri" to REDIRECT_URL,
-                    "state" to state,
-                    "grant_type" to grant
-                )).responseString()
+                    "redirect_uri" to REDIRECT_URL))
+                    .header("Content-Type" to "application/x-www-form-urlencoded").responseString()
             } else {
                 refreshToken = Utils.readSharedSettingString("refresh_token", "")
                 Log.d("Authorization", "Refresh token needed")
