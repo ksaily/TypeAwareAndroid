@@ -159,6 +159,7 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
         totalErrList.clear()
         sessionCount = 0L
         wordCount = 0
+        dataList.clear()
     }
 
     private fun clearLoopLists() {

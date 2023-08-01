@@ -50,6 +50,7 @@
 
     <PreferenceCategory app:title="@string/help">
         <EditTextPreference
+            app:key="@string/contact"
             app:summary="@string/contact_info"/>
 
     </PreferenceCategory>

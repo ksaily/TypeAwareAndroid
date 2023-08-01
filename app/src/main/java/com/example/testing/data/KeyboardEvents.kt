@@ -16,7 +16,7 @@ data class KeyboardEvents(
     val beforeText: CharSequence,
     val dailyTimeWindow: Int,
     val date: String
-)
+    )
 
 
 

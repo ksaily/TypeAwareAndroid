@@ -81,7 +81,7 @@
                 android:background="@drawable/roundstyle"
                 android:text="@string/home_keyboard_data_not_found_btn"
                 android:layout_gravity="center"
-                android:textSize="12dp"
+                android:textSize="12sp"
                 android:padding="5dp"
                 android:layout_marginTop="8dp"
                 android:id="@+id/openAccessibilitySettingsBtn"/>

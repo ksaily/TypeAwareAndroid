@@ -116,6 +116,7 @@
     <string name="sleep_data_key">show_sleep_data</string>
     <string name="network_pref_key">network_prefs</string>
     <string name="notifications_key">notifications_enabled</string>
+    <string name="contact">contact</string>
 
 
     <!-- Permissions -->

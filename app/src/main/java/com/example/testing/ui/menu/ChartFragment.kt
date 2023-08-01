@@ -1,13 +1,11 @@
 package com.example.testing.ui.menu
 
-import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
-import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.content.res.ResourcesCompat.getColor
 import androidx.fragment.app.Fragment
@@ -15,7 +13,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.testing.Graph
 import com.example.testing.R
-import com.example.testing.charts.CustomMarker
 import com.example.testing.databinding.FragmentChartBinding
 import com.example.testing.ui.viewmodel.ChartViewModel
 import com.example.testing.ui.viewmodel.DateViewModel
@@ -31,7 +28,6 @@ import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Math.random
 import java.util.*
 
 private const val ARG_PARAM1 = "param1"
@@ -47,29 +43,10 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
     private var barChart1: BarChart? = null
     private var barChart2: BarChart? = null
     private var stackedBarChart: BarChart? = null
-    private var chart: BarChart? = null
-
-    private var seekBarX: SeekBar? = null
-    private var seekBarY: SeekBar? = null
-    private var tvX: TextView? = null
-    private var tvY: TextView? = null
 
     // Chart variables:
-    private val MAX_X_VALUE = 144
-    private val GROUPS = 2
-    private val GROUP_1_LABEL = "Errors"
-    private val GROUP_2_LABEL = "Words"
-    private val BAR_SPACE = 0.1f
     private val BAR_WIDTH = 0.6f
-    private val GROUP_SPACE = 0.1f
-    protected var tfRegular: Typeface? = null
-    protected var tfLight: Typeface? = null
     private val statValues: ArrayList<Float> = ArrayList()
-    protected val statsTitles = arrayOf(
-        "Sessions", "Time window"
-    )
-    private val labels1= ArrayList<String>()
-    private val labels2= ArrayList<String>()
     private var lightPurple: Int = 0
     private var darkPurple: Int = 0
     private var teal: Int = 0
@@ -211,7 +188,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
                 }
             }
         }
-
+        xAxisTimeOfDayLabel.clear()
         for (i in 0..143) {
             when (i) {
                 0 -> xAxisTimeOfDayLabel.add("12AM")

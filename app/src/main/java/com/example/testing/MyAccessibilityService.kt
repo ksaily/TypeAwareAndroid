@@ -104,6 +104,9 @@ class MyAccessibilityService : AccessibilityService() {
                 if (beforeString.isNullOrEmpty()) {
                     resetValues()
                 } else {
+                    if (!typingTimes.isNullOrEmpty()) {
+                        val wordsPerMinute = 60 / typingTimes.average()
+                    }
                     val date = KeyboardHelper.dateFormatter(Date())
                     currentTimeSlot = countTimeSlot()
                     val keyboardEvent = KeyboardEvents(UUID.randomUUID().toString(),
