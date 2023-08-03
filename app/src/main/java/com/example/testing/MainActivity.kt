@@ -2,7 +2,6 @@ package com.example.testing
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
@@ -10,11 +9,8 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
 import com.example.testing.databinding.ActivityMainBinding
-import com.example.testing.fitbit.FitbitApiService
 import com.example.testing.notifications.AlarmReceiver
 import com.example.testing.questionnaire.DailyQuestionnaireDialog
 import com.example.testing.ui.menu.HomeFragment
@@ -36,8 +32,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.concurrent.schedule
 
@@ -126,7 +120,9 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
                 questionnaireDialog.firstWeekQuestions()
                 //Check that user info is given before showing questionnaire
                 Log.d("DailyQuestionnaire", "Questionnaire not answered")
-                questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
+                if (supportFragmentManager.findFragmentByTag("DailyQuestionnaireDialog") == null) {
+                    questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
+                }
 
             } else if (!readSharedSettingBoolean(getString(R.string.sharedpref_questionnaire_ans),
                     false) &&
@@ -186,10 +182,11 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         ) { questionnaireDialog.showQuestionnaire(
             Utils.getCurrentDateString() == readSharedSettingString(getString(R.string.sharedpref_questionnaire_day), ""
             ))
+            /**
             Timer("CheckQuestionnaire", false).schedule(2000) {
                 checkDailyQuestionnaire()
             }
-            checkSecondWeekBtn()
+            checkSecondWeekBtn()**/
     }}
 
 
@@ -266,7 +263,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
                 R.string.sharedpref_accessibility), false)) {
             showAlertDialog(this@MainActivity, 0)
         }
-        if (!readSharedSettingBoolean(getString(R.string.sharedpref_battery), false)) {
+        else if (!readSharedSettingBoolean(getString(R.string.sharedpref_battery), false)) {
             showAlertDialog(this@MainActivity, 1)
         }
     }

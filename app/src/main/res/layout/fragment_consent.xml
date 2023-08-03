@@ -132,12 +132,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_weight="1"
-            android:textColor="@color/white"
             android:padding="5dp"
+            style="@style/btn"
             android:elevation="10dp"
             android:layout_margin="8dp"
-            android:background="@drawable/roundstyle"
-            android:backgroundTint="@color/light_purple"
             android:text="@string/con_btn_give_consent"
             android:textSize="12sp" />
 

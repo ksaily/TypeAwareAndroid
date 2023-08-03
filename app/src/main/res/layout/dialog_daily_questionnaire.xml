@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/white">
@@ -38,46 +39,54 @@
             android:paddingVertical="8dp">
 
             <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:id="@+id/likertScale1"
-                android:text="@string/likert_1"/>
-
-            <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:minHeight="32dp"
+                android:text="@string/likert_1"
+                tools:ignore="TouchTargetSizeCheck" />
+
+            <RadioButton
                 android:id="@+id/likertScale2"
-                android:text="@string/likert_2"/>
-
-            <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="@string/likert_2"
+                tools:ignore="TouchTargetSizeCheck" />
+
+            <RadioButton
                 android:id="@+id/likertScale3"
-                android:text="@string/likert_3"/>
-
-            <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="@string/likert_3"
+                tools:ignore="TouchTargetSizeCheck" />
+
+            <RadioButton
                 android:id="@+id/likertScale4"
-                android:text="@string/likert_4"/>
-
-            <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/likertScale5"
-                android:text="@string/likert_5"/>
+                android:text="@string/likert_4"
+                tools:ignore="TouchTargetSizeCheck" />
 
             <RadioButton
+                android:id="@+id/likertScale5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/likert_5"
+                tools:ignore="TouchTargetSizeCheck" />
+
+            <RadioButton
+                android:id="@+id/likertScale6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/likert_6"
-                android:id="@+id/likertScale6"/>
+                tools:ignore="TouchTargetSizeCheck,TouchTargetSizeCheck" />
 
             <RadioButton
+                android:id="@+id/likertScale7"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/likertScale7"
-                android:text="@string/likert_7"/>
+                android:text="@string/likert_7"
+                tools:ignore="TouchTargetSizeCheck" />
         </RadioGroup>
 
 
@@ -91,7 +100,7 @@
             android:padding="10dp"
             android:visibility="gone"
             android:layout_gravity="center_horizontal"
-            android:hint="Words per minute"
+            android:hint="@string/words_per_minute"
             android:inputType="number"
             android:minHeight="48dp"
             android:layout_marginVertical="10dp"
@@ -122,13 +131,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/yesBtn"
-            android:text="Yes"/>
+            android:text="@string/yes"/>
 
         <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/noBtn"
-            android:text="No"/>
+            android:text="@string/no"/>
         </RadioGroup>
 
         <EditText
@@ -141,7 +150,7 @@
             android:padding="5dp"
             android:visibility="visible"
             android:layout_gravity="center_horizontal"
-            android:hint="Please explain here."
+            android:hint="@string/please_explain_here"
             android:layout_marginVertical="10dp"
             android:inputType="textCapSentences|textMultiLine"
             android:maxLength="2000"
@@ -159,7 +168,7 @@
             android:padding="5dp"
             android:visibility="gone"
             android:layout_gravity="center_horizontal"
-            android:hint="Please explain here."
+            android:hint="@string/please_explain_here"
             android:layout_marginVertical="10dp"
             android:inputType="textCapSentences|textMultiLine"
             android:maxLength="3000"
@@ -172,7 +181,7 @@
             style="@style/btn"
             android:layout_margin="10dp"
             android:layout_gravity="center_horizontal"
-            android:text="Submit" />
+            android:text="@string/submit_btn" />
 
     </LinearLayout>
 

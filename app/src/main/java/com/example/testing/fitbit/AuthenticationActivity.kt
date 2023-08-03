@@ -134,7 +134,6 @@ class AuthenticationActivity : AppCompatActivity() {
         val state = intent.data?.getQueryParameter("state")
         //val redirect = intent?.data?.getQueryParameter("redirect")
         Log.d("Intent", "$intent")
-        println(intent.data)
         if (code != null && state != null) {
             Log.d("Authorization", "Access and refresh tokens acquired")
             Utils.saveSharedSetting("state", state)

@@ -219,12 +219,13 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
                 val asleepString = "$hours h $minutes m"
                 println(asleepString)
                 sleepAmount.text = asleepString
+                /**
                 val participantId = readSharedSettingString("p_id", "")
                 firebaseViewModel.saveSleepDataToFirebase(
                     dateViewModel.selectedDate.value.toString(),
                     data,
                     participantId.toString()
-                )
+                )**/
             } else {
                 Log.d("HomeFragment", "No sleep data available")
                 sleepData.isVisible = false

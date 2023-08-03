@@ -3,7 +3,7 @@
     <!-- Button style -->
     <style name="btn" parent="TextAppearance.AppCompat">
         <item name="android:textColor">@color/white</item>
-        <item name="android:backgroundTint">@color/dark_purple</item>
+        <item name="android:backgroundTint">@color/light_purple</item>
         <item name="android:background">@drawable/roundstyle</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>

@@ -58,12 +58,7 @@ class FitbitApiService {
                 //val basicToken = "Basic " + Base64.getEncoder().encodeToString("$CLIENT_ID:$CLIENT_SECRET".toByteArray())
                 val (request, response, result) = buildTokenRequest(
                     "authorization_code", code, state)
-                //Log.d("HTTP Result", "Result: $result")
-                Log.d("HTTP Response", "Response: $response")
-                Log.d("HTTP Request", "$request")
-                Log.d("HTTP result", "$result")
                 val header = request.headers
-                Log.d("Headers", "$header")
                 val (auth, err) = result
                 when (result) {
                     is Result.Success -> {

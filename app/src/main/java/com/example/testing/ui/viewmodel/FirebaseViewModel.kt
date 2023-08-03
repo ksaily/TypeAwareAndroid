@@ -104,10 +104,6 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
                                     wordCount = (wordCount + it.child("wordCount").value as Long).toInt()
                                     errorsList.add(it.child("errorAmount").value as Long)
                                     errorRateList.add((it.child("errorRate").value as Number).toDouble())
-                                    //Add the average for one instance to a new list
-                                    Log.d("FirebaseDebug", "SpeedsList: $speedsList")
-                                    Log.d("FirebaseDebug", "ErrorsList: $errorsList")
-                                    Log.d("FirebaseDebug", "ErrorRateList: $errorRateList")
                                 }
                                 totalErrList = (totalErrList + errorsList).toMutableList()
                                 timeWindow = dataSnapshot.key?.toInt()!!
@@ -129,7 +125,6 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
                                 dataList.add(data)
                             }
                             _keyboardData.postValue(dataList)
-                            Log.d("Firebase", "Data fetched from firebase")
                         } catch (e: Exception) {
                             Log.d("FirebaseDebug", "Error: $e")
                             // skip this value

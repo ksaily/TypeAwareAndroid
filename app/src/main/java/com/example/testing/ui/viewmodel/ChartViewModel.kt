@@ -1,11 +1,13 @@
 package com.example.testing.ui.viewmodel
 
+import android.provider.Settings.Global.getString
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.testing.Graph
+import com.example.testing.R
 import com.example.testing.fitbit.FitbitApiService.Companion.authorizeRequestToken
 import com.example.testing.fitbit.FitbitApiService.Companion.getRefreshToken
 import com.example.testing.data.KeyboardChart
@@ -20,6 +22,10 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -82,6 +88,18 @@ class ChartViewModel: ViewModel() {
             dataList.add(BarEntry(i.toFloat(), 0f))
             iterErrList.add(BarEntry(i.toFloat(), 0f))
             iterSpeedList.add(BarEntry(i.toFloat(), 0f))
+        }
+    }
+
+    private fun saveSleepDataToFirebase(date: String, data: Map<String, Any>) {
+        viewModelScope.launch {
+            val myRef = Firebase.database.getReference("Data")
+            val authId = Utils.readSharedSettingString("firebase_auth_uid", "").toString()
+            val participantId = Utils.readSharedSettingString("p_id", "").toString()
+
+            // Save data under the current timeslot with an unique id for each
+            myRef.child(authId).child(participantId)
+                .child(date).child("sleep").setValue(data)
         }
     }
 
@@ -218,13 +236,11 @@ class ChartViewModel: ViewModel() {
                 val (_, response, result) = url.httpGet().header(
                     "Authorization" to "Bearer $accessToken"
                 ).responseString()
-                println(response)
 
                 val (sleepData, error) = result
                 if (response.isSuccessful) {
                     val jsonObject = JSONTokener(sleepData).nextValue() as JSONObject
                     val jsonArray = jsonObject.optJSONArray("sleep")
-                    println(jsonArray)
                     if (jsonArray != null && jsonArray.length() > 0) {
                         for (i in 0 until jsonArray.length()) {
                             val obj = jsonArray.getJSONObject(i)
@@ -235,11 +251,6 @@ class ChartViewModel: ViewModel() {
                             val lightSleep = summary.getJSONObject("light").getInt("minutes")
                             val remSleep = summary.getJSONObject("rem").getInt("minutes")
                             val wakeSleep = summary.getJSONObject("wake").getInt("minutes")
-                            Log.d("deep", deepSleep.toString())
-                            Log.d("light", lightSleep.toString())
-                            Log.d("rem", remSleep.toString())
-                            Log.d("wake", wakeSleep.toString())
-
 
                             val index = dates.indexOf(sleepLogDay)
                             if (index != -1) {
@@ -252,9 +263,13 @@ class ChartViewModel: ViewModel() {
                                         wakeSleep.toFloat()
                                     ))
                                 )
+                                val stringJson = jsonObject.toString(2)
+                                val jsonMap: Map<String, Any> = Gson().fromJson(stringJson, object : TypeToken<HashMap<String, Any>>() {}.type)
+                                saveSleepDataToFirebase(sleepLogDay, jsonMap)
                             }
                         }
                         _sleepDataValues.postValue(sleepDataList)
+
                     }
                  else {
                     _sleepDataValues.postValue(ArrayList<SleepDataForChart>())
@@ -288,7 +303,7 @@ class ChartViewModel: ViewModel() {
         val endDateFitbit = Utils.formatForFitbit(endDate)
         try {
             val accessToken = Utils.readSharedSettingString("access_token", "")
-            Log.d("GetSleepDataFromThisWeek", "week's date: $startDateFitbit")
+            //Log.d("GetSleepDataFromThisWeek", "week's date: $startDateFitbit")
             FuelManager.instance.basePath = "https://api.fitbit.com/1.2/user/-"
             val url = "/sleep/date/$startDateFitbit.json"
 
@@ -297,7 +312,6 @@ class ChartViewModel: ViewModel() {
                         "Bearer $accessToken"
             ).responseString()
             val (sleepData, error) = result
-            Log.d("GetSleepData", "sleepData: $sleepData")
             if (response.isSuccessful) {
                 val jsonObject = JSONTokener(sleepData).nextValue() as JSONObject
                 val jsonArray = jsonObject.getJSONArray("sleep")
@@ -316,7 +330,6 @@ class ChartViewModel: ViewModel() {
                     val lightSleep = summary.getString("light")
                     val remSleep = summary.getString("rem")
                     val wakeSleep = summary.getString("wake")
-                    Log.i("Sleep", "Date of sleep : $sleepLogDay")
                     sleepDataList[0] =
                         SleepDataForChart(Utils.formatDateForChart(sleepLogDay), BarEntry(0.toFloat(),
                             floatArrayOf(deepSleep.toFloat(),

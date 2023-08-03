@@ -111,9 +111,6 @@ class DailyQuestionnaireDialog : DialogFragment(){
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-    }
-
 
 
     fun changeToEndQuestionnaire() {

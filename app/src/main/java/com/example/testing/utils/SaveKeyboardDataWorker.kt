@@ -53,13 +53,11 @@ class SaveKeyboardDataWorker(appContext: Context, workerParams: WorkerParameters
             if (KeyboardHelper.timeElapsed != 0.0) {
                 KeyboardHelper.typingTimes.add(KeyboardHelper.timeElapsed)
             }
-            KeyboardHelper.addToString(text.toString().removeSurrounding("[", "]"),
-                beforeText.toString(), true)
+            //KeyboardHelper.addToString(text.toString().removeSurrounding("[", "]"), beforeText, true, ev)
         } else { // Session has changed
             KeyboardHelper.newPackage = packageName.toString()
             //startTime = nanoTime()
-            KeyboardHelper.addToString(text.toString().removeSurrounding("[", "]"),
-                beforeText.toString(), false)
+            //KeyboardHelper.addToString(text.toString().removeSurrounding("[", "]"), beforeText, false)
             val saveKeyboardDataWork = OneTimeWorkRequestBuilder<SaveKeyboardDataWorker>()
             onSessionChange()
         }

@@ -14,8 +14,8 @@ class KeyboardHelper {
         var thisPackage: String = ""
         var timeElapsed: Double = 0.0
         var deletedChars: Int = 0
+        var deletedCharsAfterSessionChange: Int = 0
         var timeStampBeginning: Long = 0
-        var errorRate: Double = 0.0
         var beforeString: String = ""
         var currentTimeSlot: Int = 0
         var previousTimeSlot: Int = 0
@@ -48,8 +48,8 @@ class KeyboardHelper {
                 val newStr = trimmedStr.split("\\s+".toRegex())
                 Log.d("KeyboardEvents", "Trimmed words is: $newStr")
                 Log.d("KeyboardEvents", "Amount of words written: ${newStr.size}")
-                wordCount = newStr.size
-                newStr.size
+                //wordCount = newStr.size
+                //newStr.size
             }
         }
 
@@ -57,42 +57,39 @@ class KeyboardHelper {
             return (session == thisPackage) && (timeElapsedd < 10.0)
         }
 
-        fun checkDeletedChars(currentText: String, beforeText: String): Boolean {
-            return currentText.length < beforeText.length && beforeString.isNotEmpty()
-        }
-
-        fun addToString(text: String, beforeText: String, sameSession: Boolean) {
+        fun addToString(text: String, beforeText: String, sameSession: Boolean, removedChars: Int) {
             try {
-
-                if (checkDeletedChars(text, beforeText)) {
-                    Log.d("KeyboardEvents", "String before deleting a char: $beforeString")
-                    val newStr = beforeString.substring(0, beforeString.length - 1)
+                if (removedChars != 0) {
                     if (sameSession) {
-                        Log.d("KeyboardEvents", "String after deleting a char: $newStr")
-                        deletedChars++
-                        beforeString = newStr
-                    } else { //In case new session is started by deleting a char
-                        Log.d("KeyboardEvents", "String after deleting a char: $newStr")
-                        deletedChars = 1
+                        deletedChars += removedChars
+                    } else {
+                        deletedCharsAfterSessionChange = removedChars
                     }
                 } else if (text.isNotEmpty()) {
                     var newChar = text.last()
+                    newChar = if (newChar.isLetterOrDigit()) {
+                        'a'
+                    } else {
+                        ' ' // Remove symbols
+                    }
                     val isWordStart = checkWordStart(newChar, beforeText)
                     val isWordEnd = checkWordEnd(newChar, beforeText)
-                    if (newChar.isLetterOrDigit()) {
-                        newChar = 'a'
-                    }
+
                     if (sameSession) {
-                        if (isWordStart) {
-                            //Log.d("Firstletter", "ofWord")
-                            startTime = System.nanoTime()
-                        } else if (isWordEnd) {
+                        if (isWordEnd) {
                             wordCount ++ // Count words even if characters would be deleted after
                             endTime = System.nanoTime()
-                            //Log.d("Lastletter", "ofWord")
+                            Log.d("KeyboardEvents", "last letter")
                             // To seconds
                             timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
                             typingTimes.add(timeElapsed)
+                            if (isWordStart) {
+                                beforeString += ' '
+                            }
+                        }
+                        if (isWordStart) {
+                            Log.d("KeyboardEvents", "first letter")
+                            startTime = System.nanoTime()
                         }
                         // Record endtime in case of session change
                         endTime = System.nanoTime()
@@ -105,8 +102,6 @@ class KeyboardHelper {
                         timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
                         if (timeElapsed > 0) {
                             typingTimes.add(timeElapsed)
-                        } else {
-                            typingTimes.add(0.0)
                         }
                         if (newChar.isLetterOrDigit()) {
                             startTime = System.nanoTime()
@@ -115,6 +110,9 @@ class KeyboardHelper {
                         //Log.d("KeyboardEvents", "New char is: $newChar")
                         Log.d("KeyboardEvents", "Current string is: $newString")
                     }
+                } else {
+                    beforeString += " "
+                    startTime = System.nanoTime()
                 }
             }
             catch (e: Error) {
@@ -123,23 +121,21 @@ class KeyboardHelper {
         }
 
         private fun checkWordStart(currentChar: Char, beforeTxt: String): Boolean {
-            // Check if the character is the first character of a word (after a space)
+            // Check if the character is the first character of a word (after a space or empty field)
             val isSpaceBefore: Boolean = if (beforeTxt.isNotEmpty()) {
                 !beforeTxt.last().isLetterOrDigit()
             } else {
-                true //Before text is empty
+                true
             }
             return isSpaceBefore && currentChar.isLetterOrDigit()
         }
 
         private fun checkWordEnd(currentChar: Char, beforeTxt: String): Boolean {
-            // Check if the character is the first character of a word (after a space)
-            val isLetterBefore: Boolean = if (beforeTxt.isNotEmpty()) {
-                beforeTxt.last().isLetterOrDigit()
+            return if (beforeTxt.isEmpty()) {
+                currentChar.isLetterOrDigit()
             } else {
-                false
+                beforeTxt.last().isLetterOrDigit() && !currentChar.isLetterOrDigit()
             }
-            return isLetterBefore && !currentChar.isLetterOrDigit()
         }
 
         fun countErrorRate(): Double {

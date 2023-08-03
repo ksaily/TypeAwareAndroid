@@ -13,13 +13,14 @@ import com.example.testing.utils.KeyboardHelper.Companion.beforeString
 import com.example.testing.utils.KeyboardHelper.Companion.checkSameSession
 import com.example.testing.utils.KeyboardHelper.Companion.countErrorRate
 import com.example.testing.utils.KeyboardHelper.Companion.countTimeSlot
-import com.example.testing.utils.KeyboardHelper.Companion.countWords
 import com.example.testing.utils.KeyboardHelper.Companion.currentTimeSlot
 import com.example.testing.utils.KeyboardHelper.Companion.dataList
 import com.example.testing.utils.KeyboardHelper.Companion.deletedChars
+import com.example.testing.utils.KeyboardHelper.Companion.deletedCharsAfterSessionChange
 import com.example.testing.utils.KeyboardHelper.Companion.newPackage
 import com.example.testing.utils.KeyboardHelper.Companion.newString
 import com.example.testing.utils.KeyboardHelper.Companion.previousTimeSlot
+import com.example.testing.utils.KeyboardHelper.Companion.startTime
 import com.example.testing.utils.KeyboardHelper.Companion.thisPackage
 import com.example.testing.utils.KeyboardHelper.Companion.timeStampBeginning
 import com.example.testing.utils.KeyboardHelper.Companion.typingTimes
@@ -65,6 +66,7 @@ class MyAccessibilityService : AccessibilityService() {
                 //First character in a session, don't add to typing times
                 thisPackage = event.packageName.toString()
                 timeElapsedBetweenChars = 0.0
+                startTime = System.nanoTime()
                 Log.d("KeyboardEvents", "This is the first char of this session")
             } else {
                 endTimeBetweenChars = System.nanoTime()
@@ -92,8 +94,11 @@ class MyAccessibilityService : AccessibilityService() {
 
     private fun saveCharIfNotPassword(event: AccessibilityEvent, sameSession: Boolean) {
         if (!event.isPassword) {
+            Log.d("KeyboardEvents", event.toString())
+            val removedChars = event.removedCount
+            Log.d("RemovedChars", removedChars.toString())
             addToString(event.text.toString().removeSurrounding("[", "]"),
-                event.beforeText.toString(), sameSession)
+                event.beforeText.toString(), sameSession, removedChars)
         }
     }
 
@@ -143,6 +148,7 @@ class MyAccessibilityService : AccessibilityService() {
                 beforeString = newString
                 newString = ""
                 wordCount = 0
+                deletedChars = deletedCharsAfterSessionChange
             }
 
 }
