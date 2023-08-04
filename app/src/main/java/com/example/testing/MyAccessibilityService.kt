@@ -133,7 +133,7 @@ class MyAccessibilityService : AccessibilityService() {
                 beforeString = newString
                 newString = ""
                 wordCount = 0
-                deletedChars = deletedCharsAfterSessionChange
+                deletedChars = 0
             }
 
 }

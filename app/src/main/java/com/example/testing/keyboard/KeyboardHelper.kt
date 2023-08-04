@@ -59,8 +59,6 @@ class KeyboardHelper {
                 if (removedChars != 0) {
                     if (sameSession) {
                         deletedChars += removedChars
-                    } else {
-                        deletedCharsAfterSessionChange = removedChars
                     }
                 } else if (text.isNotEmpty()) {
                     var newChar = text.last()
