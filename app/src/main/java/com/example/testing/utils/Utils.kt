@@ -1,6 +1,5 @@
 package com.example.testing.utils
 
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -8,7 +7,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
-import android.provider.Settings.Global.getString
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -16,12 +14,10 @@ import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import com.example.testing.Graph
 import com.example.testing.R
+import com.example.testing.data.KeyboardStats
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.concurrent.schedule
 
 class Utils {
 
@@ -42,38 +38,11 @@ class Utils {
         private val questionnaireCompleteString = "QuestionnaireCompleted"
 
 
-        /**
-         * Count average for one instance in firebase database,
-         * which is a list of typing speeds and
-         * return the average speed for that instance
-         */
-        fun countAvgSpeed(speed: MutableList<Double>): Double {
-            var total = 0.0
-            for (i in speed) {
-                total += i
-            }
-            return total / speed.size
-        }
-
-        /**
-         * Count average for one day
-         * from a list of errors and
-         * return the average errors for that day
-         */
-        fun countAvgErrors(errors: MutableList<Long>): Double {
-            var total = 0.0
-            for (i in errors) {
-                total += i
-            }
-            return total / errors.size
-        }
-
         fun formatForFitbit(inputDate: String): String {
             val inputFormatter = SimpleDateFormat("dd-MM-yyyy")
             val outputFormatter = SimpleDateFormat("yyyy-MM-dd")
             val date = inputFormatter.parse(inputDate) as Date
             val returnDate = outputFormatter.format(date)
-            Log.d("DateFormat", "Date formatted from: $date to $returnDate")
             return returnDate
         }
 
@@ -89,7 +58,6 @@ class Utils {
             val outputFormatter = SimpleDateFormat("dd-MM-yyyy")
             val date = inputFormatter.parse(inputDate) as Date
             val returnDate = outputFormatter.format(date)
-            Log.d("DateFormat", "Date formatted from $inputDate to: $returnDate")
             return returnDate
         }
 
@@ -111,13 +79,6 @@ class Utils {
             cal.time = date
             cal.add(Calendar.DATE, +7)
             return formatter.format(cal.time)
-        }
-
-        fun dateHasPassed(inputDate: String): Boolean {
-            val date = formatter.parse(inputDate) as Date
-            val thisDay = formatter.parse(currentDate) as Date
-            //Check whether date is today or has passed
-            return date.before(thisDay) || date == thisDay
         }
 
         /**
@@ -272,7 +233,6 @@ class Utils {
             } catch (e: Settings.SettingNotFoundException) {
                 e.printStackTrace()
             }
-            Log.d("AccessibilitySettings", accessEnabled.toString())
             when (accessEnabled) {
                 0 -> return if (openSettings) {
                     Toast.makeText(context, R.string.accessibility_permission_required,
@@ -283,7 +243,6 @@ class Utils {
                     context.startActivity(intent)
                     false
                 } else {
-                    Log.d("AccessibilitySettings", "value false")
                     saveSharedSettingBoolean("accessibility_permission", false)
                     false
                 }
@@ -293,57 +252,11 @@ class Utils {
                     context.startActivity(intent)
                     true
                 } else {
-                    Log.d("AccessibilitySettings", "value true")
-
                     saveSharedSettingBoolean("accessibility_permission", true)
                     true
                 }
             }
         }
-
-        fun checkQuestionnaireWeek(startDay: String, weekNumber: Int) {
-            var nextDay: String = ""
-            if (weekNumber == 1) {
-                nextDay = readSharedSettingString("questionnaire_first_day",
-                    "").toString()
-                //val nextDay = getNextDateString(startDay)
-            } else if (weekNumber == 2) {
-                nextDay = readSharedSettingString("second_week_start_date",
-                    "").toString()
-            }
-            //val nextDay = getNextDateString(startDay)
-            val participantId = readSharedSettingString( "userId", "").toString()
-            val myRef = Firebase.database.getReference("Data")
-            var isQuestionnaireAnswered = false
-            var amountOfAnswers = 0
-            val dayAfter = getNextDateString(currentDate)
-            while (nextDay != dayAfter) {
-                myRef.child(participantId).child(nextDay).child("questionnaire")
-                    .child(questionnaireCompleteString).get().addOnSuccessListener { snapshot ->
-                        Log.d("Firebase", "Questionnaire listener2")
-                        isQuestionnaireAnswered = (snapshot.exists() &&
-                                snapshot.value as Boolean)
-                    }.addOnFailureListener {
-                        // Error occurred while checking if questionnaire is answered, show home screen
-                        Log.d("checkQuestionnaireWeek", "Failure on setting listener")
-                    }
-                if (isQuestionnaireAnswered) {
-                    amountOfAnswers++
-                }
-                nextDay = getNextDateString(nextDay)
-            }
-            if (amountOfAnswers == 7) {
-                if (weekNumber == 1) {
-                    saveSharedSettingBoolean("first_week_done", true)
-                    saveSharedSetting("second_week_start_date", currentDate)
-                    saveSharedSetting("second_week_end_date", getDateWeekFromNow(
-                        currentDate))
-                } else if (weekNumber == 2) {
-                    saveSharedSettingBoolean("second_week_done", true)
-                }
-            }
-        }
-
 
     }
 }

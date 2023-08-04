@@ -98,7 +98,6 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
 
         binding.switchToWritingSpeedBtn.setOnClickListener {
             if (viewModel.chartSelected == 0) {
-                Log.d("ChartFragment", "Switching chart to WPM")
                 binding.switchToWritingSpeedBtn.setTextAppearance(R.style.switchChartChosen)
                 binding.switchToErrorsBtn.setTextAppearance(R.style.switchChartNotChosen)
                 binding.switchToWritingSpeedBtn.setBackgroundResource(R.drawable.border_selected)
@@ -116,7 +115,6 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
 
         binding.switchToErrorsBtn.setOnClickListener {
             if (viewModel.chartSelected == 1) {
-                Log.d("ChartFragment", "Switching chart to error")
                 binding.switchToErrorsBtn.setTextAppearance(R.style.switchChartChosen)
                 binding.switchToWritingSpeedBtn.setTextAppearance(R.style.switchChartNotChosen)
                 binding.switchChartTitle.text = "Error rates"
@@ -135,7 +133,6 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
 
 
         viewModel.chartErrorValues.observe(viewLifecycleOwner) {
-            Log.d("ChartView", "Errors found")
             if (viewModel.chartSelected == 0) {
                 val stats = viewModel.chartErrorValues.value
                 if (stats != null) {
@@ -146,7 +143,6 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         }
 
         viewModel.chartSpeedValues.observe(viewLifecycleOwner) {
-            Log.d("ChartView", "Speedvalues found")
             if (viewModel.chartSelected == 1) {
                 val stats = viewModel.chartSpeedValues.value
                 if (stats != null) {
@@ -157,7 +153,6 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         }
 
         viewModel.chartSessions.observe(viewLifecycleOwner) {
-            Log.d("ChartView", "Session values found")
             val stats = viewModel.chartSessions.value
             if (stats != null) {
                 updateChart(stats, "Sessions", "Time of day", barChart2!!)
@@ -167,7 +162,6 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
 
 
         viewModel.sleepDataValues.observe(viewLifecycleOwner) {
-            Log.d("ChartView", "Sleep values found")
             val stats = viewModel.sleepDataValues.value
             if (stats != null) {
                 updateStackedChart(stats, "Sleep stages in minutes", "Date")
@@ -176,8 +170,6 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         }
 
         dateViewModel.selectedDate.observe(viewLifecycleOwner) {
-            Log.d("Dateviewmodel", "Date changed to: " +
-                    dateViewModel.selectedDate.value)
             clearAllChartData()
             lifecycleScope.launch(Dispatchers.IO){
                 try {
@@ -189,7 +181,7 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
             }
         }
         xAxisTimeOfDayLabel.clear()
-        for (i in 0..143) {
+        for (i in 0..144) {
             when (i) {
                 0 -> xAxisTimeOfDayLabel.add("12AM")
                 6 -> xAxisTimeOfDayLabel.add("1AM")
@@ -359,7 +351,6 @@ class ChartFragment : Fragment(R.layout.fragment_chart), SeekBar.OnSeekBarChange
         xAxis.setDrawGridLines(false)
         xAxis.valueFormatter = IndexAxisValueFormatter(xAxisValues)
         chart!!.xAxis.isEnabled = true
-        Log.d("xAxis values", xAxisValues.toString())
         leftAxis.setDrawGridLines(false)
         //leftAxis.spaceTop = 35f
         leftAxis.axisMinimum = 0f

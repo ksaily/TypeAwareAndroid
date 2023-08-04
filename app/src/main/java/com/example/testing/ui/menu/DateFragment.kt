@@ -56,23 +56,14 @@ class DateFragment : Fragment(R.layout.fragment_date) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("DateFragment", "created")
-        //binding.currentDate.text = "Today"
-        //chosenDate = currentDate
         binding.arrowLeft.setOnClickListener {
             viewModel.previousDay()
-            //date = viewModel.checkDate()
             binding.currentDate.text = viewModel.checkDate()
-            //Get data from Firebase
-            //getFromFirebase(viewModel.selectedDate.value.toString())
-            //Set up LiveData listener in Home and chart fragments:
-            //Changes in selectedDate -> Update UI
         }
 
         binding.arrowRight.setOnClickListener {
             viewModel.nextDay()
             binding.currentDate.text = viewModel.checkDate()
-            //getFromFirebase(viewModel.selectedDate.value.toString())
         }
 
         binding.PickDate.setOnClickListener {
@@ -129,11 +120,6 @@ class DateFragment : Fragment(R.layout.fragment_date) {
     override fun onResume() {
         super.onResume()
         viewModel.checkDate()
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        Log.d("DateFragment", "DateFragment destroyed!")
     }
 
 }

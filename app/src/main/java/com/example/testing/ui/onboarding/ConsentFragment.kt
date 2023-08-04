@@ -5,18 +5,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.replace
-import androidx.fragment.app.setFragmentResult
-import com.example.testing.Graph
-import com.example.testing.MainActivity
 import com.example.testing.R
 import com.example.testing.databinding.FragmentConsentBinding
-import com.example.testing.ui.menu.DateFragment
-import com.example.testing.utils.FragmentUtils.Companion.loadFragment
-import com.example.testing.utils.FragmentUtils.Companion.removeFragmentByTag
 import com.example.testing.utils.Utils
 import com.example.testing.utils.Utils.Companion.showSnackbar
 import com.google.android.material.snackbar.Snackbar
@@ -50,7 +41,6 @@ class ConsentFragment : Fragment(R.layout.fragment_consent) {
 
         binding.conBtnGiveConsent.setOnClickListener {
             result = true
-            Log.d("Consent", "Consent given")
             //setFragmentResult("consentGiven", bundleOf("consent" to result))
             Utils.saveSharedSettingBoolean("consent_given", true)
 

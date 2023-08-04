@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -33,7 +34,6 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey)
-        Log.d("Prefs", preferenceManager.sharedPreferencesName)
         accessibilityPref = findPref(R.string.access_permission_key)
         batteryPref = findPref(R.string.battery_opt_key)
         //NotificationManager.areNotificationsEnabled?
@@ -63,30 +63,19 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
     }
 
-    override fun onResume() {
-        super.onResume()
-        Log.d("Prefs", "onResume")
-        //preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
-        //Utils.isIgnoringBatteryOptimizations(Graph.appContext)
-        //Utils.checkAccessibilityPermission(Graph.appContext, false)
-    }
 
     override fun onDetach()
      {
         super.onDetach()
-         Log.d("Prefs", "onDetach")
         preferenceManager.sharedPreferences?.unregisterOnSharedPreferenceChangeListener(this)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        Log.d("Prefs", "OnSharedPrefChanged")
         if (key == "accessibility_permission") {
-            Log.d("CheckPref", "Accessibility")
             setAccessibilityPref(accessibilityPref)
         }
 
         if (key == "battery_opt_off") {
-            Log.d("CheckPref", "Battery")
             setBatteryOptPref(batteryPref)
         }
     }
@@ -95,12 +84,12 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         if (Utils.readSharedSettingBoolean("accessibility_permission", false)) {
             pref?.title = getString(R.string.accessibility_perm_enabled)
             pref?.summary = getString(R.string.click_here_to_make_changes)
-            pref?.icon = Graph.appContext.getDrawable(
+            pref?.icon = AppCompatResources.getDrawable(Graph.appContext,
                 R.drawable.ic_baseline_check_circle_outline_24)
         } else {
             pref?.title = getString(R.string.accessibility_perm_disabled)
             pref?.summary = getString(R.string.accessibility_permission_change)
-            pref?.icon = Graph.appContext.getDrawable(
+            pref?.icon = AppCompatResources.getDrawable(Graph.appContext,
                 R.drawable.ic_outline_error_outline_24)
         }
     }
@@ -109,12 +98,12 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
         if (Utils.readSharedSettingBoolean("battery_opt_off", false)) {
             pref?.title = getString(R.string.battery_opt_off_prompt)
             //pref?.summary = getString(R.string.click_here_to_make_changes)
-            pref?.icon = Graph.appContext.getDrawable(
+            pref?.icon = AppCompatResources.getDrawable(Graph.appContext,
                 R.drawable.ic_baseline_check_circle_outline_24)
         } else {
             pref?.title = getString(R.string.battery_opt_on_prompt)
             pref?.summary = getString(R.string.battery_optimization_prompt)
-            pref?.icon = Graph.appContext.getDrawable(
+            pref?.icon = AppCompatResources.getDrawable(Graph.appContext,
                 R.drawable.ic_outline_error_outline_24)
         }
     }

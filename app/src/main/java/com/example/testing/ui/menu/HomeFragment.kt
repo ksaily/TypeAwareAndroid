@@ -16,37 +16,23 @@ import androidx.core.text.trimmedLength
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.testing.Graph
-import com.example.testing.MainActivity
 import com.example.testing.R
 import com.example.testing.databinding.FragmentHomeBinding
 import com.example.testing.fitbit.AuthenticationActivity
-import com.example.testing.fitbit.FitbitApiService
 import com.example.testing.data.SleepData
 import com.example.testing.ui.viewmodel.DateViewModel
 import com.example.testing.ui.viewmodel.FirebaseViewModel
 import com.example.testing.utils.Utils
 import com.example.testing.utils.Utils.Companion.checkAccessibilityPermission
-import com.example.testing.utils.Utils.Companion.countAvgSpeed
 import com.example.testing.utils.Utils.Companion.readSharedSettingBoolean
-import com.example.testing.utils.Utils.Companion.readSharedSettingString
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.data.*
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.Executors
-import kotlin.math.round
-import kotlin.math.roundToInt
 
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -61,23 +47,11 @@ private const val ARG_PARAM2 = "param2"
 class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeListener {
     // Chart variables:
     private val MAX_X_VALUE = 13
-    private val GROUPS = 2
-    private val GROUP_1_LABEL = "Orders"
-    private val GROUP_2_LABEL = ""
     private val BAR_SPACE = 0.1f
     private val BAR_WIDTH = 0.8f
-    private var lineChart: LineChart? = null
-    private var chart: BarChart? = null
-    protected var tfRegular: Typeface? = null
-    protected var tfLight: Typeface? = null
-    private val statValues: ArrayList<Float> = ArrayList()
-    protected val statsTitles = arrayOf(
-        "Orders", "Inventory"
-    )
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private var currentDate = ""
-    private val formatter = SimpleDateFormat("yyyy-MM-dd")
     var dateFragment = DateFragment()
     private val dateViewModel: DateViewModel by activityViewModels()
     private val firebaseViewModel: FirebaseViewModel by activityViewModels()
@@ -121,7 +95,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
         }
 
         firebaseViewModel.keyboardData.observe(viewLifecycleOwner) {
-            Log.d("FirebaseDebug", "Changes in firebase data")
             setFirebaseDataToUI()
         }
 
@@ -138,7 +111,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
         }
 
         firebaseViewModel.sleepData.observe(viewLifecycleOwner) {
-            Log.d("FirebaseViewModel","Sleep data updated")
             hideFitbitLogin(firebaseViewModel.sleepData.value!!)
         }
         updateKeyboardData()
@@ -150,9 +122,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
     private fun checkFitbitLogin() {
         if (!isLoggedInFitbit()) {
             showFitbitLogin()
-            Log.d("Fitbit", "Not logged into fitbit")
         } else {
-            Log.d("Fitbit", "Logged into fitbit")
             updateSleepData()
         }
     }
@@ -196,7 +166,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
         val formattedDate = Utils.formatForFitbit(
             dateViewModel.selectedDate.value.toString()
         )
-        Log.d("GetSleepData", "Sleep data requested")
         firebaseViewModel.getSleepData(formattedDate)
     }
 
@@ -208,7 +177,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
             if (data.dataAvailable) {
                 sleepData.isVisible = true
                 sleepDataNotFound.isVisible = false
-                Log.d("HomeFragment", "Sleep data found")
                 println(data.endTime)
                 println(data.startTime)
                 wakeUpTime.text = data.endTime.toString()
@@ -294,7 +262,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
     }
 
     private fun setFirebaseDataToUI() {
-        Log.d("FirebaseDebug2", "KeyboardData: ${firebaseViewModel.keyboardData.value}")
         if (!firebaseViewModel.keyboardData.value.isNullOrEmpty()) {
             val totalErr = mutableListOf<Double>()
             val totalSpeed = mutableListOf<Double>()
@@ -316,7 +283,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
             val clippedStringWPM: String
             val clippedStringSpeed: String
             val avgWPM = wordsPerMinute.average()
-            if (avgWPM.isFinite() && avgWPM != 0.0) {
+            if (avgWPM.isFinite()) {
                 val s = avgWPM.toString() //words per minute
                 clippedStringWPM = s.substring(0, s.length.coerceAtMost(4)) + "WPM"
                 binding.keyboardChart.textViewStats.isVisible = true
@@ -329,17 +296,16 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
                 }
             } else {
                 clippedStringWPM = "- WPM"
-                binding.keyboardChart.textViewStats.isVisible = false
             }
             val speedAvg = totalSpeed.average()
-            if (speedAvg.isFinite() && speedAvg != 0.0) {
+            if (speedAvg.isFinite()) {
                 binding.keyboardChart.textViewStats.isVisible = true
                 val s = speedAvg.toString() //words per minute
                 clippedStringSpeed = s.substring(0, s.length.coerceAtMost(4)) + "s"
             }
             else {
                 clippedStringSpeed = "- s"
-                binding.keyboardChart.textViewStats.isVisible = false
+                //binding.keyboardChart.textViewStats.isVisible = false
             }
 
             binding.keyboardChart.speedDataSeconds.text = clippedStringSpeed

@@ -1,6 +1,5 @@
 package com.example.testing.fitbit
 
-import android.net.Uri
 import android.util.Base64
 import java.security.MessageDigest
 import java.security.SecureRandom

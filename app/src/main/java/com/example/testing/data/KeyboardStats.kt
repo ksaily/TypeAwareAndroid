@@ -1,4 +1,4 @@
-package com.example.testing.utils
+package com.example.testing.data
 
 data class KeyboardStats(
     val date: String?,

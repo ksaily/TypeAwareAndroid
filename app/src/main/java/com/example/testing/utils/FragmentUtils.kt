@@ -19,7 +19,6 @@ import com.google.firebase.database.ValueEventListener
 class FragmentUtils {
     companion object {
 
-
         /**
          * Load fragment into container
          *
@@ -31,7 +30,6 @@ class FragmentUtils {
          */
         fun loadFragment(activity: AppCompatActivity, fragment: Fragment, bundle: Bundle?, tag: String, addToBackStack: Boolean) {
             try {
-                Log.d("Fragment", "Loading fragment")
                 if (fragment == null) { return }
                 if (bundle != null) { fragment.arguments = bundle }
 
@@ -39,7 +37,6 @@ class FragmentUtils {
 
                 if (addToBackStack) { transaction.addToBackStack(tag) }
                 if (!fragment.isVisible) {
-                    Log.d("Fragment", "Fragment is not visible)")
                     transaction.replace(R.id.container, fragment, tag).commit()
                 }
             } catch (e: java.lang.IllegalStateException) {
@@ -49,87 +46,5 @@ class FragmentUtils {
             }
         }
 
-        fun loadFullScreenFragment(activity: AppCompatActivity, fragment: Fragment, bundle: Bundle?, tag: String, addToBackStack: Boolean) {
-            try {
-                Log.d("Fragment", "Loading fragment")
-                if (fragment == null) { return }
-                if (bundle != null) { fragment.arguments = bundle }
-
-                val transaction = activity.supportFragmentManager.beginTransaction()
-
-                if (addToBackStack) { transaction.addToBackStack(tag) }
-                if (!fragment.isAdded) {
-                    Log.d("Fragment", "Fragment added)")
-                    transaction.replace(R.id.fullscreen_container, fragment, tag).commit()
-                }
-            } catch (e: java.lang.IllegalStateException) {
-                e.printStackTrace()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-
-        fun loadChildFragment(child: FragmentManager, container: Int, fragment: Fragment, tag: String, addToBackStack: Boolean) {
-            try {
-                Log.d("Fragment", "Loading fragment")
-                if (fragment == null) { return }
-
-                val transaction = child.beginTransaction()
-
-                if (addToBackStack) { transaction.addToBackStack(tag) }
-                if (!fragment.isAdded) {
-                    Log.d("Fragment", "$fragment added")
-                    transaction.replace(container, fragment, tag).commit()
-                }
-            } catch (e: java.lang.IllegalStateException) {
-                e.printStackTrace()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-
-        /**
-         * Remove fragment from container
-         *
-         * @param activity to get FragmentManager
-         * @param tag tag of fragment to remove
-         */
-        fun removeFragmentFromContainer(activity: AppCompatActivity, tag: String) {
-            var transaction = activity.supportFragmentManager.beginTransaction()
-            if (transaction != null) {
-                activity.supportFragmentManager.findFragmentByTag(tag)
-                    ?.let { transaction.remove(it) }
-                transaction.commit()
-            }
-        }
-
-        fun isFragmentInStack(activity: AppCompatActivity, tag: String): Boolean {
-            var inStack = false
-            var fragmentManager = activity.supportFragmentManager
-            var fragment = fragmentManager.findFragmentByTag(tag)
-            if (fragment != null) {
-                inStack = true
-            }
-            return inStack
-        }
-
-        fun getFragmentByTag(activity: AppCompatActivity, tag: String): Fragment? {
-            var fragmentManager = activity.supportFragmentManager
-            var fragment = fragmentManager.findFragmentByTag(tag)
-            if (fragment != null) {
-                return fragment
-            }
-            return null
-        }
-
-        fun removeFragmentByTag(activity: AppCompatActivity, tag: String) {
-            var fragmentManager = activity.supportFragmentManager
-            if (fragmentManager != null) {
-                var fragment = fragmentManager.findFragmentByTag(tag)
-                if (fragment != null) {
-                    fragmentManager.beginTransaction().remove(fragment).commit()
-                }
-            }
-        }
     }
 }

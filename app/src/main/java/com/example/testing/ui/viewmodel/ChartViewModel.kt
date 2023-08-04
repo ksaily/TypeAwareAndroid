@@ -1,18 +1,12 @@
 package com.example.testing.ui.viewmodel
 
-import android.provider.Settings.Global.getString
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.testing.Graph
-import com.example.testing.R
-import com.example.testing.fitbit.FitbitApiService.Companion.authorizeRequestToken
 import com.example.testing.fitbit.FitbitApiService.Companion.getRefreshToken
 import com.example.testing.data.KeyboardChart
-import com.example.testing.data.SleepData
-import com.example.testing.utils.KeyboardStats
 import com.example.testing.utils.Utils
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.core.isSuccessful
@@ -32,10 +26,6 @@ import org.json.JSONObject
 import org.json.JSONTokener
 
 class ChartViewModel: ViewModel() {
-
-    private val _keyboardStats = MutableLiveData<List<KeyboardChart>>()
-    val keyboardStats: LiveData<List<KeyboardChart>>
-        get() = _keyboardStats
 
     private val _chartErrorValues = MutableLiveData<List<BarEntry>>()
     val chartErrorValues: LiveData<List<BarEntry>>
@@ -188,7 +178,6 @@ class ChartViewModel: ViewModel() {
                         _chartErrorValues.postValue(iterErrList)
                         _chartSessions.postValue(dataList)
                         _chartSpeedValues.postValue(iterSpeedList)
-                        //_keyboardStats.postValue(dataList)
                 } else {
                     dataFound = false
                     Log.d("FirebaseChart", "No data found")

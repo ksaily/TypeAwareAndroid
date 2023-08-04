@@ -60,25 +60,21 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
             .addOnSuccessListener { authResult ->
                 val uid = authResult.user?.uid
                 saveSharedSetting("firebase_auth_uid", uid)
-                Log.d("FirebaseAuth", "UID $uid")
             }
             .addOnFailureListener { exception ->
-                Log.d("Error", exception.toString())
+                //Log.d("Error", exception.toString())
             }
 
         bottomNav = binding.bottomNav
         bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.homeFragment -> {
-                    Log.d("BottomNav", "homefragment selected")
                     loadFragment(this, homeFragment, null, "homeFragment", false)
                 }
                 R.id.settingsFragment -> {
-                    Log.d("BottomNav", "settingfragment selected")
                     loadFragment(this, settingsFragment, null, "settingsFragment", false)
                 }
                 R.id.chartFragment -> {
-                    Log.d("BottomNav", "chartfragment selected")
                     loadFragment(this, chartFragment, null, "chartFragment", false)
                 }
             }
@@ -118,8 +114,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         ) {
             if (!readSharedSettingBoolean(getString(R.string.sharedpref_firstweek_done), false)) {
                 questionnaireDialog.firstWeekQuestions()
-                //Check that user info is given before showing questionnaire
-                Log.d("DailyQuestionnaire", "Questionnaire not answered")
+                // Check that dialog is not already visible
                 if (supportFragmentManager.findFragmentByTag("DailyQuestionnaireDialog") == null) {
                     questionnaireDialog.show(supportFragmentManager, "DailyQuestionnaireDialog")
                 }
@@ -129,7 +124,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
                 readSharedSettingBoolean(getString(R.string.sharedpref_firstweek_done), false) &&
                 !readSharedSettingBoolean("study_finished", false)
             ) {
-                Log.d("Second week", "started")
+                // Second week started
                 questionnaireDialog.changeToSecondWeek()
             }
         }
@@ -163,17 +158,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         else if (key=="study_finished" && readSharedSettingBoolean("study_finished", false)) {
             questionnaireDialog.changeToEndQuestionnaire()
             binding.secondWeekQstnrBtn.isVisible = true
-            binding.secondWeekQstnrBtn.text = "Click to answer final questionnaire"
-        }
-    }
-
-    private fun checkSecondWeekBtn() {
-        if (readSharedSettingBoolean(getString(R.string.sharedpref_firstweek_done), false)
-            && !readSharedSettingBoolean("study_finished", false)) {
-            binding.secondWeekQstnrBtn.isVisible = !readSharedSettingBoolean(getString(R.string.sharedpref_questionnaire_ans), false)
-        } else if (readSharedSettingBoolean("study_finished", false) && !questionnaireDialog.isVisible) {
-            questionnaireDialog.changeToEndQuestionnaire()
-            checkDailyQuestionnaire()
+            binding.secondWeekQstnrBtn.text = getString(R.string.click_to_answer_final_questionnaire)
         }
     }
 
@@ -182,11 +167,6 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         ) { questionnaireDialog.showQuestionnaire(
             Utils.getCurrentDateString() == readSharedSettingString(getString(R.string.sharedpref_questionnaire_day), ""
             ))
-            /**
-            Timer("CheckQuestionnaire", false).schedule(2000) {
-                checkDailyQuestionnaire()
-            }
-            checkSecondWeekBtn()**/
     }}
 
 
@@ -202,7 +182,6 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     private fun onFirstLogin() {
         if (!readSharedSettingBoolean(getString(R.string.sharedpref_consent), false)
         ) {
-            Log.d("MainActivity", "Start consent fragment")
             // The user hasn't seen the onboarding & consent screens yet, so show it
             loadFragment(this, ConsentFragment(), null,
                 "consentFragment", true)
@@ -211,7 +190,6 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
 
         else if (!readSharedSettingBoolean(getString(R.string.sharedpref_user_info), false)
         ) {
-            Log.d("MainActivity", "Start userinfo fragment")
             // The user hasn't seen the onboarding & consent screens yet, so show it
             loadFragment(this, UserInfoFragment(), null,
                 "userInfoFragment", true)
@@ -220,21 +198,18 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
 
         else if (!readSharedSettingBoolean(getString(R.string.sharedpref_onboarding), false)
         ) {
-            Log.d("MainActivity", "Start onboarding activity")
             // The user hasn't seen the onboarding & consent screens yet, so show it
             loadFragment(this, OnboardingFragment(), null,
             "onboardingFragment", true)
             bottomNav.isVisible = false
         }
         else {
-            Log.d("MainActivity", "First login done")
             val userId = readSharedSettingString(getString(R.string.sharedpref_userid), "").toString()
             // Set user id for crash reports
             FirebaseCrashlytics.getInstance().setUserId(
                 userId
             )
             if (!supportFragmentManager.isStateSaved) {
-                Log.d("LoadFragment", "home")
                 loadFragment(this, homeFragment, null, "homeFragment", true)
             }
             saveSharedSetting(getString(R.string.sharedpref_questionnaire_day), currentDate)
@@ -243,17 +218,11 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     }
 
     private fun afterFirstLoginDone() {
-        Log.d("MainActivity", "After first login done")
-        //if (!homeFragment.isVisible) {
-            //loadFragment(this, homeFragment, null, "homeFragment", false)
-          //  bottomNav.isVisible = true
-        //}
         bottomNav.isVisible = true
         if (!supportFragmentManager.isStateSaved) {
             //Check which fragment is visible
             val currentFragment = supportFragmentManager.findFragmentById(R.id.container)
             if (currentFragment == null) {
-                Log.d("LoadFragment", "home")
                 loadFragment(this, homeFragment, null, "homeFragment", true)
             }
         }

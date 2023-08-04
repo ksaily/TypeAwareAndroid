@@ -1,11 +1,12 @@
-package com.example.testing.utils
+package com.example.testing.keyboard
 
 import android.content.Context
 import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.testing.data.KeyboardEvents
-import com.example.testing.utils.KeyboardHelper.Companion.dataList
+import com.example.testing.keyboard.KeyboardHelper.Companion.dataList
+import com.example.testing.utils.Utils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -22,7 +23,6 @@ class KeyboardWorker(appContext: Context, workerParams: WorkerParameters):
             val newList = dataList.filterNot {
                 !it.dailyTimeWindow.equals(keyboardTimeslot)
             }
-            Log.d("FirebaseDebug", "New list: $newList")
             for (instance in newList) {
                 saveToFirebase(keyboardTimeslot, instance)
                 if (dataList.isNotEmpty()) {

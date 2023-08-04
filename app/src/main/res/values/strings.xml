@@ -106,6 +106,7 @@
     <string name="battery_opt_snackbar_msg">Click ok to disable battery optimization in settings.</string>
     <string name="contact_info">In case of issues, please contact: \nkatri.saily@oulu.fi</string>
     <string name="help">Help</string>
+    <string name="click_to_answer_final_questionnaire">Click to answer final questionnaire</string>
 
     <!-- Pref keys -->
     <string name="notifications_header_key">notifications_header</string>
@@ -149,6 +150,7 @@
     <string name="home_keyboard_data_not_found_btn">Settings</string>
     <string name="home_keyboard_wpm_stats_faster_than_avg">You were faster than \n users on average!</string>
     <string name="home_keyboard_wpm_stats_slower_than_avg">You were slower than \n users on average.</string>
+
     <!-- Likert scale options -->
     <string name="likert_1_1">1 (significantly less)</string>
     <string name="likert_1_2">2 (less)</string>

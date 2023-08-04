@@ -99,7 +99,6 @@ class FitbitApiService {
                     accessToken = jsonObject.getString("access_token")
                     refreshToken = jsonObject.getString("refresh_token")
                     userId = jsonObject.getString("user_id")
-                    Log.d("Authorization", "Access token updated")
                     Utils.saveSharedSetting("access_token", accessToken)
                     Utils.saveSharedSetting("refresh_token", refreshToken)
                     Utils.saveSharedSettingBoolean("loggedInFitbit", true)

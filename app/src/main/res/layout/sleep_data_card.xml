@@ -51,7 +51,14 @@
 
             <Button
                 android:id="@+id/FitbitBtn"
-                style="@style/btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/dark_purple"
+                android:background="@drawable/roundstyle"
+                android:textSize="12sp"
+                android:padding="5dp"
+                android:layout_marginTop="8dp"
                 android:text="Login"
                 android:layout_gravity="center"
                 />

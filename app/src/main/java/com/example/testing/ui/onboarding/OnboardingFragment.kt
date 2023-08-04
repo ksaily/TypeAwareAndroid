@@ -9,21 +9,13 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.testing.Graph
-import com.example.testing.MainActivity
 import com.example.testing.R
 import com.example.testing.databinding.FragmentOnboardingBinding
-import com.example.testing.ui.viewmodel.DateViewModel
-import com.example.testing.utils.FragmentUtils.Companion.loadFragment
-import com.example.testing.utils.FragmentUtils.Companion.removeFragmentByTag
 import com.example.testing.utils.Utils
-import com.example.testing.utils.Utils.Companion.showSnackbar
-import com.google.android.material.snackbar.Snackbar
 
 /**
  * Fragment to show onboarding information
@@ -98,7 +90,6 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
     }
 
     private fun onboardingFinished() {
-        Log.d("Onboarding", "Saved onboarding complete")
         Utils.saveSharedSettingBoolean(getString(R.string.sharedpref_onboarding),true)
         //Utils.saveSharedSettingBoolean(Graph.appContext, "first_login_done", true)
         parentFragmentManager.beginTransaction().remove(this).commit()

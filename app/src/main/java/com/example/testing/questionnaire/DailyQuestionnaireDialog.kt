@@ -83,11 +83,9 @@ class DailyQuestionnaireDialog : DialogFragment(){
     }
 
     fun changeToSecondWeek() {
-        Log.d("Questionnaire", "Changed to second week")
         isFirstWeek = false
         isFinished = false
         secondWeekQuestions()
-        Log.d("Questions:", "$questions")
     }
 
     private fun secondWeekQuestions() {
@@ -114,11 +112,9 @@ class DailyQuestionnaireDialog : DialogFragment(){
 
 
     fun changeToEndQuestionnaire() {
-        Log.d("Questionnaire", "Changed to end questionnaire")
         isFirstWeek = false
         isFinished = true
         endQuestions()
-        Log.d("questions", "$questions")
     }
 
     private fun endQuestions() {
@@ -185,7 +181,6 @@ class DailyQuestionnaireDialog : DialogFragment(){
         binding.radioGroup2.clearCheck()
         binding.openAnswer.text.clear()
         if (isFirstWeek) {
-            Log.d("Firstweek", "setupview")
             firstWeekQuestions()
             chooseViewsToShow(true, false, false, false)
             when (currentQuestionIndex) {
@@ -209,7 +204,6 @@ class DailyQuestionnaireDialog : DialogFragment(){
                 3 -> loopForLikertScaleQuestions(R.array.questionnaire_likert_scale_options_week2)
             }
         } else if (isFinished) {
-            Log.d("Endquestionnaire", "setupview")
             endQuestions()
             binding.questionnaireTitle.text = "End questionnaire"
             chooseViewsToShow(false, false, false, false)
@@ -371,9 +365,7 @@ class DailyQuestionnaireDialog : DialogFragment(){
     fun showQuestionnaire(isFirstDay: Boolean) {
         //currentQuestionIndex = 0
         val today = Utils.getCurrentDateString()
-        Log.d("ShowQuestionnaireToday:", today)
         var isQuestionnaireAnswered: Boolean
-        Log.d("isFirstDay", isFirstDay.toString())
 
         if (!isFirstDay) {
 
@@ -383,11 +375,8 @@ class DailyQuestionnaireDialog : DialogFragment(){
 
                 myRef.child(authId).child(participantId).child(today).child(questionnaire)
                     .child(questionnaireCompleteString).get().addOnSuccessListener { snapshot ->
-                        Log.d("Firebase", "Questionnaire listener")
                         isQuestionnaireAnswered = (snapshot.exists() &&
                                 snapshot.value as Boolean)
-                        Log.d("isQuestionnaireAnswered",
-                            isQuestionnaireAnswered.toString())// both need to be true
 
                         Utils.saveSharedSettingBoolean("isQuestionnaireAnswered", isQuestionnaireAnswered)
                     }.addOnFailureListener {
@@ -422,10 +411,8 @@ class DailyQuestionnaireDialog : DialogFragment(){
             }
             //Check how many questionnaires have been answered
             val answered = Utils.readSharedSettingInt("number_of_questionnaires", 0)
-            Log.d("Questionnaires answered", answered.toString())
             if (answered == null) {
                 firstWeekQuestions()
-                Log.d("QuestionnaireAnswerAmount", "Was 0, now 1")
                 Utils.saveSharedSettingInt("number_of_questionnaires", 1)
             }
             else {
@@ -436,15 +423,8 @@ class DailyQuestionnaireDialog : DialogFragment(){
                         Utils.saveSharedSettingBoolean(getString(R.string.sharedpref_firstweek_done), true)
                         showHomeScreen()
                     }
-
-                    in 5..9 -> {
-                        Log.d("QuestionnaireAnswerAmount", "Was $answered, now $answeredNew")
-                        showHomeScreen()
-                    }
-                    10 -> {
-                        Log.d("End qstnr", "changed")
+                    9 -> {
                         Utils.saveSharedSettingBoolean("study_finished", true)
-                        //this.show(parentFragmentManager, "EndQuestionnaire")
                         showHomeScreen()
                     }
                     11 -> {
@@ -468,7 +448,6 @@ class DailyQuestionnaireDialog : DialogFragment(){
             val authId = Utils.readSharedSettingString("firebase_auth_uid", "").toString()
             val questionnaire = "questionnaire"
             participantId = Utils.readSharedSettingString("p_id", "").toString()
-            Log.d("Save answer to database", "$qstn $answer")
             // Save data under the current timeslot with an unique id for each
             if (isFinished) {
                 myRef.child(authId).child(participantId)

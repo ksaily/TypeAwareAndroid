@@ -6,7 +6,7 @@ import androidx.lifecycle.*
 import com.example.testing.fitbit.FitbitApiService
 import com.example.testing.data.SleepData
 import com.example.testing.data.KeyboardEvents
-import com.example.testing.utils.KeyboardStats
+import com.example.testing.data.KeyboardStats
 import com.example.testing.utils.Utils
 import com.github.mikephil.charting.data.BarEntry
 import com.google.firebase.database.DataSnapshot

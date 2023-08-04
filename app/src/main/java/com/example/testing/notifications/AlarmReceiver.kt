@@ -25,7 +25,6 @@ class AlarmReceiver: BroadcastReceiver() {
         private const val DAILY_REMINDER_HOUR = 18
 
         fun scheduleNotification(context: Context) {
-            Log.d("ScheduleNotification", "created")
             val calendar = GregorianCalendar.getInstance().apply {
                 if (get(Calendar.HOUR_OF_DAY) >= DAILY_REMINDER_HOUR) {
                     add(Calendar.DAY_OF_MONTH, 1)
@@ -56,7 +55,6 @@ class AlarmReceiver: BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d("OnReceive", "AlarmReceiver")
 
         if (!Utils.readSharedSettingBoolean("isQuestionnaireAnswered", false)) {
             showNotification(context)
@@ -79,11 +77,9 @@ class AlarmReceiver: BroadcastReceiver() {
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
-        Log.d("NotificationReceiver", "showNotification")
     }
 
     private fun createNotificationChannel(context: Context) {
-        Log.d("CreateNotificationChannel", "created")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channelName = "Daily Questionnaire"
             val channelDescription = "Daily questionnaire reminder"

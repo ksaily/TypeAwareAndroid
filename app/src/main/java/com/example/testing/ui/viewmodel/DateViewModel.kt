@@ -33,7 +33,6 @@ class DateViewModel : ViewModel() {
             _isToday.value = false
             "Yesterday"
         } else if (_selectedDate.value == Utils.getCurrentDateString()) {
-            Log.d("Today", "Current selected date is ${_selectedDate.value}")
             _isToday.value = true
             "Today"
         } else {
@@ -44,10 +43,5 @@ class DateViewModel : ViewModel() {
 
     fun changeDate(date: String) {
         _selectedDate.value = date
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        Log.d("DateFragment", "DateViewModel destroyed!")
     }
 }

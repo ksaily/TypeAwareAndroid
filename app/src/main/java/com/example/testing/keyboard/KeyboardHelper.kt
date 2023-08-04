@@ -1,4 +1,4 @@
-package com.example.testing.utils
+package com.example.testing.keyboard
 
 import android.util.Log
 import com.example.testing.data.KeyboardEvents
@@ -31,27 +31,24 @@ class KeyboardHelper {
             //Change to hours, multiply by six because there are six time slots in one hour
             val getHours = currentTime.get(Calendar.HOUR_OF_DAY) * 6 + 1
             val getMinutes = currentTime.get(Calendar.MINUTE) / 10
-            //Timeslots start from 0
-            Log.d("KeyboardEvents","Current hours slot: $getHours")
-            Log.d("KeyboardEvents","Current minutes slot: $getMinutes")
+            //Timeslots start from 1
             val currentTimeSlot = getHours + getMinutes
-            Log.d("KeyboardEvents", "Timeslot is: $currentTimeSlot")
 
             return currentTimeSlot
         }
 
+        /**
         fun countWords(): Int {
             val trimmedStr = beforeString.replace("[^a-zA-Z]+".toRegex(), " ").trim()
             return if (trimmedStr.isEmpty()) {
                 0
             } else {
                 val newStr = trimmedStr.split("\\s+".toRegex())
-                Log.d("KeyboardEvents", "Trimmed words is: $newStr")
                 Log.d("KeyboardEvents", "Amount of words written: ${newStr.size}")
                 //wordCount = newStr.size
                 //newStr.size
             }
-        }
+        }**/
 
         fun checkSameSession(session: String, timeElapsedd: Double): Boolean {
             return (session == thisPackage) && (timeElapsedd < 10.0)
@@ -76,19 +73,15 @@ class KeyboardHelper {
                     val isWordEnd = checkWordEnd(newChar, beforeText)
 
                     if (sameSession) {
-                        if (isWordEnd) {
-                            wordCount ++ // Count words even if characters would be deleted after
+                        if (isWordEnd && beforeString.isNotEmpty()) {
+                            wordCount++ // Count words even if characters would be deleted after
                             endTime = System.nanoTime()
-                            Log.d("KeyboardEvents", "last letter")
                             // To seconds
                             timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
                             typingTimes.add(timeElapsed)
-                            if (isWordStart) {
-                                beforeString += ' '
-                            }
+
                         }
                         if (isWordStart) {
-                            Log.d("KeyboardEvents", "first letter")
                             startTime = System.nanoTime()
                         }
                         // Record endtime in case of session change
@@ -96,22 +89,31 @@ class KeyboardHelper {
 
                         beforeString += newChar
                         //Log.d("KeyboardEvents", "New char is: $newChar")
-                        Log.d("KeyboardEvents", "Current string is: $beforeString")
                     } else {
-                        //Different sessions between newchar and beforechar
-                        timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
-                        if (timeElapsed > 0) {
-                            typingTimes.add(timeElapsed)
+                        val t = if (!beforeString.isNullOrEmpty()) {
+                             beforeString.last()
+                        } else {
+                            ' '
                         }
+
+                        if (t.isLetterOrDigit()) {
+                            // Only save word if the word is not already saved
+                            // occurs when previous session ends in a space
+                            wordCount++
+                            timeElapsed = ((endTime - startTime).toDouble() / 1_000_000_000)
+                            if (timeElapsed > 0) {
+                                typingTimes.add(timeElapsed)
+                            }
+                        }
+                        //Different sessions between newchar and beforechar
                         if (newChar.isLetterOrDigit()) {
                             startTime = System.nanoTime()
                         }
                         newString += newChar
                         //Log.d("KeyboardEvents", "New char is: $newChar")
-                        Log.d("KeyboardEvents", "Current string is: $newString")
                     }
                 } else {
-                    beforeString += " "
+                    beforeString += ' '
                     startTime = System.nanoTime()
                 }
             }

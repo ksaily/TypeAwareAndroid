@@ -7,24 +7,25 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.example.testing.data.KeyboardEvents
-import com.example.testing.utils.*
-import com.example.testing.utils.KeyboardHelper.Companion.addToString
-import com.example.testing.utils.KeyboardHelper.Companion.beforeString
-import com.example.testing.utils.KeyboardHelper.Companion.checkSameSession
-import com.example.testing.utils.KeyboardHelper.Companion.countErrorRate
-import com.example.testing.utils.KeyboardHelper.Companion.countTimeSlot
-import com.example.testing.utils.KeyboardHelper.Companion.currentTimeSlot
-import com.example.testing.utils.KeyboardHelper.Companion.dataList
-import com.example.testing.utils.KeyboardHelper.Companion.deletedChars
-import com.example.testing.utils.KeyboardHelper.Companion.deletedCharsAfterSessionChange
-import com.example.testing.utils.KeyboardHelper.Companion.newPackage
-import com.example.testing.utils.KeyboardHelper.Companion.newString
-import com.example.testing.utils.KeyboardHelper.Companion.previousTimeSlot
-import com.example.testing.utils.KeyboardHelper.Companion.startTime
-import com.example.testing.utils.KeyboardHelper.Companion.thisPackage
-import com.example.testing.utils.KeyboardHelper.Companion.timeStampBeginning
-import com.example.testing.utils.KeyboardHelper.Companion.typingTimes
-import com.example.testing.utils.KeyboardHelper.Companion.wordCount
+import com.example.testing.keyboard.KeyboardHelper
+import com.example.testing.keyboard.KeyboardWorker
+import com.example.testing.keyboard.KeyboardHelper.Companion.addToString
+import com.example.testing.keyboard.KeyboardHelper.Companion.beforeString
+import com.example.testing.keyboard.KeyboardHelper.Companion.checkSameSession
+import com.example.testing.keyboard.KeyboardHelper.Companion.countErrorRate
+import com.example.testing.keyboard.KeyboardHelper.Companion.countTimeSlot
+import com.example.testing.keyboard.KeyboardHelper.Companion.currentTimeSlot
+import com.example.testing.keyboard.KeyboardHelper.Companion.dataList
+import com.example.testing.keyboard.KeyboardHelper.Companion.deletedChars
+import com.example.testing.keyboard.KeyboardHelper.Companion.deletedCharsAfterSessionChange
+import com.example.testing.keyboard.KeyboardHelper.Companion.newPackage
+import com.example.testing.keyboard.KeyboardHelper.Companion.newString
+import com.example.testing.keyboard.KeyboardHelper.Companion.previousTimeSlot
+import com.example.testing.keyboard.KeyboardHelper.Companion.startTime
+import com.example.testing.keyboard.KeyboardHelper.Companion.thisPackage
+import com.example.testing.keyboard.KeyboardHelper.Companion.timeStampBeginning
+import com.example.testing.keyboard.KeyboardHelper.Companion.typingTimes
+import com.example.testing.keyboard.KeyboardHelper.Companion.wordCount
 import java.util.*
 
 class MyAccessibilityService : AccessibilityService() {
@@ -48,33 +49,22 @@ class MyAccessibilityService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) { return }
         if (event.eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
-            /**
-            try {
-                val setUpKeyboardWork = OneTimeWorkRequestBuilder<SaveKeyboardDataWorker>()
-                    .setInputData(workDataOf(
-                        "packageName" to event.packageName.toString(),
-                        "text" to event.text.toString(),
-                        "beforeText" to event.beforeText.toString()
-                    ))
-                    .build()
-                WorkManager.getInstance(applicationContext).enqueue(setUpKeyboardWork)
-            } catch (e: Exception) {
-                Log.d("MyAccessibilityEvent", "Exception: $e")
-            }
-            **/
+
             if (startTimeBetweenChars == 0L) {
                 //First character in a session, don't add to typing times
                 thisPackage = event.packageName.toString()
                 timeElapsedBetweenChars = 0.0
                 startTime = System.nanoTime()
-                Log.d("KeyboardEvents", "This is the first char of this session")
             } else {
                 endTimeBetweenChars = System.nanoTime()
                 timeElapsedBetweenChars = ((endTimeBetweenChars - startTimeBetweenChars).toDouble() / 1_000_000_000)
             }
             startTimeBetweenChars = System.nanoTime()
             timeStampBeginning = System.currentTimeMillis()
-            checkSession(event)
+            if (beforeString != event.text.toString().removeSurrounding("[", "]")) {
+                // Avoid duplicates
+                checkSession(event)
+            }
         }
     }
 
@@ -94,9 +84,7 @@ class MyAccessibilityService : AccessibilityService() {
 
     private fun saveCharIfNotPassword(event: AccessibilityEvent, sameSession: Boolean) {
         if (!event.isPassword) {
-            Log.d("KeyboardEvents", event.toString())
             val removedChars = event.removedCount
-            Log.d("RemovedChars", removedChars.toString())
             addToString(event.text.toString().removeSurrounding("[", "]"),
                 event.beforeText.toString(), sameSession, removedChars)
         }
@@ -106,12 +94,10 @@ class MyAccessibilityService : AccessibilityService() {
              * and if the timeslot has changed, also set up a worker that saves info to Firebase.
              * After that, reset values. **/
             private fun onSessionChange() {
-                if (beforeString.isNullOrEmpty()) {
+                if (beforeString.isNullOrEmpty() || typingTimes.isNullOrEmpty()) {
                     resetValues()
                 } else {
-                    if (!typingTimes.isNullOrEmpty()) {
-                        val wordsPerMinute = 60 / typingTimes.average()
-                    }
+                    val wordsPerMinute = 60 / typingTimes.average()
                     val date = KeyboardHelper.dateFormatter(Date())
                     currentTimeSlot = countTimeSlot()
                     val keyboardEvent = KeyboardEvents(UUID.randomUUID().toString(),
@@ -136,7 +122,6 @@ class MyAccessibilityService : AccessibilityService() {
                     }
                     //Add the current event to a list of KeyboardEvents
                     dataList.add(keyboardEvent)
-                    Log.d("KeyboardEvents", "$dataList")
                     resetValues()
                 }
             }
