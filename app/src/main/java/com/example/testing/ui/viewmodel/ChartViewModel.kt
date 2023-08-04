@@ -231,7 +231,6 @@ class ChartViewModel: ViewModel() {
 
                 val startDateFitbit = Utils.formatForFitbit(startDay)
                 val endDateFitbit = Utils.formatForFitbit(dates.last())
-                Log.d("Dates reversed", dates.toString())
 
                 val url = "/sleep/date/$startDateFitbit/$endDateFitbit.json"
                 val (_, response, result) = url.httpGet().header(
