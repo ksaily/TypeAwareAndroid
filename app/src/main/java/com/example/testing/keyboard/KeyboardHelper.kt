@@ -94,7 +94,7 @@ class KeyboardHelper {
                             ' '
                         }
 
-                        if (t.isLetterOrDigit()) {
+                        if (t.isLetterOrDigit() || isWordEnd) {
                             // Only save word if the word is not already saved
                             // occurs when previous session ends in a space
                             wordCount++

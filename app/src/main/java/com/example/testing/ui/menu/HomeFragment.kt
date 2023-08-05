@@ -323,7 +323,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
 
     private fun checkAccessibilityEnabled() {
         binding.keyboardChart.keyboardDataNotFound.isVisible = true
-        if (readSharedSettingBoolean(getString(R.string.sharedpref_accessibility), false)) {
+        if (checkAccessibilityPermission(Graph.appContext, false)) {
             binding.keyboardChart.checkAccessibilitySettingsPrompt.isVisible = false
             binding.keyboardChart.openAccessibilitySettingsBtn.isVisible = false
             binding.keyboardChart.waitForDataToUpdate.isVisible = true

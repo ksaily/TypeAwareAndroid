@@ -7,7 +7,6 @@ import com.google.firebase.ktx.Firebase
 class TypeAware : Application() {
     override fun onCreate() {
         super.onCreate()
-        Firebase.database.setPersistenceEnabled(true)
         Graph.provide(this)
     }
 }
