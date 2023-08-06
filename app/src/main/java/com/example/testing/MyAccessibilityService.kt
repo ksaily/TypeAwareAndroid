@@ -94,8 +94,8 @@ class MyAccessibilityService : AccessibilityService() {
              * and if the timeslot has changed, also set up a worker that saves info to Firebase.
              * After that, reset values. **/
             private fun onSessionChange() {
-                if (beforeString.isNullOrEmpty() || typingTimes.isNullOrEmpty()) {
-                    resetValues()
+                if (beforeString.length < 2 || typingTimes.isEmpty()) {
+                    resetValues() // Ignore one letter words due to issues with typing times
                 } else {
                     val wordsPerMinute = 60 / typingTimes.average()
                     val date = KeyboardHelper.dateFormatter(Date())

@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
     private val chartFragment = ChartFragment()
     private val settingsFragment = SettingsFragment()
     private val questionnaireDialog = DailyQuestionnaireDialog()
+    val database = Firebase.database
 
 
 
@@ -166,6 +167,7 @@ class MainActivity : AppCompatActivity(), OnSharedPreferenceChangeListener {
         ) { questionnaireDialog.showQuestionnaire(
             Utils.getCurrentDateString() == readSharedSettingString(getString(R.string.sharedpref_questionnaire_day), ""
             ))
+            checkDailyQuestionnaire()
     }}
 
 

@@ -22,20 +22,11 @@ import java.util.*
 class Utils {
 
     companion object {
-        var keyboardList: ArrayList<KeyboardStats> = arrayListOf()
-        var errorsList: MutableList<Long> = mutableListOf()
-        var totalErrList: MutableList<Long> = mutableListOf()
-        var totalSpeedsList: MutableList<MutableList<Double>> = mutableListOf()
-        var totalAvgErrors: ArrayList<Long> = arrayListOf()
-        var timeWindow: Int = 0
-        var totalErr: Double = 0.0
-        var totalSpeed: Double = 0.0
-        var speedsList: MutableList<Double> = mutableListOf()
-        val calendar = Calendar.getInstance()
         val formatter = SimpleDateFormat("dd-MM-yyyy")
         val formatterChart = SimpleDateFormat("dd-MM")
         var currentDate: String = getCurrentDateString()
         private val questionnaireCompleteString = "QuestionnaireCompleted"
+        val editor = getSharedPrefs().edit()
 
 
         fun formatForFitbit(inputDate: String): String {
@@ -183,7 +174,6 @@ class Utils {
             settingName: String?, settingValue: String?
         ) {
             val s = getSharedPrefs()
-            val editor = s.edit()
             editor.putString(settingName, settingValue)
             editor.apply()
         }
@@ -192,7 +182,6 @@ class Utils {
             settingName: String?, settingValue: Boolean
         ) {
             val s = getSharedPrefs()
-            val editor = s.edit()
             editor.putBoolean(settingName, settingValue)
             editor.apply()
         }
@@ -201,7 +190,7 @@ class Utils {
             settingName: String?, settingValue: Int
         ) {
             val s = getSharedPrefs()
-            val editor = s.edit()
+            //val editor = s.edit()
             editor.putInt(settingName, settingValue)
             editor.apply()
         }

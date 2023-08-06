@@ -76,74 +76,72 @@ class FirebaseViewModel(application: Application): AndroidViewModel(application)
     }
 
     fun getFromFirebase(date: String, isToday: Boolean) {
-            val rootRef = Firebase.database.getReference("Data")
+        val rootRef = Firebase.database.getReference("Data")
         val authId = Utils.readSharedSettingString("firebase_auth_uid", "").toString()
-            val participantId = Utils.readSharedSettingString(
-                "p_id",
-                "").toString()
-            val ref = rootRef.child(authId).child(participantId).child(date)
-                .child("keyboardEvents")
-            clearAllLists()
-            val valueEventListener = object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.exists()) {
-                        clearAllLists()
-                        try {
-                            val children = snapshot.children
-                            children.forEach { dataSnapshot ->
-                                clearLoopLists()
-                                var child = dataSnapshot.children
-                                child.forEach {
-                                    val speeds =
-                                        it.child("typingSpeed").value as Any
-                                    if (speeds != null) {
-                                        speeds as MutableList<Double>
-                                        val avgForOne = speeds.average()
-                                        speedsList.add(avgForOne)
-                                    }
-                                    wordCount = (wordCount + it.child("wordCount").value as Long).toInt()
-                                    errorsList.add(it.child("errorAmount").value as Long)
-                                    errorRateList.add((it.child("errorRate").value as Number).toDouble())
+        val participantId = Utils.readSharedSettingString(
+            "p_id", "").toString()
+        val ref = rootRef.child(authId).child(participantId).child(date)
+            .child("keyboardEvents")
+        val valueEventListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    clearAllLists()
+                    try {
+                        val children = snapshot.children
+                        children.forEach { dataSnapshot ->
+                            clearLoopLists()
+                            var child = dataSnapshot.children
+                            child.forEach {
+                                val speeds =
+                                    it.child("typingSpeed").value as Any
+                                if (speeds != null) {
+                                    speeds as MutableList<Double>
+                                    val avgForOne = speeds.average()
+                                    speedsList.add(avgForOne)
                                 }
-                                totalErrList = (totalErrList + errorsList).toMutableList()
-                                timeWindow = dataSnapshot.key?.toInt()!!
-                                val totalErrorRate = errorRateList.average()
-                                totalErr = totalErrList.average()
-                                totalSpeed = speedsList.average()
-                                //val avgDurationInMinutes = wordCount * (totalSpeed / 60)
-                                //val averageWPM = wordCount / avgDurationInMinutes
-                                val averageWPM = 60 / totalSpeed
-                                var data = KeyboardStats(
-                                    date,
-                                    timeWindow,
-                                    totalErr,
-                                    totalSpeed,
-                                    totalErrorRate,
-                                    averageWPM,
-                                )
-                                //addToListOfFirebaseData(data)
-                                dataList.add(data)
+                                wordCount = (wordCount + it.child("wordCount").value as Long).toInt()
+                                errorsList.add(it.child("errorAmount").value as Long)
+                                errorRateList.add((it.child("errorRate").value as Number).toDouble())
                             }
-                            _keyboardData.postValue(dataList)
-                        } catch (e: Exception) {
-                            Log.d("FirebaseDebug", "Error: $e")
-                            // skip this value
+                            totalErrList = (totalErrList + errorsList).toMutableList()
+                            timeWindow = dataSnapshot.key?.toInt()!!
+                            val totalErrorRate = errorRateList.average()
+                            totalErr = totalErrList.average()
+                            totalSpeed = speedsList.average()
+                            //val avgDurationInMinutes = wordCount * (totalSpeed / 60)
+                            //val averageWPM = wordCount / avgDurationInMinutes
+                            val averageWPM = 60 / totalSpeed
+                            var data = KeyboardStats(
+                                date,
+                                timeWindow,
+                                totalErr,
+                                totalSpeed,
+                                totalErrorRate,
+                                averageWPM,
+                            )
+                            //addToListOfFirebaseData(data)
+                            dataList.add(data)
                         }
-                    } else {
-                        Log.d("Firebase", "No data found")
-                        _keyboardData.postValue(mutableListOf())
+                        _keyboardData.postValue(dataList)
+                    } catch (e: Exception) {
+                        Log.d("FirebaseDebug", "Error: $e")
+                    // skip this value
                     }
-                }
-                override fun onCancelled(error: DatabaseError) {
-                    Log.d("Firebase", error.message)
+                } else {
+                    Log.d("Firebase", "No data found")
+                    _keyboardData.postValue(mutableListOf())
                 }
             }
-            if (!isToday) {
-                ref.addListenerForSingleValueEvent(valueEventListener)
-            } else {
-                ref.addValueEventListener(valueEventListener)
+            override fun onCancelled(error: DatabaseError) {
+                Log.d("Firebase", error.message)
             }
         }
+        if (!isToday) {
+            ref.addListenerForSingleValueEvent(valueEventListener)
+        } else {
+            ref.addValueEventListener(valueEventListener)
+        }
+    }
 
     private fun clearAllLists() {
         errorsList.clear()

@@ -56,7 +56,7 @@ class KeyboardHelper {
 
         fun addToString(text: String, beforeText: String, sameSession: Boolean, removedChars: Int) {
             try {
-                if (removedChars != 0) {
+                if (removedChars > 0) {
                     if (sameSession) {
                         deletedChars += removedChars
                     }

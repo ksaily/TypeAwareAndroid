@@ -38,7 +38,6 @@ class KeyboardWorker(appContext: Context, workerParams: WorkerParameters):
 
     private fun saveToFirebase(timeslot: Int, event: KeyboardEvents) {
         val myRef = Firebase.database.getReference("Data")
-        println(myRef)
         // Save data under the current timeslot with an unique id for each
         val dateString = event.date
         val participantId = Utils.readSharedSettingString(
@@ -49,13 +48,8 @@ class KeyboardWorker(appContext: Context, workerParams: WorkerParameters):
         if (user == null) {
             FirebaseAuth.getInstance().signInAnonymously()
         }
-        println(user!!.uid)
-        println("SaveToFirebase")
         myRef.child(user!!.uid).child(participantId.toString())
             .child(dateString).child("keyboardEvents")
             .child(timeslot.toString()).child(event.id.toString()).setValue(event)
-        println(myRef.child(user!!.uid).child(participantId.toString())
-            .child(dateString).child("keyboardEvents")
-            .child(timeslot.toString()).child(event.id.toString()).setValue(event))
     }
 }
