@@ -182,6 +182,7 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="please_explain_here">Please explain here.</string>
+    <string name="prolific_id_is_used_to_verify">Your prolific ID is used to verify your identity after the study is concluded.</string>
 
 
 </resources>
