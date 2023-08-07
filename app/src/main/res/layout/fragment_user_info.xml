@@ -65,6 +65,7 @@
         android:layout_marginHorizontal="50dp"
         android:background="@drawable/roundstyle"
         android:ems="10"
+        android:textColor="@color/dark_grey"
         android:layout_gravity="center"
         android:hint="Your Prolific ID"
         android:inputType="text"
