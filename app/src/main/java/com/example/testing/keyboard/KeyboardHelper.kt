@@ -54,11 +54,15 @@ class KeyboardHelper {
             return (session == thisPackage) && (timeElapsedd < 10.0)
         }
 
+        fun checkDeletedChars(currentText: String, beforeText: String): Boolean {
+            return currentText.length < beforeText.length && beforeString.isNotEmpty()
+        }
+
         fun addToString(text: String, beforeText: String, sameSession: Boolean, removedChars: Int) {
             try {
-                if (removedChars > 0) {
+                if (removedChars > 0 && checkDeletedChars(text, beforeText)) {
                     if (sameSession) {
-                        deletedChars += removedChars
+                        deletedChars ++
                     }
                 } else if (text.isNotEmpty()) {
                     var newChar = text.last()

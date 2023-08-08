@@ -33,7 +33,7 @@ class MyAccessibilityService : AccessibilityService() {
     private var endTimeBetweenChars: Long = 0L
     private var timeElapsedBetweenChars: Double = 0.0
 
-    override fun onDestroy() {
+    override fun onInterrupt() {
         super.onDestroy()
         val setUpWork = OneTimeWorkRequestBuilder<KeyboardWorker>()
         .setInputData(workDataOf(
@@ -42,9 +42,6 @@ class MyAccessibilityService : AccessibilityService() {
         WorkManager.getInstance(applicationContext).enqueue(setUpWork)
     }
 
-    override fun onInterrupt() {
-        Log.d("AccessibilityService","Service interrupted")
-    }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) { return }

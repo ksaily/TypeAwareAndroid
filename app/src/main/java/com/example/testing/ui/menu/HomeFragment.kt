@@ -285,7 +285,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
             val avgWPM = wordsPerMinute.average()
             if (avgWPM.isFinite()) {
                 val s = avgWPM.toString() //words per minute
-                clippedStringWPM = s.substring(0, s.length.coerceAtMost(4)) + "WPM"
+                clippedStringWPM = s.substring(0, s.length.coerceAtMost(4)) + "wpm"
                 binding.keyboardChart.textViewStats.isVisible = true
                 if (wordsPerMinute.average() > 25.0) {
                     binding.keyboardChart.textViewStats.text =
