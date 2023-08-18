@@ -1,18 +1,14 @@
 package com.example.testing.ui.menu
 
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
-import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ProgressBar
-import androidx.core.text.trimmedLength
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -27,11 +23,8 @@ import com.example.testing.ui.viewmodel.FirebaseViewModel
 import com.example.testing.utils.Utils
 import com.example.testing.utils.Utils.Companion.checkAccessibilityPermission
 import com.example.testing.utils.Utils.Companion.readSharedSettingBoolean
-import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.charts.LineChart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -45,10 +38,7 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeListener {
-    // Chart variables:
-    private val MAX_X_VALUE = 13
-    private val BAR_SPACE = 0.1f
-    private val BAR_WIDTH = 0.8f
+
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private var currentDate = ""
@@ -177,15 +167,12 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
             if (data.dataAvailable) {
                 sleepData.isVisible = true
                 sleepDataNotFound.isVisible = false
-                println(data.endTime)
-                println(data.startTime)
                 wakeUpTime.text = data.endTime.toString()
                 bedTime.text = data.startTime.toString()
                 val t: Int = data.totalMinutesAsleep
                 val hours = t / 60
                 val minutes = t % 60
                 val asleepString = "$hours h $minutes m"
-                println(asleepString)
                 sleepAmount.text = asleepString
                 /**
                 val participantId = readSharedSettingString("p_id", "")
@@ -229,7 +216,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
      * returns true if on and false sleep data will not be shown
      */
     private fun checkSleepDataSetting(): Boolean {
-        return if (!Utils.readSharedSettingBoolean(getString(R.string.sleep_data_key), true)) {
+        return if (!readSharedSettingBoolean(getString(R.string.sleep_data_key), true)) {
             //Hide sleep data
             binding.sleepDataContainer.apply {
                 SleepDataView.isVisible = false
@@ -268,7 +255,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
             val totalErrRate = mutableListOf<Double>()
             val wordsPerMinute = mutableListOf<Double>()
             for (i in firebaseViewModel.keyboardData.value!!) {
-                var totalWords: Int = 0
                 if (i.date == dateViewModel.selectedDate.value) {
                     totalErr.add(i.errors)
                     totalSpeed.add(i.speed)
@@ -336,7 +322,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), OnSharedPreferenceChangeL
     }
 
     fun showPercentage(errorRate: Double, progressBar: ProgressBar): Int {
-        var successRate = (1.0 - errorRate) * 100
+        val successRate = (1.0 - errorRate) * 100
         progressBar.progress = successRate.toInt()
         return successRate.toInt()
     }

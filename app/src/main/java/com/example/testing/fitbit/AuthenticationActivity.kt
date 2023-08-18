@@ -34,7 +34,6 @@ class AuthenticationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         try {
             val authorizationUrl = buildUrl(fitbitAuthUrl)
-            println(authorizationUrl)
             launchAuthorizationPage(authorizationUrl)
         }
         catch (e: Exception) {
