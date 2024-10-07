@@ -1,34 +1,34 @@
 {
   "project_info": {
-    "project_number": "305150239580",
-    "firebase_url": "https://health-app-9c151-default-rtdb.europe-west1.firebasedatabase.app",
-    "project_id": "health-app-9c151",
-    "storage_bucket": "health-app-9c151.appspot.com"
+    "project_number": "",
+    "firebase_url": "",
+    "project_id": "",
+    "storage_bucket": ""
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:305150239580:android:279ee36fd5388c6acd1799",
+        "mobilesdk_app_id": "",
         "android_client_info": {
-          "package_name": "com.example.testing"
+          "package_name": ""
         }
       },
       "oauth_client": [
         {
-          "client_id": "305150239580-6rr0bvuh6vp6368b1qqj2p3a9ro4mabj.apps.googleusercontent.com",
+          "client_id": "",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAI71JEOP9RwokXcSwsN2N1xCnFyqStAZw"
+          "current_key": ""
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "305150239580-6rr0bvuh6vp6368b1qqj2p3a9ro4mabj.apps.googleusercontent.com",
+              "client_id": "",
               "client_type": 3
             }
           ]
