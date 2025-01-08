@@ -28,11 +28,11 @@ When first downloading the app and using it for the first time, the user is guid
 through onboarding. The three main goals of onboarding are asking for consent (screen not included in this documentation),
 receiving user information and introducing the application.
 
-<img src="https://github.com/user-attachments/assets/b7c3f6b7-ab97-46c4-b43f-75e20c77b652" width="180">
-<img src="https://github.com/user-attachments/assets/f635f5a3-bcd6-4630-8635-42882a60d78b" width="180">
-<img src="https://github.com/user-attachments/assets/61b2ede9-748f-47d6-ba5d-a192077a14dc" width="180">
-<img src="https://github.com/user-attachments/assets/7ed41029-78e2-4f24-8a03-76347fefe783" width="180">
-<img src="https://github.com/user-attachments/assets/9a447646-b572-4518-9d01-4ad47e8626a3" width="180">
+<img src="https://github.com/user-attachments/assets/b7c3f6b7-ab97-46c4-b43f-75e20c77b652" width="160">
+<img src="https://github.com/user-attachments/assets/f635f5a3-bcd6-4630-8635-42882a60d78b" width="160">
+<img src="https://github.com/user-attachments/assets/61b2ede9-748f-47d6-ba5d-a192077a14dc" width="160">
+<img src="https://github.com/user-attachments/assets/7ed41029-78e2-4f24-8a03-76347fefe783" width="160">
+<img src="https://github.com/user-attachments/assets/9a447646-b572-4518-9d01-4ad47e8626a3" width="160">
 
 
 ## Home
