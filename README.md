@@ -41,11 +41,11 @@ Home screen is the landing page after onboarding and when first opening the appl
 This view handles many scenarios, such as user not logged into Fitbit, data not found or permissions missing (visible in any view when opening the app). This alerts the user to take necessary actions or contact support if there are any issues.
 
 
-<img src="https://github.com/user-attachments/assets/de6497e4-7554-4413-b3c2-93640ca995f4" width="180">
-<img src="https://github.com/user-attachments/assets/7d6c8b65-22cf-44cd-990f-cd0c7d0b1de1" width="180">
-<img src="https://github.com/user-attachments/assets/c7c44e8d-cb16-4afa-9ce8-f438b248c72e" width="180">
-<img src="https://github.com/user-attachments/assets/4924c32a-ee71-4fb8-929f-2e02dd8607bc" width="180">
-<img src="https://github.com/user-attachments/assets/e7dd4f5c-3e0e-4c28-94b0-f7a20f12e1ea" width="180">
+<img src="https://github.com/user-attachments/assets/de6497e4-7554-4413-b3c2-93640ca995f4" width="160">
+<img src="https://github.com/user-attachments/assets/7d6c8b65-22cf-44cd-990f-cd0c7d0b1de1" width="160">
+<img src="https://github.com/user-attachments/assets/c7c44e8d-cb16-4afa-9ce8-f438b248c72e" width="160">
+<img src="https://github.com/user-attachments/assets/4924c32a-ee71-4fb8-929f-2e02dd8607bc" width="160">
+<img src="https://github.com/user-attachments/assets/e7dd4f5c-3e0e-4c28-94b0-f7a20f12e1ea" width="160">
 
 ## Charts
 
@@ -53,8 +53,8 @@ The charts screen offers a more accurate display of all the data collected
 by the application. This scroll view contains charts on daily keyboard usage as well as weekly sleep cycles.
 The charts are implemented using MPAndroidChart’s library.
 
-<img src="https://github.com/user-attachments/assets/c13ced82-ffef-4e4b-9559-a046d64bc5af" width="180">
-<img src="https://github.com/user-attachments/assets/1095cb15-05e8-46ad-b591-a8b699218f75" width="180">
+<img src="https://github.com/user-attachments/assets/c13ced82-ffef-4e4b-9559-a046d64bc5af" width="160">
+<img src="https://github.com/user-attachments/assets/1095cb15-05e8-46ad-b591-a8b699218f75" width="160">
 
 
 ## Settings
@@ -66,7 +66,7 @@ settings screen is designed to indicate the right settings by showing a green ma
 a correctly set setting and a red marker for a setting that needs to be set differently.
 Text is also added to prompt the user to take action if they see a red marker.
 
-<img src="https://github.com/user-attachments/assets/d55ca761-913f-4a1c-9f7e-92d94331b4c7" width="200">
+<img src="https://github.com/user-attachments/assets/d55ca761-913f-4a1c-9f7e-92d94331b4c7" width="180">
 
 
 ## Questionnaires
@@ -79,11 +79,11 @@ questionnaire can be answered after five questionnaires for week one and five fo
 two are completed. The nature of the questions varies, some are open-ended, some request numerical values and some are answered on the Likert scale. Week one questionnaires pop up automatically if not answered for that day but during week two the user can choose when they prefer to answer the daily questionnaire.
 The questionnaires were implemented using Android's DialogFragment. 
 
-<img src="https://github.com/user-attachments/assets/07867404-327f-49d1-a6e5-66708939e88a" width="180">
-<img src="https://github.com/user-attachments/assets/85c1b544-06bb-43bc-a2a0-3ca23cd2f175" width="180">
-<img src="https://github.com/user-attachments/assets/1bfc1c94-ca62-489e-b2ae-11798cf3d4dc" width="180">
-<img src="https://github.com/user-attachments/assets/db0dc935-8fc6-49a7-be2a-21ce667234ac" width="180">
-<img src="https://github.com/user-attachments/assets/7c37ae14-d47a-43be-9dd0-30ea9b89a5d4" width="180">
+<img src="https://github.com/user-attachments/assets/07867404-327f-49d1-a6e5-66708939e88a" width="160">
+<img src="https://github.com/user-attachments/assets/85c1b544-06bb-43bc-a2a0-3ca23cd2f175" width="160">
+<img src="https://github.com/user-attachments/assets/1bfc1c94-ca62-489e-b2ae-11798cf3d4dc" width="160">
+<img src="https://github.com/user-attachments/assets/db0dc935-8fc6-49a7-be2a-21ce667234ac" width="160">
+<img src="https://github.com/user-attachments/assets/7c37ae14-d47a-43be-9dd0-30ea9b89a5d4" width="160">
 
 The app also sends notifications reminding the user to answer their daily questionnaires. 
 The notifications are implemented using Android’s BroadcastReceiver to receive an
